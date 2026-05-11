@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>가입 완료 - LastSys</title>
+    <link rel="stylesheet" th:href="@{/css/home.css}" href="../../static/css/home.css">
+</head>
+<body>
+<main class="mobile-page auth-page" aria-label="가입 완료 화면">
+    <section class="auth-panel success-panel">
+        <img class="auth-logo success-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" alt="LastSys 로고">
+        <div class="auth-heading">
+            <h1>가입 완료</h1>
+            <p><strong th:text="${nickname}">닉네임</strong>님의 계정이 생성되었습니다.</p>
+        </div>
+        <div class="actions">
+            <a class="button button-primary" th:href="@{/login}" href="/login">로그인</a>
+            <a class="button button-secondary" th:href="@{/}" href="/">처음 화면</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

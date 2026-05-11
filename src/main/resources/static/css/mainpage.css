@@ -1,0 +1,306 @@
+html,
+body {
+    overflow-y: auto;
+    overflow-x: hidden;
+    align-items: flex-start;
+}
+
+.home-app {
+    min-height: 100svh;
+    justify-content: flex-start;
+    padding: max(22px, env(safe-area-inset-top)) 20px calc(128px + env(safe-area-inset-bottom));
+}
+
+.dashboard {
+    width: 100%;
+    min-height: calc(100svh - 50px);
+    display: flex;
+    flex-direction: column;
+}
+
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding-bottom: 6px;
+}
+
+.app-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    color: var(--primary-color);
+    font-size: 18px;
+    font-weight: 850;
+    text-decoration: none;
+}
+
+.app-logo {
+    width: 54px;
+    height: 54px;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 14px rgba(26, 77, 57, 0.18));
+    flex: 0 0 auto;
+}
+
+.logout-btn {
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid rgba(26, 77, 57, 0.14);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--primary-color);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.main-content {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 16px;
+    padding-top: 20px;
+}
+
+.today-hero {
+    width: 100%;
+    padding: 20px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(26, 77, 57, 0.92), rgba(60, 135, 94, 0.88));
+    color: #FFFFFF;
+    box-shadow: 0 18px 34px rgba(26, 77, 57, 0.18);
+}
+
+.eyebrow {
+    margin-bottom: 10px;
+    color: rgba(255, 255, 255, 0.76);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.today-hero h1 {
+    font-size: 28px;
+    font-weight: 850;
+    line-height: 1.2;
+}
+
+.today-hero h1 strong {
+    color: #FFFFFF;
+}
+
+.today-hero p:last-child {
+    margin-top: 8px;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.quote-card,
+.calendar-panel {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.76);
+    border: 1px solid rgba(255, 255, 255, 0.92);
+    box-shadow: 0 12px 24px rgba(26, 77, 57, 0.06);
+}
+
+.quote-card {
+    min-height: 112px;
+    padding: 22px 20px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quote-card p {
+    color: var(--primary-color);
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.45;
+    word-break: keep-all;
+}
+
+.calendar-panel {
+    padding: 16px;
+    border-radius: 24px;
+}
+
+.emotion-calendar-head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.emotion-calendar-head h2 {
+    min-width: 92px;
+    color: var(--text-main);
+    font-size: 17px;
+    font-weight: 850;
+    text-align: center;
+}
+
+.emotion-calendar-head button {
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(26, 77, 57, 0.12);
+    border-radius: 50%;
+    background: rgba(248, 250, 249, 0.9);
+    color: var(--primary-color);
+    font: inherit;
+    font-size: 22px;
+    font-weight: 850;
+    line-height: 1;
+    cursor: pointer;
+}
+
+#emotion-calendar {
+    width: 100%;
+}
+
+.fallback-calendar {
+    width: 100%;
+}
+
+.fallback-calendar-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.fallback-calendar-head h2 {
+    color: var(--text-main);
+    font-size: 18px;
+    font-weight: 850;
+}
+
+.fallback-calendar-head button {
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(26, 77, 57, 0.12);
+    border-radius: 50%;
+    background: rgba(248, 250, 249, 0.9);
+    color: var(--primary-color);
+    font: inherit;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.fallback-weekdays,
+.fallback-days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    text-align: center;
+}
+
+.fallback-weekdays {
+    margin-bottom: 8px;
+    color: var(--text-sub);
+    font-size: 12px;
+    font-weight: 850;
+}
+
+.fallback-days {
+    gap: 5px;
+}
+
+.fallback-days button {
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(26, 77, 57, 0.08);
+    border-radius: 15px;
+    background: rgba(248, 250, 249, 0.72);
+    color: var(--text-main);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.fallback-days .muted {
+    background: rgba(248, 250, 249, 0.42);
+    color: #A7B8B0;
+    cursor: default;
+}
+
+.fallback-days .today {
+    background: rgba(26, 77, 57, 0.11);
+    border-color: rgba(26, 77, 57, 0.18);
+    color: var(--primary-color);
+}
+
+.fallback-days .is-emotion-selected {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #FFFFFF;
+}
+
+.bottom-tabs {
+    position: fixed;
+    left: 50%;
+    bottom: max(18px, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    width: min(calc(100% - 32px), 398px);
+    height: 64px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.96);
+    box-shadow: 0 18px 42px rgba(26, 77, 57, 0.18), 0 -10px 30px rgba(248, 250, 249, 0.5);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    z-index: 100;
+}
+
+.bottom-tabs a {
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    color: var(--text-sub);
+    font-size: 14px;
+    font-weight: 850;
+    text-decoration: none;
+}
+
+.bottom-tabs a.active {
+    background: var(--primary-color);
+    color: #FFFFFF;
+}
+
+.floating-toggle {
+    position: fixed;
+    left: 50%;
+    transform: translateX(calc(min(calc(100vw - 32px), 398px) / 2 - 72px));
+    bottom: calc(max(18px, env(safe-area-inset-bottom)) + 72px);
+    width: 52px;
+    height: 52px;
+    border: 4px solid rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    background-color: #DDE9DA;
+    background-image: url("../images/emotion-toggle.png");
+    background-position: center;
+    background-size: 118%;
+    background-repeat: no-repeat;
+    box-shadow: 0 16px 32px rgba(26, 77, 57, 0.22);
+    cursor: pointer;
+    z-index: 101;
+}

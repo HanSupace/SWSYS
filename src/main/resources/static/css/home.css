@@ -1,0 +1,422 @@
+:root {
+    --primary-color: #1A4D39;
+    --primary-hover: #123829;
+    --bg-color: #F8FAF9; /* 배경을 조금 더 화사하게 */
+    --text-main: #1C2622;
+    --text-sub: #5E7A6E;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    min-height: 100svh;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+}
+
+/* 1. 심심함을 달래줄 은은한 도트 패턴 포인트 */
+.bg-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(26, 77, 57, 0.06) 1.5px, transparent 1.5px);
+    background-size: 28px 28px;
+    z-index: 0;
+}
+
+/* 2. 감각적인 빛 번짐 (Mesh Gradient) 효과 */
+.bg-shape {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: 0;
+    opacity: 0.65;
+    animation: floatBg 12s infinite alternate ease-in-out;
+}
+.bg-shape-1 {
+    width: 350px; height: 350px;
+    background: #A3D9B1; /* 산뜻한 민트그린 */
+    top: -10%; left: -20%;
+}
+.bg-shape-2 {
+    width: 300px; height: 300px;
+    background: #FFD6C9; /* 포인트 컬러: 따뜻한 피치(살구색) */
+    bottom: 0%; right: -20%;
+    animation-delay: -4s;
+}
+.bg-shape-3 {
+    width: 250px; height: 250px;
+    background: #DCEBE1;
+    top: 40%; left: 50%;
+    transform: translateX(-50%);
+    animation-delay: -8s;
+}
+
+@keyframes floatBg {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(40px, -30px) scale(1.15); }
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 로고가 가볍게 둥둥 떠다니는 효과 */
+@keyframes floatLogo {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+/* 모바일 페이지 컨테이너: 글래스모피즘 */
+.mobile-page {
+    width: min(100%, 430px);
+    min-height: 100svh;
+    padding: max(40px, env(safe-area-inset-top)) 28px max(40px, env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* 요소들을 화면 중앙으로 모음 */
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.04), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    z-index: 1;
+    animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.welcome {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* 양끝 배치가 아닌 중앙 정렬 */
+    align-items: center;
+    gap: 8vh; /* 로고 영역과 버튼 영역 사이의 적당한 간격 */
+    height: 100%;
+}
+
+.brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+/* 네모 틀 없이 로고 이미지만 깔끔하게 */
+.logo {
+    width: 110px; /* 로고 크기 조정 */
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 16px 24px rgba(26, 77, 57, 0.15)); /* 로고 자체에 예쁜 그림자 */
+    animation: floatLogo 4s ease-in-out infinite; /* 애니메이션 적용 */
+}
+
+.copy {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.copy h1 {
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--primary-color);
+}
+
+.copy p {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--text-sub);
+    word-break: keep-all;
+}
+
+.actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+.session-summary {
+    width: 100%;
+    padding: 16px 18px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    color: var(--text-sub);
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 10px 18px rgba(26, 77, 57, 0.06);
+}
+
+.session-summary strong {
+    color: var(--primary-color);
+    font-weight: 800;
+}
+
+.button {
+    width: 100%;
+    height: 60px;
+    border-radius: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 17px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    border: none;
+}
+
+.button:active {
+    transform: scale(0.97);
+}
+
+.button-primary {
+    background: var(--primary-color);
+    color: #FFF;
+    box-shadow: 0 12px 24px rgba(26, 77, 57, 0.15);
+}
+
+.button-primary:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 16px 32px rgba(26, 77, 57, 0.25);
+    transform: translateY(-2px);
+}
+
+.button-secondary {
+    background: rgba(255, 255, 255, 0.85);
+    color: var(--primary-color);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(255, 255, 255, 1);
+}
+
+.button-secondary:hover {
+    background: #FFFFFF;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+}
+
+@media (max-width: 360px) {
+    .copy h1 { font-size: 32px; }
+    .copy p { font-size: 14px; }
+    .logo { width: 90px; }
+    .welcome { gap: 6vh; }
+    .button { height: 54px; font-size: 16px; border-radius: 16px; }
+}
+
+@media (max-width: 430px) {
+    .bg-shape {
+        filter: blur(48px);
+        opacity: 0.76;
+    }
+
+    .bg-shape-1 {
+        width: 250px;
+        height: 250px;
+        background: #7FCF95;
+        top: 18%;
+        left: 0;
+    }
+
+    .bg-shape-2 {
+        width: 240px;
+        height: 240px;
+        background: #FFBBA8;
+        right: 0;
+        bottom: 22%;
+    }
+
+    .bg-shape-3 {
+        width: 210px;
+        height: 210px;
+        background: #BBDDC8;
+        top: 44%;
+        left: 50%;
+    }
+}
+/* --- 메인 로고 크기 수정 --- */
+.logo {
+    width: 150px; /* 기존 110px에서 훨씬 크게 수정 */
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 16px 24px rgba(26, 77, 57, 0.15));
+    animation: floatLogo 4s ease-in-out infinite;
+}
+
+/* --- 모바일 컨테이너 스크롤 처리 보완 --- */
+/* 입력 폼이 길어지면 잘리지 않고 스크롤 되도록 변경 */
+.mobile-page {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* --- 회원가입 폼 전용 스타일 (Auth Page) --- */
+.auth-page {
+    justify-content: center;
+}
+
+.auth-panel {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 22px;
+    padding-block: 24px;
+}
+
+/* 인증 화면 로고 */
+.brand-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    align-self: center;
+    color: var(--primary-color);
+    font-size: 22px;
+    font-weight: 800;
+    text-decoration: none;
+    margin-bottom: 6px;
+}
+
+.auth-logo {
+    width: 118px;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 14px 22px rgba(26, 77, 57, 0.16));
+}
+
+.auth-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 6px;
+    text-align: center;
+}
+
+.auth-heading h1 {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--primary-color);
+    letter-spacing: -0.02em;
+}
+
+.auth-heading p {
+    font-size: 15px;
+    color: var(--text-sub);
+    font-weight: 500;
+}
+
+.success-panel {
+    align-items: center;
+    text-align: center;
+}
+
+.success-logo {
+    width: 132px;
+    margin-bottom: 4px;
+}
+
+/* 입력 폼 레이아웃 */
+.signup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.field span {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary-hover);
+    padding-left: 2px;
+}
+
+/* 트렌디한 입력창(Input) 스타일 */
+.field input {
+    width: 100%;
+    height: 52px;
+    padding: 0 16px;
+    border-radius: 14px; /* 버튼과 어울리는 둥근 테두리 */
+    border: 1.5px solid rgba(26, 77, 57, 0.12);
+    background: rgba(255, 255, 255, 0.6); /* 반투명 배경 */
+    color: var(--text-main);
+    font-size: 15px;
+    font-family: inherit;
+    font-weight: 500;
+    transition: all 0.25s ease;
+    outline: none;
+}
+
+.field input::placeholder {
+    color: #9EBBAD;
+}
+
+/* 입력창 포커스(클릭) 시 부드러운 하이라이트 */
+.field input:focus {
+    background: #FFFFFF;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(26, 77, 57, 0.1);
+}
+
+/* 에러 메시지 */
+.field-error {
+    color: #E53E3E; /* 너무 눈부시지 않은 부드러운 레드 */
+    font-size: 13px;
+    font-weight: 600;
+    padding-left: 2px;
+    margin-top: -4px;
+}
+
+.form-error {
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: rgba(229, 62, 62, 0.1);
+    color: #C53030;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* 폼 안의 제출 버튼 여백 설정 */
+.submit-btn {
+    margin-top: 12px;
+}
+
+/* 하단 뒤로가기 링크 */
+.text-link {
+    align-self: center;
+    color: var(--text-sub);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    margin-top: 20px;
+    transition: color 0.2s ease;
+}
+
+.text-link:hover {
+    color: var(--primary-color);
+}

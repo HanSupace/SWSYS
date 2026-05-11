@@ -1,0 +1,36 @@
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :resolveMainClassName
+
+> Task :bootRun
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.6)
+
+2026-05-11T21:43:35.742+09:00  INFO 2256 --- [LastSys] [           main] com.daily.lastsys.LastSysApplication     : Starting LastSysApplication using Java 25.0.1 with PID 2256 (C:\LastSys\LastSys\build\classes\java\main started by wagks in C:\LastSys\LastSys)
+2026-05-11T21:43:35.748+09:00  INFO 2256 --- [LastSys] [           main] com.daily.lastsys.LastSysApplication     : No active profile set, falling back to 1 default profile: "default"
+2026-05-11T21:43:37.762+09:00  INFO 2256 --- [LastSys] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-05-11T21:43:37.791+09:00  INFO 2256 --- [LastSys] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-11T21:43:37.792+09:00  INFO 2256 --- [LastSys] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.21]
+2026-05-11T21:43:37.954+09:00  INFO 2256 --- [LastSys] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 2088 ms
+2026-05-11T21:43:38.180+09:00  INFO 2256 --- [LastSys] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-05-11T21:43:38.902+09:00  INFO 2256 --- [LastSys] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4f7be6c8
+2026-05-11T21:43:38.906+09:00  INFO 2256 --- [LastSys] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-05-11T21:43:39.773+09:00  INFO 2256 --- [LastSys] [           main] .w.s.a.s.AnnotationActionEndpointMapping : Supporting [WS-Addressing August 2004, WS-Addressing 1.0]
+2026-05-11T21:43:39.899+09:00  INFO 2256 --- [LastSys] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-05-11T21:43:39.916+09:00  INFO 2256 --- [LastSys] [           main] com.daily.lastsys.LastSysApplication     : Started LastSysApplication in 4.896 seconds (process running for 5.543)
+2026-05-11T21:43:50.006+09:00  INFO 2256 --- [LastSys] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-11T21:43:50.006+09:00  INFO 2256 --- [LastSys] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-05-11T21:43:50.008+09:00  INFO 2256 --- [LastSys] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+
+Timed out waiting for finished message from client socket connection from /127.0.0.1:46586 to /127.0.0.1:23153. Discarding connection.
+
+> Task :bootRun FAILED
+4 actionable tasks: 2 executed, 2 up-to-date

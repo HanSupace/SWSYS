@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>로그인 - LastSys</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" th:href="@{/css/home.css}" href="../../static/css/home.css">
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="bg-shape bg-shape-1"></div>
+<div class="bg-shape bg-shape-2"></div>
+<div class="bg-shape bg-shape-3"></div>
+
+<main class="mobile-page auth-page" aria-label="로그인 화면">
+    <section class="auth-panel">
+        <a class="brand-link" th:href="@{/}" href="/">
+            <img class="auth-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" alt="LastSys 로고">
+            <span>LastSys</span>
+        </a>
+
+        <div class="auth-heading">
+            <h1>로그인</h1>
+            <p>계정 정보를 입력해 주세요.</p>
+        </div>
+
+        <form class="signup-form" th:action="@{/login}" th:object="${loginForm}" method="post" novalidate>
+            <p class="form-error" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}" th:text="${error}">
+                로그인 오류
+            </p>
+
+            <label class="field">
+                <span>아이디</span>
+                <input type="text" th:field="*{username}" autocomplete="username" placeholder="아이디">
+                <small class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">아이디 오류</small>
+            </label>
+
+            <label class="field">
+                <span>비밀번호</span>
+                <input type="password" th:field="*{password}" autocomplete="current-password" placeholder="비밀번호">
+                <small class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">비밀번호 오류</small>
+            </label>
+
+            <button class="button button-primary submit-btn" type="submit">로그인</button>
+        </form>
+
+        <a class="text-link" th:href="@{/signup}" href="/signup">새 계정 만들기</a>
+    </section>
+</main>
+</body>
+</html>
