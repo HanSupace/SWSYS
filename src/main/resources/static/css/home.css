@@ -38,27 +38,26 @@ html, body {
 .bg-shape {
     position: absolute;
     border-radius: 50%;
-    filter: blur(80px);
+    filter: blur(88px);
     z-index: 0;
-    opacity: 0.65;
+    opacity: 0.62;
     animation: floatBg 12s infinite alternate ease-in-out;
 }
 .bg-shape-1 {
-    width: 350px; height: 350px;
-    background: #A3D9B1; /* 산뜻한 민트그린 */
-    top: -10%; left: -20%;
+    width: 390px; height: 390px;
+    background: #8ED6A3; /* 산뜻한 민트그린 */
+    top: -24%; left: -30%;
 }
 .bg-shape-2 {
-    width: 300px; height: 300px;
-    background: #FFD6C9; /* 포인트 컬러: 따뜻한 피치(살구색) */
-    bottom: 0%; right: -20%;
+    width: 360px; height: 360px;
+    background: #C6E8D2; /* 부드러운 세이지 그린 */
+    bottom: -22%; right: -30%;
     animation-delay: -4s;
 }
 .bg-shape-3 {
-    width: 250px; height: 250px;
-    background: #DCEBE1;
-    top: 40%; left: 50%;
-    transform: translateX(-50%);
+    width: 260px; height: 260px;
+    background: #E7F3EB;
+    top: 18%; right: -26%;
     animation-delay: -8s;
 }
 
@@ -223,32 +222,32 @@ html, body {
 
 @media (max-width: 430px) {
     .bg-shape {
-        filter: blur(48px);
-        opacity: 0.76;
+        filter: blur(54px);
+        opacity: 0.72;
     }
 
     .bg-shape-1 {
-        width: 250px;
-        height: 250px;
+        width: 280px;
+        height: 280px;
         background: #7FCF95;
-        top: 18%;
-        left: 0;
+        top: -8%;
+        left: -42%;
     }
 
     .bg-shape-2 {
-        width: 240px;
-        height: 240px;
-        background: #FFBBA8;
-        right: 0;
-        bottom: 22%;
+        width: 280px;
+        height: 280px;
+        background: #C6E8D2;
+        right: -42%;
+        bottom: -8%;
     }
 
     .bg-shape-3 {
-        width: 210px;
-        height: 210px;
-        background: #BBDDC8;
-        top: 44%;
-        left: 50%;
+        width: 220px;
+        height: 220px;
+        background: #E7F3EB;
+        top: 28%;
+        right: -46%;
     }
 }
 /* --- 메인 로고 크기 수정 --- */

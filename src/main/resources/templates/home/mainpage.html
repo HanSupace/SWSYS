@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>LastSys 메인</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
-    <link rel="stylesheet" th:href="@{/css/home.css}" href="../../static/css/home.css">
-    <link rel="stylesheet" th:href="@{/css/mainpage.css}" href="../../static/css/mainpage.css">
-    <script th:src="@{/js/mainpage.js}" src="../../static/js/mainpage.js" defer></script>
+    <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
+    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260512j)}" href="../../static/css/mainpage.css?v=20260512j">
+    <script th:src="@{/js/mainpage.js(v=20260512h)}" src="../../static/js/mainpage.js?v=20260512h" defer></script>
 </head>
 <body>
 <div class="bg-pattern"></div>
@@ -28,11 +28,19 @@
         </header>
 
         <div class="main-content">
-            <div class="today-hero">
-                <p class="eyebrow">Today</p>
+            <a class="today-hero" th:href="@{/ranking}" href="/ranking" aria-label="랭킹 페이지로 이동">
                 <h1><strong th:text="${loginUser.nickname()}">닉네임</strong>님</h1>
-                <p>오늘 감정을 기록해볼까요?</p>
-            </div>
+                <p>오늘도 반가워요!</p>
+                <div class="hero-progress" aria-label="사용자 레벨과 경험치">
+                    <div class="hero-progress-top">
+                        <span id="user-xp" th:text="|${progress.currentXp()} / ${progress.requiredXp()} XP|">0 / 100 XP</span>
+                        <strong id="user-level" th:text="|Lv. ${progress.level()}|">Lv. 1</strong>
+                    </div>
+                    <div class="xp-track" aria-hidden="true">
+                        <span id="user-xp-bar" th:style="|width: ${progress.progressPercent()}%;|"></span>
+                    </div>
+                </div>
+            </a>
 
             <article class="quote-card" aria-label="오늘의 명언">
                 <p th:text="${quote}">작은 기록이 하루의 방향을 만든다.</p>
@@ -51,7 +59,17 @@
 
 </main>
 
-<button class="floating-toggle" type="button" aria-label="감정 기록 토글"></button>
+<section class="mission-panel" id="mission-panel" aria-label="오늘의 선행 미션" aria-hidden="true">
+    <div class="mission-panel-head">
+        <div>
+            <h2>오늘의 미션</h2>
+        </div>
+        <button class="mission-close" type="button" aria-label="미션 닫기">×</button>
+    </div>
+    <ul class="mission-list" id="mission-list" aria-live="polite"></ul>
+</section>
+
+<button class="floating-toggle" type="button" aria-label="오늘의 선행 미션 열기" aria-controls="mission-panel" aria-expanded="false"></button>
 
 <nav class="bottom-tabs" aria-label="하단 메뉴">
     <a class="active" th:href="@{/}" href="/">홈</a>
