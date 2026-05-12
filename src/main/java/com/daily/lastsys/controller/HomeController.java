@@ -1,6 +1,7 @@
 package com.daily.lastsys.controller;
 
 import com.daily.lastsys.dto.LoginUser;
+import com.daily.lastsys.service.UserProgressService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,6 +22,12 @@ public class HomeController {
             "지금 느끼는 감정은 지나가지만, 돌본 마음은 오래 남습니다."
     );
 
+    private final UserProgressService userProgressService;
+
+    public HomeController(UserProgressService userProgressService) {
+        this.userProgressService = userProgressService;
+    }
+
     @GetMapping("/")
     public String home(HttpSession session, Model model) {
         LoginUser loginUser = (LoginUser) session.getAttribute(LoginController.LOGIN_USER_SESSION_KEY);
@@ -30,6 +37,7 @@ public class HomeController {
 
         model.addAttribute("loginUser", loginUser);
         model.addAttribute("quote", randomQuote());
+        model.addAttribute("progress", userProgressService.getProgress(loginUser.id()));
         return "home/mainpage";
     }
 

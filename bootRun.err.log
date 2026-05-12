@@ -11,4 +11,4 @@ Execution failed for task ':bootRun'.
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 25m 22s
+BUILD FAILED in 30m 23s
