@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 
 @Service
 public class DailyMissionService {
@@ -52,8 +53,9 @@ public class DailyMissionService {
     public DailyMissionListResponse getTodayMissions(Long userId) {
         LocalDate today = LocalDate.now(APP_ZONE);
         int successCount = dailyMissionRepository.findSuccessCount(userId, today);
+        Set<String> completedMissionKeys = dailyMissionRepository.findCompletedMissionKeys(userId, today);
         return new DailyMissionListResponse(
-                getMissionItems(userId, today, successCount),
+                getMissionItems(userId, today, completedMissionKeys),
                 successCount,
                 userProgressService.getProgress(userId)
         );
@@ -69,7 +71,9 @@ public class DailyMissionService {
             return getTodayMissions(userId);
         }
 
-        boolean completed = dailyMissionRepository.increaseSuccessCount(userId, today, DAILY_MISSION_COUNT);
+        boolean completionInserted = dailyMissionRepository.insertMissionCompletion(userId, today, missionKey);
+        boolean completed = completionInserted
+                && dailyMissionRepository.increaseSuccessCount(userId, today, DAILY_MISSION_COUNT);
 
         if (completed) {
             userProgressService.addXp(userId, MISSION_COMPLETE_XP);
@@ -88,13 +92,12 @@ public class DailyMissionService {
                 .toList();
     }
 
-    private List<DailyMissionResponse> getMissionItems(Long userId, LocalDate today, int successCount) {
+    private List<DailyMissionResponse> getMissionItems(Long userId, LocalDate today, Set<String> completedMissionKeys) {
         List<DailyMissionSeed> missions = pickMissions(userId, today);
-        int completedCount = Math.min(successCount, missions.size());
         List<DailyMissionResponse> responses = new ArrayList<>();
 
-        for (int index = 0; index < missions.size(); index += 1) {
-            responses.add(toResponse(missions.get(index), index < completedCount));
+        for (DailyMissionSeed mission : missions) {
+            responses.add(toResponse(mission, completedMissionKeys.contains(mission.key())));
         }
 
         return responses;

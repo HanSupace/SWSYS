@@ -417,7 +417,7 @@ body {
 .mission-panel {
     position: fixed;
     left: 50%;
-    bottom: calc(var(--bottom-safe-area) + var(--bottom-tab-height) + 63px);
+    bottom: calc(var(--bottom-safe-area) + var(--bottom-tab-height) + 70px);
     width: min(calc(100% - 32px), 398px);
     height: min(60svh, 560px);
     max-height: calc(100svh - var(--bottom-safe-area) - var(--bottom-tab-height) - 87px);
@@ -578,4 +578,112 @@ body {
     font-size: 14px;
     font-weight: 750;
     text-align: center;
+}
+
+.mission-confirm {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1100;
+    transition: opacity 0.2s ease;
+}
+
+.mission-confirm.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.mission-confirm-backdrop {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: rgba(20, 36, 29, 0.42);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    cursor: pointer;
+}
+
+.mission-confirm-dialog {
+    position: relative;
+    width: min(100%, 360px);
+    padding: 24px 20px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.96);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 28px 70px rgba(16, 34, 26, 0.26);
+    text-align: center;
+    transform: translateY(12px) scale(0.98);
+    transition: transform 0.2s ease;
+}
+
+.mission-confirm.is-open .mission-confirm-dialog {
+    transform: translateY(0) scale(1);
+}
+
+.mission-confirm-mark {
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 14px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2F7650, #63B47F);
+    color: #FFFFFF;
+    font-size: 28px;
+    font-weight: 900;
+    box-shadow: 0 14px 28px rgba(47, 118, 80, 0.22);
+}
+
+.mission-confirm-dialog h2 {
+    color: var(--primary-color);
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1.3;
+}
+
+.mission-confirm-dialog p {
+    margin-top: 10px;
+    color: var(--text-sub);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.5;
+    word-break: keep-all;
+}
+
+.mission-confirm-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.mission-confirm-actions button {
+    min-height: 48px;
+    border-radius: 15px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 850;
+    cursor: pointer;
+}
+
+.mission-confirm-cancel {
+    border: 1px solid rgba(26, 77, 57, 0.12);
+    background: rgba(248, 250, 249, 0.96);
+    color: var(--primary-color);
+}
+
+.mission-confirm-submit {
+    border: 0;
+    background: var(--primary-color);
+    color: #FFFFFF;
+    box-shadow: 0 14px 24px rgba(26, 77, 57, 0.18);
+}
+
+.mission-confirm-submit:disabled {
+    cursor: wait;
+    opacity: 0.72;
 }

@@ -6,8 +6,8 @@
     <title>LastSys 메인</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
-    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260512j)}" href="../../static/css/mainpage.css?v=20260512j">
-    <script th:src="@{/js/mainpage.js(v=20260512h)}" src="../../static/js/mainpage.js?v=20260512h" defer></script>
+    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260513a)}" href="../../static/css/mainpage.css?v=20260513a">
+    <script th:src="@{/js/mainpage.js(v=20260513a)}" src="../../static/js/mainpage.js?v=20260513a" defer></script>
 </head>
 <body>
 <div class="bg-pattern"></div>
@@ -67,6 +67,19 @@
         <button class="mission-close" type="button" aria-label="미션 닫기">×</button>
     </div>
     <ul class="mission-list" id="mission-list" aria-live="polite"></ul>
+</section>
+
+<section class="mission-confirm" id="mission-confirm" aria-hidden="true">
+    <button class="mission-confirm-backdrop" type="button" data-mission-confirm-close aria-label="미션 완료 확인 닫기"></button>
+    <div class="mission-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="mission-confirm-title" aria-describedby="mission-confirm-description">
+        <div class="mission-confirm-mark" aria-hidden="true">✓</div>
+        <h2 id="mission-confirm-title">미션을 완료하셨습니까?</h2>
+        <p id="mission-confirm-description">완료로 기록하면 오늘의 진행도와 경험치에 반영됩니다.</p>
+        <div class="mission-confirm-actions">
+            <button class="mission-confirm-cancel" type="button" data-mission-confirm-close>아직이에요</button>
+            <button class="mission-confirm-submit" type="button" id="mission-confirm-submit">완료했어요</button>
+        </div>
+    </div>
 </section>
 
 <button class="floating-toggle" type="button" aria-label="오늘의 선행 미션 열기" aria-controls="mission-panel" aria-expanded="false"></button>

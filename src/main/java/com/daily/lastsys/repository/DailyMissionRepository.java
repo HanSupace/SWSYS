@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 public class DailyMissionRepository {
@@ -51,6 +53,33 @@ public class DailyMissionRepository {
                 maxSuccessCount
         );
         return updated > 0;
+    }
+
+    public boolean insertMissionCompletion(Long userId, LocalDate missionDate, String missionKey) {
+        int inserted = jdbcTemplate.update(
+                """
+                insert ignore into daily_mission_completions (user_id, mission_date, mission_key)
+                values (?, ?, ?)
+                """,
+                userId,
+                missionDate,
+                missionKey
+        );
+        return inserted > 0;
+    }
+
+    public Set<String> findCompletedMissionKeys(Long userId, LocalDate missionDate) {
+        return jdbcTemplate.queryForList(
+                        """
+                        select mission_key
+                        from daily_mission_completions
+                        where user_id = ? and mission_date = ?
+                        """,
+                        String.class,
+                        userId,
+                        missionDate
+                ).stream()
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     public List<DailyMissionDay> findSuccessCounts(Long userId, LocalDate startDate, LocalDate endDateExclusive) {

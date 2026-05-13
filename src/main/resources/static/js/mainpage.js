@@ -7,11 +7,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const missionToggle = document.querySelector('.floating-toggle');
     const missionClose = document.querySelector('.mission-close');
     const missionList = document.getElementById('mission-list');
+    const missionConfirm = document.getElementById('mission-confirm');
+    const missionConfirmSubmit = document.getElementById('mission-confirm-submit');
+    const missionConfirmCloseTriggers = document.querySelectorAll('[data-mission-confirm-close]');
     const userLevel = document.getElementById('user-level');
     const userXp = document.getElementById('user-xp');
     const userXpBar = document.getElementById('user-xp-bar');
     let missionsLoaded = false;
     let missionSuccessCounts = new Map();
+    let pendingMissionButton = null;
 
     const today = getKoreaToday();
     let visibleMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -61,18 +65,52 @@ document.addEventListener('DOMContentLoaded', () => {
         setMissionPanelOpen(false);
     });
 
-    missionList?.addEventListener('click', async (event) => {
+    const setMissionConfirmOpen = (isOpen, missionButton = null) => {
+        if (!missionConfirm) {
+            return;
+        }
+
+        pendingMissionButton = isOpen ? missionButton : null;
+        missionConfirm.classList.toggle('is-open', isOpen);
+        missionConfirm.setAttribute('aria-hidden', String(!isOpen));
+
+        if (isOpen) {
+            missionConfirmSubmit?.focus();
+        }
+    };
+
+    missionConfirmCloseTriggers.forEach((trigger) => {
+        trigger.addEventListener('click', () => {
+            setMissionConfirmOpen(false);
+        });
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && missionConfirm?.classList.contains('is-open')) {
+            setMissionConfirmOpen(false);
+        }
+    });
+
+    missionList?.addEventListener('click', (event) => {
         const missionButton = event.target.closest('[data-mission-id]');
 
         if (!missionButton || missionButton.classList.contains('is-completed')) {
             return;
         }
 
-        if (!confirm('미션 완료하셨습니까?')) {
+        setMissionConfirmOpen(true, missionButton);
+    });
+
+    missionConfirmSubmit?.addEventListener('click', async () => {
+        const missionButton = pendingMissionButton;
+
+        if (!missionButton || missionButton.classList.contains('is-completed')) {
+            setMissionConfirmOpen(false);
             return;
         }
 
         missionButton.disabled = true;
+        missionConfirmSubmit.disabled = true;
 
         try {
             const response = await fetch(`/api/daily-missions/${missionButton.dataset.missionId}/complete`, {
@@ -87,9 +125,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             renderMissionPayload(await response.json());
+            setMissionConfirmOpen(false);
         } catch (error) {
             missionButton.disabled = false;
             renderMissionMessage('미션 완료 처리에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+        } finally {
+            missionConfirmSubmit.disabled = false;
         }
     });
 
