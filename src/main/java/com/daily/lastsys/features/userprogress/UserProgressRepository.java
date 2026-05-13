@@ -1,4 +1,4 @@
-package com.daily.lastsys.repository;
+package com.daily.lastsys.features.userprogress;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;

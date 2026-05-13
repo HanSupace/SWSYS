@@ -1,7 +1,8 @@
-package com.daily.lastsys.controller;
+package com.daily.lastsys.features.home;
 
-import com.daily.lastsys.dto.LoginUser;
-import com.daily.lastsys.service.UserProgressService;
+import com.daily.lastsys.features.login.LoginController;
+import com.daily.lastsys.features.login.LoginUser;
+import com.daily.lastsys.features.userprogress.UserProgressService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,8 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-@Controller
-public class HomeController {
+@Controller // 아래 클래스는 웹 요청 담당
+
+public class HomeController { // 홈페이지 클래스
 
     private static final List<String> QUOTES = List.of(
             "감정은 없애야 할 문제가 아니라 이해해야 할 신호입니다.",
@@ -20,7 +22,7 @@ public class HomeController {
             "감정을 천천히 바라보면 마음은 조금씩 자리를 찾습니다.",
             "좋은 하루는 밝은 감정만 있는 하루가 아니라 내 마음을 돌본 하루입니다.",
             "지금 느끼는 감정은 지나가지만, 돌본 마음은 오래 남습니다."
-    );
+    ); //홈페이지에 띄워 줄 랜덤 명언 생성자
 
     private final UserProgressService userProgressService;
 

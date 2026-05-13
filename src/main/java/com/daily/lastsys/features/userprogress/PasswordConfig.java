@@ -1,4 +1,4 @@
-package com.daily.lastsys.config;
+package com.daily.lastsys.features.userprogress;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

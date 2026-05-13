@@ -1,8 +1,5 @@
-package com.daily.lastsys.controller;
+package com.daily.lastsys.features.signup;
 
-import com.daily.lastsys.dto.SignupForm;
-import com.daily.lastsys.service.SignupDuplicateException;
-import com.daily.lastsys.service.SignupService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

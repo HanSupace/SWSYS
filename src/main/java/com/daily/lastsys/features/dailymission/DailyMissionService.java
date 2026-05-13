@@ -1,10 +1,7 @@
-package com.daily.lastsys.service;
+package com.daily.lastsys.features.dailymission;
 
-import com.daily.lastsys.dto.DailyMissionDayResponse;
-import com.daily.lastsys.dto.DailyMissionListResponse;
-import com.daily.lastsys.dto.DailyMissionResponse;
-import com.daily.lastsys.repository.DailyMissionRepository;
-import com.daily.lastsys.repository.DailyMissionRepository.DailyMissionSeed;
+import com.daily.lastsys.features.dailymission.DailyMissionRepository.DailyMissionSeed;
+import com.daily.lastsys.features.userprogress.UserProgressService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

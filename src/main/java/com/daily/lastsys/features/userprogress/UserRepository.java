@@ -1,4 +1,4 @@
-package com.daily.lastsys.repository;
+package com.daily.lastsys.features.userprogress;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;

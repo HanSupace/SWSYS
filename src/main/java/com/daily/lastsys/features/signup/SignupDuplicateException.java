@@ -1,4 +1,4 @@
-package com.daily.lastsys.service;
+package com.daily.lastsys.features.signup;
 
 public class SignupDuplicateException extends RuntimeException {
 

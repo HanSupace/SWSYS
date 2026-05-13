@@ -1,4 +1,4 @@
-package com.daily.lastsys.dto;
+package com.daily.lastsys.features.userprogress;
 
 public record UserProgressResponse(
         int level,

@@ -1,4 +1,4 @@
-package com.daily.lastsys.repository;
+package com.daily.lastsys.features.userprogress;
 
 public record UserAccount(
         Long id,

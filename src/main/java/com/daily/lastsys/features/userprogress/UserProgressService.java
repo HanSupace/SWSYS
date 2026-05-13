@@ -1,7 +1,5 @@
-package com.daily.lastsys.service;
+package com.daily.lastsys.features.userprogress;
 
-import com.daily.lastsys.dto.UserProgressResponse;
-import com.daily.lastsys.repository.UserProgressRepository;
 import org.springframework.stereotype.Service;
 
 @Service

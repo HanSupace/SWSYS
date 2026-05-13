@@ -1,4 +1,4 @@
-package com.daily.lastsys.repository;
+package com.daily.lastsys.features.dailymission;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;

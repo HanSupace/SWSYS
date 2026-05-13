@@ -1,7 +1,8 @@
 package com.daily.lastsys.service;
 
-import com.daily.lastsys.dto.DailyMissionListResponse;
-import com.daily.lastsys.dto.DailyMissionResponse;
+import com.daily.lastsys.features.dailymission.DailyMissionListResponse;
+import com.daily.lastsys.features.dailymission.DailyMissionResponse;
+import com.daily.lastsys.features.dailymission.DailyMissionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

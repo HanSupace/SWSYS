@@ -1,8 +1,5 @@
-package com.daily.lastsys.controller;
+package com.daily.lastsys.features.login;
 
-import com.daily.lastsys.dto.LoginForm;
-import com.daily.lastsys.dto.LoginUser;
-import com.daily.lastsys.service.LoginService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;

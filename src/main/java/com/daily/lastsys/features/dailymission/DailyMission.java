@@ -1,4 +1,4 @@
-package com.daily.lastsys.repository;
+package com.daily.lastsys.features.dailymission;
 
 public record DailyMission(
         String missionKey,

@@ -1,7 +1,6 @@
-package com.daily.lastsys.service;
+package com.daily.lastsys.features.signup;
 
-import com.daily.lastsys.dto.SignupForm;
-import com.daily.lastsys.repository.UserRepository;
+import com.daily.lastsys.features.userprogress.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

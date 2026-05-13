@@ -1,8 +1,7 @@
-package com.daily.lastsys.controller;
+package com.daily.lastsys.features.ranking;
 
-import com.daily.lastsys.dto.LoginUser;
-import com.daily.lastsys.dto.RankingPageResponse;
-import com.daily.lastsys.service.RankingService;
+import com.daily.lastsys.features.login.LoginController;
+import com.daily.lastsys.features.login.LoginUser;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

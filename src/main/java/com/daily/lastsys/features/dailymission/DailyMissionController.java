@@ -1,9 +1,7 @@
-package com.daily.lastsys.controller;
+package com.daily.lastsys.features.dailymission;
 
-import com.daily.lastsys.dto.DailyMissionDayResponse;
-import com.daily.lastsys.dto.DailyMissionListResponse;
-import com.daily.lastsys.dto.LoginUser;
-import com.daily.lastsys.service.DailyMissionService;
+import com.daily.lastsys.features.login.LoginController;
+import com.daily.lastsys.features.login.LoginUser;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;

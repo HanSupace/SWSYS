@@ -1,4 +1,6 @@
-package com.daily.lastsys.dto;
+package com.daily.lastsys.features.dailymission;
+
+import com.daily.lastsys.features.userprogress.UserProgressResponse;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.daily.lastsys.dto;
+package com.daily.lastsys.features.dailymission;
 
 import java.time.LocalDate;
 

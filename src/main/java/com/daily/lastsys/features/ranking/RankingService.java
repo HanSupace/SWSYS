@@ -1,8 +1,7 @@
-package com.daily.lastsys.service;
+package com.daily.lastsys.features.ranking;
 
-import com.daily.lastsys.dto.RankingEntryResponse;
-import com.daily.lastsys.dto.RankingPageResponse;
-import com.daily.lastsys.repository.UserProgressRepository;
+import com.daily.lastsys.features.userprogress.UserProgressRepository;
+import com.daily.lastsys.features.userprogress.UserProgressService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
