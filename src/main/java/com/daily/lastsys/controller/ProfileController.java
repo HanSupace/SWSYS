@@ -1,0 +1,21 @@
+package com.daily.lastsys.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.SessionAttribute;
+import com.daily.lastsys.dto.LoginUser; 
+
+@Controller
+public class ProfileController {
+
+    @GetMapping("/profile")
+    public String showProfile(
+            @SessionAttribute(name = "loginUser", required = false) LoginUser loginUser, 
+            Model model) {
+        
+        model.addAttribute("loginUser", loginUser);
+        
+        return "home/profile"; 
+    }
+}
