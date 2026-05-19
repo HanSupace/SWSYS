@@ -467,7 +467,14 @@ body {
     line-height: 1.25;
 }
 
-.mission-close {
+.mission-panel-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mission-close,
+.mission-reroll {
     width: 34px;
     height: 34px;
     flex: 0 0 auto;
@@ -480,6 +487,16 @@ body {
     font-weight: 600;
     line-height: 1;
     cursor: pointer;
+}
+
+.mission-reroll {
+    font-size: 20px;
+    font-weight: 850;
+}
+
+.mission-reroll:disabled {
+    cursor: wait;
+    opacity: 0.58;
 }
 
 .mission-list {
@@ -498,14 +515,24 @@ body {
     list-style: none;
 }
 
-.mission-list button {
+.mission-item {
     width: 100%;
     height: 100%;
     min-height: 48px;
     display: flex;
     align-items: center;
+    gap: 8px;
+}
+
+.mission-complete {
+    min-width: 0;
+    height: 100%;
+    min-height: 48px;
+    flex: 1;
+    display: flex;
+    align-items: center;
     gap: 12px;
-    padding: 11px 12px;
+    padding: 11px 10px 11px 12px;
     border-radius: 16px;
     background: rgba(248, 250, 249, 0.88);
     border: 1px solid rgba(26, 77, 57, 0.08);
@@ -516,11 +543,11 @@ body {
     transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
 }
 
-.mission-list button:active {
+.mission-complete:active {
     transform: scale(0.985);
 }
 
-.mission-list button.is-completed {
+.mission-item.is-completed .mission-complete {
     background: rgba(198, 232, 210, 0.76);
     border-color: rgba(26, 77, 57, 0.18);
     cursor: default;
@@ -561,13 +588,33 @@ body {
     text-align: center;
 }
 
-.mission-list button.is-completed strong {
+.mission-item.is-completed strong {
     background: var(--primary-color);
     color: #FFFFFF;
 }
 
-.mission-list button.is-completed p {
+.mission-item.is-completed p {
     color: var(--primary-color);
+}
+
+.mission-item-reroll {
+    width: 42px;
+    height: 48px;
+    flex: 0 0 auto;
+    border: 1px solid rgba(26, 77, 57, 0.1);
+    border-radius: 15px;
+    background: rgba(248, 250, 249, 0.94);
+    color: var(--primary-color);
+    font: inherit;
+    font-size: 20px;
+    font-weight: 850;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.mission-item-reroll:disabled {
+    cursor: default;
+    opacity: 0.48;
 }
 
 .mission-message {

@@ -92,6 +92,109 @@
         .text-danger { color: #e74c3c !important; }
         .text-danger .icon { background: #ffeaea; color: #e74c3c; }
         .text-gray .icon { background: #f1f3f5; color: #666; }
+        .mission-settings {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .mission-settings form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .mission-settings-head {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .mission-settings-head h3 {
+            color: var(--primary-color);
+            font-size: 18px;
+            font-weight: 850;
+        }
+        .mission-settings-head p {
+            color: var(--text-sub, #666);
+            font-size: 13px;
+            font-weight: 650;
+            line-height: 1.45;
+            word-break: keep-all;
+        }
+        .mission-settings-saved {
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(49, 112, 74, 0.1);
+            color: var(--primary-color);
+            font-size: 13px;
+            font-weight: 800;
+        }
+        .mission-mode-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .mission-mode-options label {
+            min-height: 62px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            border: 1px solid rgba(26, 77, 57, 0.1);
+            border-radius: 14px;
+            background: rgba(248, 250, 249, 0.88);
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .mission-mode-options input {
+            accent-color: var(--primary-color);
+        }
+        .mission-setting-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        .mission-setting-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .mission-setting-field span {
+            color: var(--text-sub, #666);
+            font-size: 12px;
+            font-weight: 850;
+        }
+        .mission-setting-field select {
+            width: 100%;
+            height: 46px;
+            padding: 0 12px;
+            border: 1px solid rgba(26, 77, 57, 0.12);
+            border-radius: 12px;
+            background: rgba(248, 250, 249, 0.94);
+            color: var(--text-main);
+            font: inherit;
+            font-size: 14px;
+            font-weight: 750;
+        }
+        .mission-setting-grid.is-disabled {
+            opacity: 0.48;
+        }
+        .mission-setting-grid.is-disabled select {
+            cursor: not-allowed;
+        }
+        .mission-settings-submit {
+            width: 100%;
+            min-height: 48px;
+            border: 0;
+            border-radius: 15px;
+            background: var(--primary-color);
+            color: #FFFFFF;
+            font: inherit;
+            font-size: 14px;
+            font-weight: 850;
+            cursor: pointer;
+            box-shadow: 0 12px 22px rgba(26, 77, 57, 0.16);
+        }
     </style>
 </head>
 <body>
@@ -119,6 +222,63 @@
                     <h2><strong th:text="${loginUser != null ? loginUser.nickname() : '사용자'}">닉네임</strong>님</h2>
                 </div>
             </article>
+
+            <section class="menu-section mission-settings" aria-label="선행 미션 설정">
+                <div class="mission-settings-head">
+                    <h3>선행 미션 방식</h3>
+                    <p>평범 모드는 랜덤 미션을, 규칙 기반 모드는 현재 역할과 상황에 맞는 미션을 우선 보여줍니다.</p>
+                </div>
+                <p class="mission-settings-saved" th:if="${param.missionSettingsSaved}">미션 설정이 저장되었습니다.</p>
+
+                <form th:action="@{/profile/mission-settings}" th:object="${missionSettingsForm}" method="post">
+                    <div class="mission-mode-options" role="radiogroup" aria-label="미션 제공 방식">
+                        <label>
+                            <input type="radio" th:field="*{mode}" value="PLAIN">
+                            <span>평범 모드</span>
+                        </label>
+                        <label>
+                            <input type="radio" th:field="*{mode}" value="RULE_BASED">
+                            <span>규칙 기반 모드</span>
+                        </label>
+                    </div>
+
+                    <div class="mission-setting-grid" id="mission-rule-fields">
+                        <label class="mission-setting-field">
+                            <span>직업/역할</span>
+                            <select th:field="*{lifeStage}" data-rule-field>
+                                <option value="ANY">상관없음</option>
+                                <option value="STUDENT">학생</option>
+                                <option value="WORKER">직장인</option>
+                                <option value="FREELANCER">프리랜서</option>
+                                <option value="CAREGIVER">돌봄/가사 중심</option>
+                            </select>
+                        </label>
+
+                        <label class="mission-setting-field">
+                            <span>주로 있는 환경</span>
+                            <select th:field="*{environmentType}" data-rule-field>
+                                <option value="ANY">상관없음</option>
+                                <option value="SCHOOL">학교</option>
+                                <option value="OFFICE">회사</option>
+                                <option value="HOME">집</option>
+                                <option value="OUTSIDE">외부/이동 중</option>
+                            </select>
+                        </label>
+
+                        <label class="mission-setting-field">
+                            <span>오늘의 상태</span>
+                            <select th:field="*{conditionType}" data-rule-field>
+                                <option value="NORMAL">보통</option>
+                                <option value="SAD">우울/가라앉음</option>
+                                <option value="TIRED">피곤함</option>
+                                <option value="STRESSED">스트레스</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <button class="mission-settings-submit" type="submit">저장하기</button>
+                </form>
+            </section>
 
             <!-- 2. 내 활동 관리 메뉴 -->
             <section class="menu-section" aria-label="내 활동 관리">
@@ -175,5 +335,27 @@
     <a class="active" th:href="@{/profile}" href="/profile">프로필</a>
 </nav>
 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modeInputs = document.querySelectorAll('input[name="mode"]');
+        const ruleFields = document.querySelectorAll('[data-rule-field]');
+        const ruleFieldGroup = document.getElementById('mission-rule-fields');
+
+        const updateRuleFields = () => {
+            const selectedMode = document.querySelector('input[name="mode"]:checked')?.value || 'PLAIN';
+            const disabled = selectedMode !== 'RULE_BASED';
+
+            ruleFields.forEach((field) => {
+                field.disabled = disabled;
+            });
+            ruleFieldGroup?.classList.toggle('is-disabled', disabled);
+        };
+
+        modeInputs.forEach((input) => {
+            input.addEventListener('change', updateRuleFields);
+        });
+        updateRuleFields();
+    });
+</script>
 </body>
 </html>

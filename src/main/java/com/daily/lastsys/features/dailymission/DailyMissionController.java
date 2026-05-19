@@ -47,6 +47,21 @@ public class DailyMissionController {
         return dailyMissionService.completeMission(loginUser.id(), missionKey);
     }
 
+    @PostMapping("/api/daily-missions/reroll")
+    public DailyMissionListResponse rerollTodayMissions(HttpSession session) {
+        LoginUser loginUser = requireLogin(session);
+        return dailyMissionService.rerollTodayMissions(loginUser.id());
+    }
+
+    @PostMapping("/api/daily-missions/slots/{slotIndex}/reroll")
+    public DailyMissionListResponse rerollMissionSlot(
+            @PathVariable int slotIndex,
+            HttpSession session
+    ) {
+        LoginUser loginUser = requireLogin(session);
+        return dailyMissionService.rerollMissionSlot(loginUser.id(), slotIndex);
+    }
+
     private LoginUser requireLogin(HttpSession session) {
         LoginUser loginUser = (LoginUser) session.getAttribute(LoginController.LOGIN_USER_SESSION_KEY);
 
