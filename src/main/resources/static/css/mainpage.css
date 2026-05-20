@@ -249,29 +249,58 @@ body {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
-.emotion-choice[data-tone="anger"] {
-    background: #FFF1F0;
-    border-color: rgba(196, 73, 64, 0.22);
-    color: #9D312B;
-}
-
-.emotion-choice[data-tone="joy"] {
+/*
+* 감정 버튼 글자 색 변경 참고
+버튼 배경색
+테두리색
+글자색
+*/
+.emotion-choice[data-emotion-id="default-happiness"] {
     background: #FFF7D7;
     border-color: rgba(171, 126, 9, 0.22);
     color: #765A08;
 }
 
-.emotion-choice[data-tone="sadness"] {
+.emotion-choice[data-emotion-id="default-anticipation"] {
+    background: #ECF8DD;
+    border-color: rgba(89, 137, 36, 0.22);
+    color: #4F711F;
+}
+
+.emotion-choice[data-emotion-id="default-sadness"] {
     background: #EAF3FF;
     border-color: rgba(62, 111, 162, 0.22);
     color: #315C86;
 }
 
-.emotion-choice[data-tone="melancholy"] {
-    background: #ECEEF2;
-    border-color: rgba(88, 99, 116, 0.22);
-    color: #4C5664;
+.emotion-choice[data-emotion-id="default-anger"] {
+    background: #FFF1F0;
+    border-color: rgba(196, 73, 64, 0.22);
+    color: #9D312B;
+}
+
+.emotion-choice[data-emotion-id="default-anxiety"] {
+    background: #F3EEFF;
+    border-color: rgba(106, 78, 150, 0.22);
+    color: #5C477D;
+}
+
+.emotion-choice[data-emotion-id="default-embarrassment"] {
+    background: #FFEFF7;
+    border-color: rgba(177, 75, 120, 0.22);
+    color: #8B3D66;
+}
+
+.emotion-choice[data-emotion-id="default-surprise"] {
+    background: #E8F9F7;
+    border-color: rgba(50, 137, 128, 0.22);
+    color: #28746F;
+}
+
+.emotion-choice[data-emotion-id="default-irritation"] {
+    background: #FFF0E4;
+    border-color: rgba(181, 99, 31, 0.22);
+    color: #925021;
 }
 
 .emotion-choice.is-selected {
