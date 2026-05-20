@@ -14,93 +14,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const userXp = document.getElementById('user-xp');
     const userXpBar = document.getElementById('user-xp-bar');
     const emotionButtonBox = document.getElementById('emotion-button-box');
-    const emotionAddButton = document.getElementById('emotion-add-button');
-    const emotionEditButton = document.getElementById('emotion-edit-button');
     let missionsLoaded = false;
     let missionSuccessCounts = new Map();
     let pendingMissionButton = null;
-    let emotionEditMode = false;
-    const customEmotionStorageKey = 'lastsys.customEmotions';
-    const emotionLabelStorageKey = 'lastsys.emotionLabels';
     const selectedEmotionStorageKey = 'lastsys.selectedEmotion';
 
     const today = getKoreaToday();
     let visibleMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
     const getEmotionValue = (button) => button.dataset.emotion || button.textContent.trim();
-
-    const loadCustomEmotions = () => {
-        try {
-            const emotions = JSON.parse(localStorage.getItem(customEmotionStorageKey) || '[]');
-
-            if (!Array.isArray(emotions)) {
-                return [];
-            }
-
-            const uniqueEmotions = new Set();
-
-            return emotions
-                .map((emotion) => String(emotion).trim())
-                .filter((emotion) => {
-                    if (!emotion || uniqueEmotions.has(emotion)) {
-                        return false;
-                    }
-
-                    uniqueEmotions.add(emotion);
-                    return true;
-                });
-        } catch (error) {
-            return [];
-        }
-    };
-
-    const saveCustomEmotions = (emotions) => {
-        try {
-            localStorage.setItem(customEmotionStorageKey, JSON.stringify(emotions));
-        } catch (error) {
-            // 저장 공간을 사용할 수 없는 환경에서는 화면에만 추가합니다.
-        }
-    };
-
-    const loadEmotionLabels = () => {
-        try {
-            const labels = JSON.parse(localStorage.getItem(emotionLabelStorageKey) || '{}');
-
-            if (!labels || Array.isArray(labels) || typeof labels !== 'object') {
-                return {};
-            }
-
-            return labels;
-        } catch (error) {
-            return {};
-        }
-    };
-
-    const saveEmotionLabels = (labels) => {
-        try {
-            localStorage.setItem(emotionLabelStorageKey, JSON.stringify(labels));
-        } catch (error) {
-            // 저장 공간을 사용할 수 없는 환경에서는 화면에만 반영합니다.
-        }
-    };
-
-    const createEmotionButton = (emotion) => {
-        const button = document.createElement('button');
-
-        button.className = 'emotion-choice';
-        button.type = 'button';
-        button.dataset.customEmotion = 'true';
-        button.dataset.emotion = emotion;
-        button.setAttribute('aria-pressed', 'false');
-        button.textContent = emotion;
-
-        return button;
-    };
-
-    const updateEmotionButtonLabel = (button, emotion) => {
-        button.dataset.emotion = emotion;
-        button.textContent = emotion;
-    };
 
     const setSelectedEmotion = (selectedButton) => {
         if (!emotionButtonBox || !selectedButton) {
@@ -146,95 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const applyEmotionLabels = () => {
-        if (!emotionButtonBox) {
-            return;
-        }
-
-        const labels = loadEmotionLabels();
-
-        emotionButtonBox.querySelectorAll('.emotion-choice[data-emotion-id]').forEach((button) => {
-            const emotionId = button.dataset.emotionId;
-            const emotion = String(labels[emotionId] || '').trim().slice(0, 12);
-
-            if (emotion) {
-                updateEmotionButtonLabel(button, emotion);
-            }
-        });
-    };
-
-    const findEmotionButtonByValue = (emotion, exceptButton = null) => {
-        if (!emotionButtonBox) {
-            return null;
-        }
-
-        return Array.from(emotionButtonBox.querySelectorAll('.emotion-choice'))
-            .find((button) => button !== exceptButton && getEmotionValue(button) === emotion) || null;
-    };
-
-    const setEmotionEditMode = (isEditing) => {
-        emotionEditMode = isEditing;
-        emotionButtonBox?.classList.toggle('is-editing', isEditing);
-        emotionEditButton?.classList.toggle('is-active', isEditing);
-        emotionEditButton?.setAttribute('aria-pressed', String(isEditing));
-        emotionEditButton?.setAttribute('aria-label', isEditing ? '감정 편집 완료' : '감정 편집');
-
-        if (emotionEditButton) {
-            emotionEditButton.textContent = isEditing ? '완료' : '편집';
-        }
-    };
-
-    const editEmotionButton = (button) => {
-        const currentEmotion = getEmotionValue(button);
-        const emotion = window.prompt('수정할 감정을 입력해 주세요.', currentEmotion);
-        const normalizedEmotion = String(emotion || '').trim().slice(0, 12);
-
-        if (!normalizedEmotion || normalizedEmotion === currentEmotion) {
-            return;
-        }
-
-        if (findEmotionButtonByValue(normalizedEmotion, button)) {
-            window.alert('이미 있는 감정입니다.');
-            return;
-        }
-
-        const wasSelected = button.classList.contains('is-selected');
-
-        updateEmotionButtonLabel(button, normalizedEmotion);
-
-        if (button.dataset.customEmotion === 'true') {
-            const customEmotions = loadCustomEmotions();
-            const customEmotionIndex = customEmotions.indexOf(currentEmotion);
-
-            if (customEmotionIndex >= 0) {
-                customEmotions[customEmotionIndex] = normalizedEmotion;
-            } else {
-                customEmotions.push(normalizedEmotion);
-            }
-
-            saveCustomEmotions(customEmotions);
-        } else if (button.dataset.emotionId) {
-            const labels = loadEmotionLabels();
-
-            labels[button.dataset.emotionId] = normalizedEmotion;
-            saveEmotionLabels(labels);
-        }
-
-        if (wasSelected) {
-            setSelectedEmotion(button);
-        }
-    };
-
-    const renderCustomEmotions = () => {
-        if (!emotionButtonBox || !emotionAddButton) {
-            return;
-        }
-
-        loadCustomEmotions().forEach((emotion) => {
-            emotionButtonBox.insertBefore(createEmotionButton(emotion), emotionAddButton);
-        });
-
-        applyEmotionLabels();
+    const initializeEmotionButtons = () => {
         restoreSelectedEmotion();
     };
 
@@ -259,10 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loadMonthlySuccessCounts();
     });
 
-    emotionEditButton?.addEventListener('click', () => {
-        setEmotionEditMode(!emotionEditMode);
-    });
-
     emotionButtonBox?.addEventListener('click', (event) => {
         const emotionButton = event.target.closest('.emotion-choice');
 
@@ -270,40 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (emotionEditMode) {
-            editEmotionButton(emotionButton);
-            return;
-        }
-
-        setSelectedEmotion(emotionButton);
-    });
-
-    emotionAddButton?.addEventListener('click', () => {
-        if (!emotionButtonBox) {
-            return;
-        }
-
-        const emotion = window.prompt('추가할 감정을 입력해 주세요.');
-        const normalizedEmotion = String(emotion || '').trim().slice(0, 12);
-
-        if (!normalizedEmotion) {
-            return;
-        }
-
-        const existingButton = Array.from(emotionButtonBox.querySelectorAll('.emotion-choice'))
-            .find((button) => getEmotionValue(button) === normalizedEmotion);
-
-        if (existingButton) {
-            setSelectedEmotion(existingButton);
-            return;
-        }
-
-        const customEmotions = loadCustomEmotions();
-        const nextCustomEmotions = [...customEmotions, normalizedEmotion];
-        const emotionButton = createEmotionButton(normalizedEmotion);
-
-        saveCustomEmotions(nextCustomEmotions);
-        emotionButtonBox.insertBefore(emotionButton, emotionAddButton);
         setSelectedEmotion(emotionButton);
     });
 
@@ -502,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    renderCustomEmotions();
+    initializeEmotionButtons();
     renderCalendar();
     loadMonthlySuccessCounts();
 });
