@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../static/css/home.css?v=20260512b">
     <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260513a)}" href="../static/css/mainpage.css?v=20260513a">
-    <link rel="stylesheet" th:href="@{/css/map.css(v=20260519a)}" href="../static/css/map.css?v=20260519a">
+    <link rel="stylesheet" th:href="@{/css/map.css(v=20260520n)}" href="../static/css/map.css?v=20260520n">
 </head>
 <body>
 <div class="bg-pattern"></div>
@@ -28,15 +28,75 @@
         </header>
 
         <section class="map-shell" aria-label="감정지도">
-            <div class="map-title">
-                <h1>감정지도</h1>
-                <p>오늘의 마음이 머문 위치를 한눈에 살펴보세요.</p>
+            <form id="map-search-form" class="map-search-form" autocomplete="off">
+                <input id="map-search-input" type="search" placeholder="위치 검색" aria-label="위치 검색">
+                <button type="submit">검색</button>
+            </form>
+            <div class="map-stage">
+                <div id="map" class="emotion-map" aria-label="카카오 지도"></div>
+                <div id="map-search-results" class="map-search-results" hidden></div>
+                <div class="map-crosshair" aria-hidden="true"></div>
+                <button id="open-marker-modal" class="open-marker-modal" type="button">기록하기</button>
             </div>
-            <div id="map" class="emotion-map" aria-label="카카오 지도"></div>
             <div id="map-message" class="map-message" role="status">지도를 불러오는 중입니다.</div>
         </section>
     </section>
 </main>
+
+<div id="marker-modal" class="marker-modal" hidden>
+    <button id="marker-modal-backdrop" class="marker-modal-backdrop" type="button" aria-label="기록하기 닫기"></button>
+    <section class="marker-modal-panel" role="dialog" aria-modal="true" aria-labelledby="marker-modal-title">
+        <div class="marker-modal-head">
+            <div>
+                <h2 id="marker-modal-title">기록하기</h2>
+                <p>선택한 위치에 감정 마커를 남겨보세요.</p>
+            </div>
+            <button id="close-marker-modal" class="marker-modal-close" type="button" aria-label="기록하기 닫기">×</button>
+        </div>
+
+        <form id="emotion-marker-form" class="emotion-marker-form" autocomplete="off">
+            <div class="emotion-picker" role="radiogroup" aria-label="감정 선택">
+                <label class="emotion-option is-joy">
+                    <input type="radio" name="emotion" value="joy" data-label="기쁨" data-color="#F4B942" checked>
+                    <span>기쁨</span>
+                </label>
+                <label class="emotion-option is-calm">
+                    <input type="radio" name="emotion" value="calm" data-label="평온" data-color="#46B39D">
+                    <span>평온</span>
+                </label>
+                <label class="emotion-option is-sad">
+                    <input type="radio" name="emotion" value="sad" data-label="슬픔" data-color="#5B7CFA">
+                    <span>슬픔</span>
+                </label>
+                <label class="emotion-option is-angry">
+                    <input type="radio" name="emotion" value="angry" data-label="화남" data-color="#E85D5D">
+                    <span>화남</span>
+                </label>
+                <label class="emotion-option is-anxious">
+                    <input type="radio" name="emotion" value="anxious" data-label="불안" data-color="#9B6BDF">
+                    <span>불안</span>
+                </label>
+            </div>
+            <div class="marker-fields">
+                <label>
+                    <span>위치</span>
+                    <input id="marker-location" type="text" maxlength="40" placeholder="위치 이름을 적어주세요" required>
+                    <input id="marker-location-selected" type="hidden">
+                </label>
+                <div id="marker-location-results" class="marker-location-results" hidden></div>
+                <label>
+                    <span>제목</span>
+                    <input id="marker-title" type="text" maxlength="24" placeholder="지금의 마음" required>
+                </label>
+                <label>
+                    <span>설명</span>
+                    <textarea id="marker-description" maxlength="90" rows="2" placeholder="짧게 적어보세요" required></textarea>
+                </label>
+            </div>
+            <button class="marker-submit" type="submit">마커 추가</button>
+        </form>
+    </section>
+</div>
 
 <nav class="bottom-tabs" aria-label="하단 메뉴">
     <a th:href="@{/}" href="/">홈</a>
@@ -44,11 +104,18 @@
     <a th:href="@{/profile}" href="/profile">프로필</a>
 </nav>
 
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=193ceb4c1a6b6b4e4651b199d5836ee5"></script>
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=193ceb4c1a6b6b4e4651b199d5836ee5&libraries=services"></script>
 <script>
     (function () {
         var container = document.getElementById('map');
         var message = document.getElementById('map-message');
+        var searchForm = document.getElementById('map-search-form');
+        var searchInput = document.getElementById('map-search-input');
+        var searchResults = document.getElementById('map-search-results');
+        var markerModal = document.getElementById('marker-modal');
+        var openMarkerModalButton = document.getElementById('open-marker-modal');
+        var closeMarkerModalButton = document.getElementById('close-marker-modal');
+        var markerModalBackdrop = document.getElementById('marker-modal-backdrop');
 
         if (!window.kakao || !window.kakao.maps) {
             message.textContent = '지도를 불러오지 못했습니다. Kakao JavaScript 키와 도메인 설정을 확인해주세요.';
@@ -56,22 +123,456 @@
             return;
         }
 
+        var form = document.getElementById('emotion-marker-form');
+        var markerLocationInput = document.getElementById('marker-location');
+        var markerLocationSelectedInput = document.getElementById('marker-location-selected');
+        var markerLocationResults = document.getElementById('marker-location-results');
+        var titleInput = document.getElementById('marker-title');
+        var descriptionInput = document.getElementById('marker-description');
+        var defaultPosition = new kakao.maps.LatLng(37.566826, 126.9786567);
+        var currentPosition = defaultPosition;
+        var selectedPosition = defaultPosition;
+        var searchedPlaces = [];
+        var markerPlaces = [];
+        var activeInfoOverlay = null;
+        var searchTimer = null;
+        var markerLocationTimer = null;
         var options = {
-            center: new kakao.maps.LatLng(37.566826, 126.9786567),
+            center: defaultPosition,
             level: 5
         };
 
         var map = new kakao.maps.Map(container, options);
-        var marker = new kakao.maps.Marker({
-            position: options.center
+        map.setDraggable(true);
+        var places = kakao.maps.services ? new kakao.maps.services.Places() : null;
+        var currentLocationElement = document.createElement('div');
+        currentLocationElement.className = 'current-location-dot';
+        currentLocationElement.setAttribute('aria-label', '현재 위치');
+
+        var currentLocationOverlay = new kakao.maps.CustomOverlay({
+            position: currentPosition,
+            content: currentLocationElement,
+            yAnchor: 0.5,
+            xAnchor: 0.5,
+            zIndex: 4
         });
 
-        marker.setMap(map);
-        message.hidden = true;
+        currentLocationOverlay.setMap(map);
+        message.textContent = '현재 위치를 확인하는 중입니다.';
+
+        function openMarkerModal() {
+            markerModal.hidden = false;
+            document.body.classList.add('is-marker-modal-open');
+            window.setTimeout(function () {
+                markerLocationInput.focus();
+            }, 120);
+        }
+
+        function closeMarkerModal() {
+            markerModal.hidden = true;
+            document.body.classList.remove('is-marker-modal-open');
+            openMarkerModalButton.focus();
+        }
+
+        function moveTo(position, level) {
+            currentPosition = position;
+            currentLocationOverlay.setPosition(position);
+            map.setLevel(level);
+            map.setCenter(position);
+        }
+
+        function formatPosition(position) {
+            return position.getLat().toFixed(6) + ', ' + position.getLng().toFixed(6);
+        }
+
+        function formatPlace(place) {
+            return place.place_name + ' · ' + (place.road_address_name || place.address_name || '주소 정보 없음');
+        }
+
+        function chooseMapPlace(index) {
+            var place = searchedPlaces[index];
+
+            if (!place) {
+                return;
+            }
+
+            var searchedPosition = new kakao.maps.LatLng(place.y, place.x);
+
+            selectedPosition = searchedPosition;
+            map.setLevel(4);
+            map.setCenter(searchedPosition);
+            searchInput.value = place.place_name;
+            searchInput.blur();
+            searchResults.hidden = true;
+            showNotice((index + 1) + '번째 검색 위치를 선택했습니다.');
+        }
+
+        function showError(text) {
+            message.textContent = text;
+            message.classList.add('is-error');
+            message.hidden = false;
+        }
+
+        function showNotice(text) {
+            message.textContent = text;
+            message.classList.remove('is-error');
+            message.hidden = false;
+
+            window.setTimeout(function () {
+                message.hidden = true;
+            }, 1800);
+        }
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    var userPosition = new kakao.maps.LatLng(
+                        position.coords.latitude,
+                        position.coords.longitude
+                    );
+
+                    moveTo(userPosition, 4);
+                    message.hidden = true;
+                },
+                function () {
+                    showError('현재 위치를 가져오지 못했습니다. 브라우저 위치 권한을 허용해주세요.');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 8000,
+                    maximumAge: 60000
+                }
+            );
+        } else {
+            showError('이 브라우저에서는 현재 위치 기능을 지원하지 않습니다.');
+        }
+
+        kakao.maps.event.addListener(map, 'center_changed', function () {
+            selectedPosition = map.getCenter();
+        });
+
+        kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
+            selectedPosition = mouseEvent.latLng;
+            map.panTo(selectedPosition);
+            searchResults.hidden = true;
+        });
+
+        function renderSearchResults(results) {
+            searchResults.innerHTML = '';
+            searchedPlaces = results.slice(0, 5);
+
+            searchedPlaces.forEach(function (place, index) {
+                var resultButton = document.createElement('button');
+                resultButton.type = 'button';
+                resultButton.className = 'map-search-result';
+                resultButton.innerHTML =
+                    '<strong>' + escapeHtml(place.place_name) + '</strong>' +
+                    '<span>' + escapeHtml(place.road_address_name || place.address_name || '주소 정보 없음') + '</span>';
+
+                resultButton.addEventListener('click', function () {
+                    chooseMapPlace(index);
+                });
+
+                searchResults.appendChild(resultButton);
+            });
+
+            searchResults.hidden = false;
+        }
+
+        function searchPlaces() {
+            var keyword = searchInput.value.trim();
+
+            if (keyword.length < 2) {
+                searchResults.hidden = true;
+                return;
+            }
+
+            if (!places) {
+                showError('위치 검색을 사용할 수 없습니다. Kakao 지도 services 라이브러리를 확인해주세요.');
+                return;
+            }
+
+            places.keywordSearch(keyword, function (results, status) {
+                if (status !== kakao.maps.services.Status.OK || !results.length) {
+                    searchResults.hidden = true;
+                    return;
+                }
+
+                renderSearchResults(results);
+            });
+        }
+
+        searchForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            searchPlaces();
+        });
+
+        searchInput.addEventListener('input', function () {
+            window.clearTimeout(searchTimer);
+
+            searchTimer = window.setTimeout(function () {
+                searchPlaces();
+            }, 220);
+        });
+
+        function renderMarkerLocationResults(results) {
+            markerLocationResults.innerHTML = '';
+            markerPlaces = results.slice(0, 5);
+
+            markerPlaces.forEach(function (place) {
+                var resultButton = document.createElement('button');
+                resultButton.type = 'button';
+                resultButton.className = 'marker-location-result';
+                resultButton.innerHTML =
+                    '<strong>' + escapeHtml(place.place_name) + '</strong>' +
+                    '<span>' + escapeHtml(place.road_address_name || place.address_name || '주소 정보 없음') + '</span>';
+
+                resultButton.addEventListener('click', function () {
+                    markerLocationInput.value = place.place_name;
+                    markerLocationSelectedInput.value = place.place_name;
+                    markerLocationResults.hidden = true;
+                    titleInput.focus();
+                });
+
+                markerLocationResults.appendChild(resultButton);
+            });
+
+            markerLocationResults.hidden = !markerPlaces.length;
+        }
+
+        function searchMarkerLocations() {
+            var keyword = markerLocationInput.value.trim();
+
+            if (keyword.length < 2) {
+                markerPlaces = [];
+                markerLocationResults.hidden = true;
+                return;
+            }
+
+            if (!places) {
+                showError('위치 검색을 사용할 수 없습니다. Kakao 지도 services 라이브러리를 확인해주세요.');
+                return;
+            }
+
+            places.keywordSearch(keyword, function (results, status) {
+                if (status !== kakao.maps.services.Status.OK || !results.length) {
+                    markerPlaces = [];
+                    markerLocationResults.hidden = true;
+                    return;
+                }
+
+                renderMarkerLocationResults(results);
+            });
+        }
+
+        markerLocationInput.addEventListener('input', function () {
+            window.clearTimeout(markerLocationTimer);
+            markerLocationSelectedInput.value = '';
+
+            markerLocationTimer = window.setTimeout(function () {
+                searchMarkerLocations();
+            }, 220);
+        });
+
+        function escapeHtml(value) {
+            return value.replace(/[&<>"']/g, function (match) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[match];
+            });
+        }
+
+        function createEmotionMarker(position, emotion, title, description, locationName, shouldOpen) {
+            var markerElement = document.createElement('button');
+            markerElement.type = 'button';
+            markerElement.className = 'emotion-map-marker';
+            markerElement.style.setProperty('--marker-color', emotion.color);
+            markerElement.setAttribute('aria-label', emotion.label + ' 감정 마커: ' + title);
+            markerElement.innerHTML = '<span></span>';
+
+            var markerOverlay = new kakao.maps.CustomOverlay({
+                position: position,
+                content: markerElement,
+                yAnchor: 1,
+                xAnchor: 0.5,
+                zIndex: 6
+            });
+
+            var infoElement = document.createElement('article');
+            infoElement.className = 'emotion-marker-popup';
+            infoElement.style.setProperty('--marker-color', emotion.color);
+            infoElement.innerHTML =
+                '<strong>' + escapeHtml(title) + '</strong>' +
+                '<span>' + escapeHtml(emotion.label) + '</span>' +
+                '<small>' + escapeHtml(locationName || formatPosition(position)) + '</small>' +
+                '<p>' + escapeHtml(description) + '</p>';
+
+            var infoOverlay = new kakao.maps.CustomOverlay({
+                position: position,
+                content: infoElement,
+                yAnchor: 1.28,
+                xAnchor: 0.5,
+                zIndex: 7
+            });
+
+            markerElement.addEventListener('click', function () {
+                if (activeInfoOverlay && activeInfoOverlay !== infoOverlay) {
+                    activeInfoOverlay.setMap(null);
+                }
+
+                var isOpen = activeInfoOverlay === infoOverlay;
+                infoOverlay.setMap(isOpen ? null : map);
+                activeInfoOverlay = isOpen ? null : infoOverlay;
+            });
+
+            markerOverlay.setMap(map);
+
+            if (shouldOpen) {
+                if (activeInfoOverlay) {
+                    activeInfoOverlay.setMap(null);
+                }
+
+                infoOverlay.setMap(map);
+                activeInfoOverlay = infoOverlay;
+            }
+        }
+
+        function markerFromResponse(marker, shouldOpen) {
+            if (!marker.latitude || !marker.longitude || !marker.emotionLabel || !marker.title) {
+                return;
+            }
+
+            createEmotionMarker(
+                new kakao.maps.LatLng(marker.latitude, marker.longitude),
+                {
+                    label: marker.emotionLabel,
+                    color: marker.emotionColor
+                },
+                marker.title,
+                marker.description || '',
+                marker.locationName || '',
+                shouldOpen
+            );
+        }
+
+        async function loadEmotionMarkers() {
+            try {
+                var response = await fetch('/api/emotion-map-markers');
+
+                if (!response.ok) {
+                    return;
+                }
+
+                var markers = await response.json();
+                markers.forEach(function (marker) {
+                    markerFromResponse(marker, false);
+                });
+            } catch (error) {
+                showError('저장된 감정 마커를 불러오지 못했습니다.');
+            }
+        }
+
+        async function saveEmotionMarker(marker) {
+            var response = await fetch('/api/emotion-map-markers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(marker)
+            });
+
+            if (!response.ok) {
+                throw new Error(String(response.status));
+            }
+
+            return response.json();
+        }
+
+        loadEmotionMarkers();
+
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            var checkedEmotion = form.querySelector('input[name="emotion"]:checked');
+            var markerPosition = map.getCenter();
+            var locationName = markerLocationInput.value.trim();
+            var selectedLocationName = markerLocationSelectedInput.value.trim();
+            var title = titleInput.value.trim();
+            var description = descriptionInput.value.trim();
+
+            if (!locationName || locationName !== selectedLocationName) {
+                markerLocationInput.focus();
+                showError('위치 리스트에서 위치를 선택해주세요.');
+                return;
+            }
+
+            if (!title) {
+                titleInput.focus();
+                return;
+            }
+
+            if (!description) {
+                descriptionInput.focus();
+                showError('설명을 입력해주세요.');
+                return;
+            }
+
+            try {
+                var savedMarker = await saveEmotionMarker({
+                    latitude: markerPosition.getLat(),
+                    longitude: markerPosition.getLng(),
+                    emotionLabel: checkedEmotion.dataset.label,
+                    emotionColor: checkedEmotion.dataset.color,
+                    title: title,
+                    locationName: locationName,
+                    description: description
+                });
+
+                markerFromResponse(savedMarker, true);
+            } catch (error) {
+                if (error.message === '401') {
+                    showError('로그인 후 감정 마커를 저장할 수 있습니다.');
+                } else if (error.message === '400') {
+                    showError('입력한 내용을 확인해주세요.');
+                } else {
+                    showError('감정 마커를 저장하지 못했습니다. 서버 상태를 확인해주세요.');
+                }
+                return;
+            }
+
+            titleInput.value = '';
+            descriptionInput.value = '';
+            markerLocationInput.value = '';
+            markerLocationSelectedInput.value = '';
+            markerLocationResults.hidden = true;
+            markerPlaces = [];
+            closeMarkerModal();
+            message.classList.remove('is-error');
+            message.textContent = '감정 마커를 추가했습니다.';
+            message.hidden = false;
+
+            window.setTimeout(function () {
+                message.hidden = true;
+            }, 1800);
+        });
+
+        openMarkerModalButton.addEventListener('click', openMarkerModal);
+        closeMarkerModalButton.addEventListener('click', closeMarkerModal);
+        markerModalBackdrop.addEventListener('click', closeMarkerModal);
+
+        window.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && !markerModal.hidden) {
+                closeMarkerModal();
+            }
+        });
 
         window.addEventListener('resize', function () {
             kakao.maps.event.trigger(map, 'resize');
-            map.setCenter(options.center);
+            map.setCenter(currentPosition);
         });
     })();
 </script>
