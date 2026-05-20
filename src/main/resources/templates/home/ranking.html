@@ -88,7 +88,10 @@
         <div>
             <h2>오늘의 미션</h2>
         </div>
-        <button class="mission-close" type="button" aria-label="미션 닫기">×</button>
+        <div class="mission-panel-actions">
+            <button class="mission-reroll" type="button" aria-label="오늘의 미션 전체 다시 뽑기">↻</button>
+            <button class="mission-close" type="button" aria-label="미션 닫기">×</button>
+        </div>
     </div>
     <ul class="mission-list" id="mission-list" aria-live="polite"></ul>
 </section>
@@ -111,7 +114,7 @@
 <nav class="bottom-tabs" aria-label="하단 메뉴">
     <a th:href="@{/}" href="/">홈</a>
     <a href="#">감정지도</a>
-    <a href="#">프로필</a>
+    <a th:href="@{/profile}" href="/profile">프로필</a>
 </nav>
 </body>
 </html>

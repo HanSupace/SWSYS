@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const missionPanel = document.getElementById('mission-panel');
     const missionToggle = document.querySelector('.floating-toggle');
     const missionClose = document.querySelector('.mission-close');
+    const missionReroll = document.querySelector('.mission-reroll');
     const missionList = document.getElementById('mission-list');
     const missionConfirm = document.getElementById('mission-confirm');
     const missionConfirmSubmit = document.getElementById('mission-confirm-submit');
@@ -127,6 +128,35 @@ document.addEventListener('DOMContentLoaded', () => {
         setMissionPanelOpen(false);
     });
 
+    missionReroll?.addEventListener('click', async () => {
+        if (!missionList || missionReroll.disabled) {
+            return;
+        }
+
+        missionReroll.disabled = true;
+        renderMissionMessage('오늘의 미션을 새로 뽑는 중입니다.');
+
+        try {
+            const response = await fetch('/api/daily-missions/reroll', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('mission reroll failed');
+            }
+
+            missionsLoaded = true;
+            renderMissionPayload(await response.json());
+        } catch (error) {
+            renderMissionMessage('미션을 다시 뽑지 못했습니다. 잠시 후 다시 시도해 주세요.');
+        } finally {
+            missionReroll.disabled = false;
+        }
+    });
+
     const setMissionConfirmOpen = (isOpen, missionButton = null) => {
         if (!missionConfirm) {
             return;
@@ -154,6 +184,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     missionList?.addEventListener('click', (event) => {
+        const rerollButton = event.target.closest('[data-mission-reroll-slot]');
+
+        if (rerollButton) {
+            rerollMissionSlot(rerollButton);
+            return;
+        }
+
         const missionButton = event.target.closest('[data-mission-id]');
 
         if (!missionButton || missionButton.classList.contains('is-completed')) {
@@ -162,6 +199,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setMissionConfirmOpen(true, missionButton);
     });
+
+    async function rerollMissionSlot(rerollButton) {
+        if (rerollButton.disabled) {
+            return;
+        }
+
+        rerollButton.disabled = true;
+
+        try {
+            const response = await fetch(`/api/daily-missions/slots/${rerollButton.dataset.missionRerollSlot}/reroll`, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('mission slot reroll failed');
+            }
+
+            missionsLoaded = true;
+            renderMissionPayload(await response.json());
+        } catch (error) {
+            rerollButton.disabled = false;
+            renderMissionMessage('미션을 다시 뽑지 못했습니다. 잠시 후 다시 시도해 주세요.');
+        }
+    }
 
     missionConfirmSubmit?.addEventListener('click', async () => {
         const missionButton = pendingMissionButton;
@@ -234,11 +298,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         missionList.innerHTML = missions.map((mission, index) => `
             <li>
-                <button class="${mission.completed ? 'is-completed' : ''}" type="button" data-mission-id="${mission.id}" ${mission.completed ? 'disabled' : ''}>
-                    <span>${index + 1}</span>
-                    <p>${escapeHtml(mission.text)}</p>
-                    <strong>${mission.completed ? '성공' : '도전'}</strong>
-                </button>
+                <div class="mission-item ${mission.completed ? 'is-completed' : ''}">
+                    <button class="mission-complete" type="button" data-mission-id="${mission.id}" ${mission.completed ? 'disabled' : ''}>
+                        <span>${index + 1}</span>
+                        <p>${escapeHtml(mission.text)}</p>
+                        <strong>${mission.completed ? '성공' : '도전'}</strong>
+                    </button>
+                    <button class="mission-item-reroll" type="button" data-mission-reroll-slot="${mission.slotIndex}" ${mission.completed ? 'disabled' : ''} aria-label="${index + 1}번 미션 다시 뽑기">↻</button>
+                </div>
             </li>
         `).join('');
     }
