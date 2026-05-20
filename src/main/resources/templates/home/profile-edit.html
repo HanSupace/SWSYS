@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>프로필 수정 - LastSys</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}">
+    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260513a)}">
+    
+    <style>
+        .edit-profile-section { background: rgba(255, 255, 255, 0.76); border: 1px solid rgba(255, 255, 255, 0.92); border-radius: 20px; padding: 20px; box-shadow: 0 12px 24px rgba(26, 77, 57, 0.06); display: flex; flex-direction: column; gap: 20px; }
+        .edit-profile-head h3 { color: var(--primary-color); font-size: 18px; font-weight: 850; margin-bottom: 4px; }
+        .edit-profile-head p { color: var(--text-sub, #666); font-size: 13px; font-weight: 650; }
+        .avatar-edit-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0; }
+        .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: #DDEFD8; border: 3px solid #FFFFFF; box-shadow: 0 8px 16px rgba(26, 77, 57, 0.12); display: flex; align-items: center; justify-content: center; font-size: 36px; margin-bottom: 10px; }
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        .input-group span { color: var(--text-sub, #666); font-size: 13px; font-weight: 850; }
+        .input-field { width: 100%; height: 48px; padding: 0 14px; border: 1px solid rgba(26, 77, 57, 0.12); border-radius: 14px; background: rgba(248, 250, 249, 0.94); color: var(--text-main); font: inherit; font-size: 14px; font-weight: 750; box-sizing: border-box; }
+        .input-field:focus { border-color: var(--primary-color); outline: none; }
+        .submit-btn { width: 100%; min-height: 48px; border: 0; border-radius: 15px; background: var(--primary-color); color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 850; cursor: pointer; box-shadow: 0 12px 22px rgba(26, 77, 57, 0.16); margin-top: 10px; }
+        .back-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--text-main); font-weight: 800; text-decoration: none; margin-bottom: 16px; font-size: 15px; }
+        
+        /* 알림 메시지 스타일 추가 */
+        .alert-msg { padding: 12px 14px; border-radius: 12px; font-size: 13px; font-weight: 800; margin-bottom: 15px; }
+        .alert-error { background: #ffeaea; color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.2); }
+        .alert-success { background: rgba(49, 112, 74, 0.1); color: var(--primary-color); border: 1px solid rgba(49, 112, 74, 0.2); }
+    </style>
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="bg-shape bg-shape-1"></div>
+<div class="bg-shape bg-shape-2"></div>
+<div class="bg-shape bg-shape-3"></div>
+
+<main class="mobile-page home-app">
+    <section class="dashboard">
+        <header class="app-header">
+            <a class="app-brand" th:href="@{/}">
+                <img class="app-logo" th:src="@{/images/logo.png}" alt="LastSys 로고">
+                <span>LastSys</span>
+            </a>
+        </header>
+
+        <div class="main-content">
+            <a th:href="@{/profile}" class="back-btn">← 프로필로 돌아가기</a>
+            
+            <section class="edit-profile-section">
+                <div class="edit-profile-head">
+                    <h3>프로필 수정</h3>
+                    <p>서비스에서 사용할 닉네임을 변경할 수 있습니다.</p>
+                </div>
+
+                <div class="avatar-edit-wrapper">
+                    <div class="profile-avatar">🌿</div>
+                </div>
+                
+                <div th:if="${errorMsg != null}" class="alert-msg alert-error" th:text="${errorMsg}"></div>
+                <div th:if="${successMsg != null}" class="alert-msg alert-success" th:text="${successMsg}"></div>
+
+                <form th:action="@{/profile/edit}" method="post">
+                    <div class="input-group">
+                        <span>닉네임</span>
+                        <input type="text" name="nickname" class="input-field" th:value="${loginUser != null ? loginUser.nickname() : ''}" required placeholder="닉네임을 입력하세요">
+                    </div>
+
+                    <button type="submit" class="submit-btn">변경사항 저장</button>
+                </form>
+            </section>
+        </div>
+    </section>
+</main>
+
+<nav class="bottom-tabs">
+    <a th:href="@{/}">홈</a>
+    <a href="#">감정지도</a>
+    <a class="active" th:href="@{/profile}">프로필</a>
+</nav>
+</body>
+</html>

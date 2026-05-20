@@ -151,13 +151,6 @@ public class DailyMissionService {
     }
 
     @Transactional
-    public DailyMissionListResponse rerollTodayMissions(Long userId) {
-        LocalDate today = LocalDate.now(APP_ZONE);
-        dailyMissionRepository.increaseRerollCount(userId, today);
-        return getTodayMissions(userId);
-    }
-
-    @Transactional
     public DailyMissionListResponse rerollMissionSlot(Long userId, int slotIndex) {
         if (slotIndex < 0 || slotIndex >= DAILY_MISSION_COUNT) {
             return getTodayMissions(userId);
@@ -201,34 +194,51 @@ public class DailyMissionService {
 
     private List<DailyMissionSlot> pickMissions(Long userId, LocalDate today) {
         MissionSettings settings = dailyMissionRepository.findMissionSettings(userId);
-        int listRerollCount = dailyMissionRepository.findRerollCount(userId, today);
         Map<Integer, Integer> slotRerollCounts = dailyMissionRepository.findSlotRerollCounts(userId, today);
         List<DailyMissionSeed> missionPool = missionPoolFor(settings);
-        Set<String> selectedKeys = new HashSet<>();
+
+        String[] currentPicks = new String[DAILY_MISSION_COUNT];
+
+        for (int slotIndex = 0; slotIndex < DAILY_MISSION_COUNT; slotIndex++) {
+            currentPicks[slotIndex] = pickForSlot(userId, today, settings, missionPool, slotIndex, 0, currentPicks);
+        }
+
+        for (int slotIndex = 0; slotIndex < DAILY_MISSION_COUNT; slotIndex++) {
+            int rerolls = slotRerollCounts.getOrDefault(slotIndex, 0);
+            for (int r = 1; r <= rerolls; r++) {
+                currentPicks[slotIndex] = pickForSlot(userId, today, settings, missionPool, slotIndex, r, currentPicks);
+            }
+        }
+
         List<DailyMissionSlot> missions = new ArrayList<>();
-
-        for (int slotIndex = 0; slotIndex < DAILY_MISSION_COUNT; slotIndex += 1) {
-            int rerollCount = slotRerollCounts.getOrDefault(slotIndex, 0);
-            List<DailyMissionSeed> candidates = new ArrayList<>(missionPool);
-            long seed = Objects.hash(userId, today, settings, listRerollCount, slotIndex, rerollCount);
-            Collections.shuffle(candidates, new Random(seed));
-            DailyMissionSeed selected = firstAvailable(candidates, selectedKeys);
-
-            selectedKeys.add(selected.key());
-            missions.add(new DailyMissionSlot(slotIndex, selected));
+        for (int slotIndex = 0; slotIndex < DAILY_MISSION_COUNT; slotIndex++) {
+            String key = currentPicks[slotIndex];
+            DailyMissionSeed seedObj = missionPool.stream().filter(m -> m.key().equals(key)).findFirst().orElseThrow();
+            missions.add(new DailyMissionSlot(slotIndex, seedObj));
         }
 
         return missions;
     }
 
-    private DailyMissionSeed firstAvailable(List<DailyMissionSeed> candidates, Set<String> selectedKeys) {
-        for (DailyMissionSeed candidate : candidates) {
-            if (!selectedKeys.contains(candidate.key())) {
-                return candidate;
+    private String pickForSlot(Long userId, LocalDate today, MissionSettings settings, List<DailyMissionSeed> pool, int slotIndex, int reroll, String[] currentPicks) {
+        List<DailyMissionSeed> candidates = new ArrayList<>(pool);
+        long seed = Objects.hash(userId, today, settings, slotIndex, reroll);
+        Collections.shuffle(candidates, new Random(seed));
+
+        Set<String> excludes = new HashSet<>();
+        for (int i = 0; i < currentPicks.length; i++) {
+            if (i != slotIndex && currentPicks[i] != null) {
+                excludes.add(currentPicks[i]);
             }
         }
 
-        return candidates.get(0);
+        for (DailyMissionSeed candidate : candidates) {
+            if (!excludes.contains(candidate.key())) {
+                return candidate.key();
+            }
+        }
+
+        return candidates.get(0).key();
     }
 
     private List<DailyMissionSeed> missionPoolFor(MissionSettings settings) {
