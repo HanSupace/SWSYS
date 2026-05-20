@@ -56,25 +56,37 @@
 
         <form id="emotion-marker-form" class="emotion-marker-form" autocomplete="off">
             <div class="emotion-picker" role="radiogroup" aria-label="감정 선택">
-                <label class="emotion-option is-joy">
-                    <input type="radio" name="emotion" value="joy" data-label="기쁨" data-color="#F4B942" checked>
+                <label class="emotion-option" data-emotion-id="default-happiness">
+                    <input type="radio" name="emotion" value="happiness" data-label="기쁨" data-color="#765A08" checked>
                     <span>기쁨</span>
                 </label>
-                <label class="emotion-option is-calm">
-                    <input type="radio" name="emotion" value="calm" data-label="평온" data-color="#46B39D">
-                    <span>평온</span>
+                <label class="emotion-option" data-emotion-id="default-anticipation">
+                    <input type="radio" name="emotion" value="anticipation" data-label="기대" data-color="#4F711F">
+                    <span>기대</span>
                 </label>
-                <label class="emotion-option is-sad">
-                    <input type="radio" name="emotion" value="sad" data-label="슬픔" data-color="#5B7CFA">
+                <label class="emotion-option" data-emotion-id="default-sadness">
+                    <input type="radio" name="emotion" value="sadness" data-label="슬픔" data-color="#315C86">
                     <span>슬픔</span>
                 </label>
-                <label class="emotion-option is-angry">
-                    <input type="radio" name="emotion" value="angry" data-label="화남" data-color="#E85D5D">
-                    <span>화남</span>
+                <label class="emotion-option" data-emotion-id="default-anger">
+                    <input type="radio" name="emotion" value="anger" data-label="분노" data-color="#9D312B">
+                    <span>분노</span>
                 </label>
-                <label class="emotion-option is-anxious">
-                    <input type="radio" name="emotion" value="anxious" data-label="불안" data-color="#9B6BDF">
+                <label class="emotion-option" data-emotion-id="default-anxiety">
+                    <input type="radio" name="emotion" value="anxiety" data-label="불안" data-color="#5C477D">
                     <span>불안</span>
+                </label>
+                <label class="emotion-option" data-emotion-id="default-embarrassment">
+                    <input type="radio" name="emotion" value="embarrassment" data-label="당황" data-color="#8B3D66">
+                    <span>당황</span>
+                </label>
+                <label class="emotion-option" data-emotion-id="default-surprise">
+                    <input type="radio" name="emotion" value="surprise" data-label="놀람" data-color="#28746F">
+                    <span>놀람</span>
+                </label>
+                <label class="emotion-option" data-emotion-id="default-irritation">
+                    <input type="radio" name="emotion" value="irritation" data-label="짜증" data-color="#925021">
+                    <span>짜증</span>
                 </label>
             </div>
             <div class="marker-fields">

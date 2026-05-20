@@ -334,13 +334,20 @@ body.is-marker-modal-open {
 
 .emotion-picker {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(0.5rem, 2vw, 0.625rem);
+    padding: clamp(0.625rem, 3vw, 0.75rem);
+    border: 1px solid rgba(26, 77, 57, 0.08);
+    border-radius: 18px;
+    background: rgba(248, 250, 249, 0.78);
 }
 
 .emotion-option {
     position: relative;
     min-width: 0;
+    --emotion-bg: #EDF7F0;
+    --emotion-border: rgba(26, 77, 57, 0.1);
+    --emotion-text: var(--primary-color);
 }
 
 .emotion-option input {
@@ -351,51 +358,77 @@ body.is-marker-modal-open {
 
 .emotion-option span {
     display: flex;
-    min-height: 40px;
+    min-height: 42px;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(26, 77, 57, 0.12);
+    border: 1px solid var(--emotion-border);
     border-radius: 14px;
-    background: rgba(248, 252, 247, 0.92);
-    color: var(--text-main);
-    font-size: 13px;
-    font-weight: 900;
+    background: var(--emotion-bg);
+    color: var(--emotion-text);
+    font-size: 14px;
+    font-weight: 850;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.emotion-option span::before {
-    content: "";
-    width: 8px;
-    height: 8px;
-    margin-right: 5px;
-    border-radius: 50%;
-    background: var(--emotion-color);
-}
-
 .emotion-option input:checked + span {
-    border-color: var(--emotion-color);
-    box-shadow: 0 8px 18px color-mix(in srgb, var(--emotion-color) 28%, transparent);
+    border-color: rgba(26, 77, 57, 0.42);
+    box-shadow: inset 0 0 0 2px rgba(26, 77, 57, 0.18), 0 8px 16px rgba(26, 77, 57, 0.08);
     transform: translateY(-1px);
 }
 
-.emotion-option.is-joy {
-    --emotion-color: #F4B942;
+.emotion-option:active span {
+    transform: scale(0.96);
 }
 
-.emotion-option.is-calm {
-    --emotion-color: #46B39D;
+.emotion-option[data-emotion-id="default-happiness"] {
+    --emotion-bg: #FFF7D7;
+    --emotion-border: rgba(171, 126, 9, 0.22);
+    --emotion-text: #765A08;
 }
 
-.emotion-option.is-sad {
-    --emotion-color: #5B7CFA;
+.emotion-option[data-emotion-id="default-anticipation"] {
+    --emotion-bg: #ECF8DD;
+    --emotion-border: rgba(89, 137, 36, 0.22);
+    --emotion-text: #4F711F;
 }
 
-.emotion-option.is-angry {
-    --emotion-color: #E85D5D;
+.emotion-option[data-emotion-id="default-sadness"] {
+    --emotion-bg: #EAF3FF;
+    --emotion-border: rgba(62, 111, 162, 0.22);
+    --emotion-text: #315C86;
 }
 
-.emotion-option.is-anxious {
-    --emotion-color: #9B6BDF;
+.emotion-option[data-emotion-id="default-anger"] {
+    --emotion-bg: #FFF1F0;
+    --emotion-border: rgba(196, 73, 64, 0.22);
+    --emotion-text: #9D312B;
+}
+
+.emotion-option[data-emotion-id="default-anxiety"] {
+    --emotion-bg: #F3EEFF;
+    --emotion-border: rgba(106, 78, 150, 0.22);
+    --emotion-text: #5C477D;
+}
+
+.emotion-option[data-emotion-id="default-embarrassment"] {
+    --emotion-bg: #FFEFF7;
+    --emotion-border: rgba(177, 75, 120, 0.22);
+    --emotion-text: #8B3D66;
+}
+
+.emotion-option[data-emotion-id="default-surprise"] {
+    --emotion-bg: #E8F9F7;
+    --emotion-border: rgba(50, 137, 128, 0.22);
+    --emotion-text: #28746F;
+}
+
+.emotion-option[data-emotion-id="default-irritation"] {
+    --emotion-bg: #FFF0E4;
+    --emotion-border: rgba(181, 99, 31, 0.22);
+    --emotion-text: #925021;
 }
 
 .marker-fields {
@@ -596,6 +629,12 @@ body.is-marker-modal-open {
 @media (max-height: 740px) {
     .map-stage {
         min-height: 456px;
+    }
+}
+
+@media (max-width: 360px) {
+    .emotion-picker {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
