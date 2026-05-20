@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const missionPanel = document.getElementById('mission-panel');
     const missionToggle = document.querySelector('.floating-toggle');
     const missionClose = document.querySelector('.mission-close');
+    const missionReroll = document.querySelector('.mission-reroll');
     const missionList = document.getElementById('mission-list');
     const missionConfirm = document.getElementById('mission-confirm');
     const missionConfirmSubmit = document.getElementById('mission-confirm-submit');
@@ -13,12 +14,64 @@ document.addEventListener('DOMContentLoaded', () => {
     const userLevel = document.getElementById('user-level');
     const userXp = document.getElementById('user-xp');
     const userXpBar = document.getElementById('user-xp-bar');
+    const emotionButtonBox = document.getElementById('emotion-button-box');
     let missionsLoaded = false;
     let missionSuccessCounts = new Map();
     let pendingMissionButton = null;
+    const selectedEmotionStorageKey = 'lastsys.selectedEmotion';
 
     const today = getKoreaToday();
     let visibleMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    const getEmotionValue = (button) => button.dataset.emotion || button.textContent.trim();
+
+    const setSelectedEmotion = (selectedButton) => {
+        if (!emotionButtonBox || !selectedButton) {
+            return;
+        }
+
+        emotionButtonBox.querySelectorAll('.emotion-choice').forEach((button) => {
+            const isSelected = button === selectedButton;
+
+            button.classList.toggle('is-selected', isSelected);
+            button.setAttribute('aria-pressed', String(isSelected));
+        });
+
+        try {
+            localStorage.setItem(selectedEmotionStorageKey, getEmotionValue(selectedButton));
+        } catch (error) {
+            // 선택 저장이 막혀도 버튼 선택 상태는 유지합니다.
+        }
+    };
+
+    const restoreSelectedEmotion = () => {
+        if (!emotionButtonBox) {
+            return;
+        }
+
+        let selectedEmotion = '';
+
+        try {
+            selectedEmotion = localStorage.getItem(selectedEmotionStorageKey) || '';
+        } catch (error) {
+            selectedEmotion = '';
+        }
+
+        if (!selectedEmotion) {
+            return;
+        }
+
+        const selectedButton = Array.from(emotionButtonBox.querySelectorAll('.emotion-choice'))
+            .find((button) => getEmotionValue(button) === selectedEmotion);
+
+        if (selectedButton) {
+            setSelectedEmotion(selectedButton);
+        }
+    };
+
+    const initializeEmotionButtons = () => {
+        restoreSelectedEmotion();
+    };
 
     const renderCalendar = () => {
         if (!calendarElement) {
@@ -39,6 +92,16 @@ document.addEventListener('DOMContentLoaded', () => {
         visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 1);
         renderCalendar();
         loadMonthlySuccessCounts();
+    });
+
+    emotionButtonBox?.addEventListener('click', (event) => {
+        const emotionButton = event.target.closest('.emotion-choice');
+
+        if (!emotionButton || !emotionButtonBox.contains(emotionButton)) {
+            return;
+        }
+
+        setSelectedEmotion(emotionButton);
     });
 
     const setMissionPanelOpen = (isOpen) => {
@@ -63,6 +126,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     missionClose?.addEventListener('click', () => {
         setMissionPanelOpen(false);
+    });
+
+    missionReroll?.addEventListener('click', async () => {
+        if (!missionList || missionReroll.disabled) {
+            return;
+        }
+
+        missionReroll.disabled = true;
+        renderMissionMessage('오늘의 미션을 새로 뽑는 중입니다.');
+
+        try {
+            const response = await fetch('/api/daily-missions/reroll', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('mission reroll failed');
+            }
+
+            missionsLoaded = true;
+            renderMissionPayload(await response.json());
+        } catch (error) {
+            renderMissionMessage('미션을 다시 뽑지 못했습니다. 잠시 후 다시 시도해 주세요.');
+        } finally {
+            missionReroll.disabled = false;
+        }
     });
 
     const setMissionConfirmOpen = (isOpen, missionButton = null) => {
@@ -92,6 +184,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     missionList?.addEventListener('click', (event) => {
+        const rerollButton = event.target.closest('[data-mission-reroll-slot]');
+
+        if (rerollButton) {
+            rerollMissionSlot(rerollButton);
+            return;
+        }
+
         const missionButton = event.target.closest('[data-mission-id]');
 
         if (!missionButton || missionButton.classList.contains('is-completed')) {
@@ -100,6 +199,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setMissionConfirmOpen(true, missionButton);
     });
+
+    async function rerollMissionSlot(rerollButton) {
+        if (rerollButton.disabled) {
+            return;
+        }
+
+        rerollButton.disabled = true;
+
+        try {
+            const response = await fetch(`/api/daily-missions/slots/${rerollButton.dataset.missionRerollSlot}/reroll`, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('mission slot reroll failed');
+            }
+
+            missionsLoaded = true;
+            renderMissionPayload(await response.json());
+        } catch (error) {
+            rerollButton.disabled = false;
+            renderMissionMessage('미션을 다시 뽑지 못했습니다. 잠시 후 다시 시도해 주세요.');
+        }
+    }
 
     missionConfirmSubmit?.addEventListener('click', async () => {
         const missionButton = pendingMissionButton;
@@ -172,11 +298,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         missionList.innerHTML = missions.map((mission, index) => `
             <li>
-                <button class="${mission.completed ? 'is-completed' : ''}" type="button" data-mission-id="${mission.id}" ${mission.completed ? 'disabled' : ''}>
-                    <span>${index + 1}</span>
-                    <p>${escapeHtml(mission.text)}</p>
-                    <strong>${mission.completed ? '성공' : '도전'}</strong>
-                </button>
+                <div class="mission-item ${mission.completed ? 'is-completed' : ''}">
+                    <button class="mission-complete" type="button" data-mission-id="${mission.id}" ${mission.completed ? 'disabled' : ''}>
+                        <span>${index + 1}</span>
+                        <p>${escapeHtml(mission.text)}</p>
+                        <strong>${mission.completed ? '성공' : '도전'}</strong>
+                    </button>
+                    <button class="mission-item-reroll" type="button" data-mission-reroll-slot="${mission.slotIndex}" ${mission.completed ? 'disabled' : ''} aria-label="${index + 1}번 미션 다시 뽑기">↻</button>
+                </div>
             </li>
         `).join('');
     }
@@ -236,6 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    initializeEmotionButtons();
     renderCalendar();
     loadMonthlySuccessCounts();
 });

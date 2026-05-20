@@ -12,9 +12,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Controller // 아래 클래스는 웹 요청 담당
-
 public class HomeController { // 홈페이지 클래스
-
     private static final List<String> QUOTES = List.of(
             "감정은 없애야 할 문제가 아니라 이해해야 할 신호입니다.",
             "오늘의 마음을 알아차리는 것만으로도 충분히 잘하고 있습니다.",
