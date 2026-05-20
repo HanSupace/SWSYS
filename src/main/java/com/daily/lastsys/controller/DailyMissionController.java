@@ -49,6 +49,19 @@ public class DailyMissionController {
         return dailyMissionService.completeMission(loginUser.id(), missionKey);
     }
 
+<<<<<<< Updated upstream:src/main/java/com/daily/lastsys/controller/DailyMissionController.java
+=======
+    // 🌟 개별 리롤 API (전체 리롤 API는 삭제됨)
+    @PostMapping("/api/daily-missions/slots/{slotIndex}/reroll")
+    public DailyMissionListResponse rerollMissionSlot(
+            @PathVariable int slotIndex,
+            HttpSession session
+    ) {
+        LoginUser loginUser = requireLogin(session);
+        return dailyMissionService.rerollMissionSlot(loginUser.id(), slotIndex);
+    }
+
+>>>>>>> Stashed changes:src/main/java/com/daily/lastsys/features/dailymission/DailyMissionController.java
     private LoginUser requireLogin(HttpSession session) {
         LoginUser loginUser = (LoginUser) session.getAttribute(LoginController.LOGIN_USER_SESSION_KEY);
 

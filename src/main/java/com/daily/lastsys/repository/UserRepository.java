@@ -52,6 +52,25 @@ public class UserRepository {
         }
     }
 
+    // 🌟 추가됨: ID로 유저 찾기
+    public Optional<UserAccount> findById(Long id) {
+        try {
+            UserAccount user = jdbcTemplate.queryForObject(
+                    "select id, username, password_hash, nickname from users where id = ?",
+                    (rs, rowNum) -> new UserAccount(
+                            rs.getLong("id"),
+                            rs.getString("username"),
+                            rs.getString("password_hash"),
+                            rs.getString("nickname")
+                    ),
+                    id
+            );
+            return Optional.ofNullable(user);
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
+    }
+
     public void save(String username, String passwordHash, String nickname) {
         try {
             jdbcTemplate.update(
@@ -63,5 +82,20 @@ public class UserRepository {
         } catch (DuplicateKeyException exception) {
             throw new IllegalArgumentException("이미 사용 중인 아이디 또는 닉네임입니다.", exception);
         }
+    }
+
+    public void updatePassword(Long id, String newPasswordHash) {
+        jdbcTemplate.update(
+                "update users set password_hash = ? where id = ?",
+                newPasswordHash,
+                id
+        );
+    }
+    public void updateNickname(Long id, String newNickname) {
+        jdbcTemplate.update(
+                "update users set nickname = ? where id = ?",
+                newNickname,
+                id
+        );
     }
 }
