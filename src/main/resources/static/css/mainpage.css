@@ -167,6 +167,7 @@ body {
 }
 
 .quote-card,
+.emotion-checkin,
 .calendar-panel {
     width: 100%;
     background: rgba(255, 255, 255, 0.76);
@@ -189,6 +190,138 @@ body {
     font-weight: 800;
     line-height: 1.45;
     word-break: keep-all;
+}
+
+.emotion-checkin {
+    padding: 18px;
+    border-radius: 22px;
+}
+
+.emotion-checkin-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.emotion-checkin h2 {
+    flex: 1;
+    color: var(--primary-color);
+    font-size: 18px;
+    font-weight: 900;
+    line-height: 1.35;
+    word-break: keep-all;
+}
+
+.emotion-edit-button {
+    width: 58px;
+    height: 34px;
+    flex: 0 0 auto;
+    border: 1px solid rgba(26, 77, 57, 0.12);
+    border-radius: 12px;
+    background: rgba(248, 250, 249, 0.9);
+    color: var(--primary-color);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 850;
+    cursor: pointer;
+    transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.emotion-edit-button.is-active {
+    border-color: rgba(26, 77, 57, 0.28);
+    background: var(--primary-color);
+    color: #FFFFFF;
+}
+
+.emotion-button-box {
+    width: 100%;
+    margin-top: 14px;
+    padding: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    border: 1px solid rgba(26, 77, 57, 0.08);
+    border-radius: 18px;
+    background: rgba(248, 250, 249, 0.78);
+}
+
+.emotion-button-box.is-editing {
+    border-color: rgba(26, 77, 57, 0.22);
+    background: rgba(255, 255, 255, 0.64);
+}
+
+.emotion-choice,
+.emotion-add-button {
+    height: 42px;
+    border: 1px solid rgba(26, 77, 57, 0.1);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 850;
+    cursor: pointer;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.emotion-choice {
+    width: 72px;
+    min-width: 0;
+    flex: 0 0 72px;
+    padding: 0 13px;
+    border-radius: 14px;
+    background: #EDF7F0;
+    color: var(--primary-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.emotion-button-box.is-editing .emotion-choice {
+    border-style: dashed;
+}
+
+.emotion-choice[data-tone="anger"] {
+    background: #FFF1F0;
+    border-color: rgba(196, 73, 64, 0.22);
+    color: #9D312B;
+}
+
+.emotion-choice[data-tone="joy"] {
+    background: #FFF7D7;
+    border-color: rgba(171, 126, 9, 0.22);
+    color: #765A08;
+}
+
+.emotion-choice[data-tone="sadness"] {
+    background: #EAF3FF;
+    border-color: rgba(62, 111, 162, 0.22);
+    color: #315C86;
+}
+
+.emotion-choice[data-tone="melancholy"] {
+    background: #ECEEF2;
+    border-color: rgba(88, 99, 116, 0.22);
+    color: #4C5664;
+}
+
+.emotion-choice.is-selected {
+    border-color: rgba(26, 77, 57, 0.42);
+    box-shadow: inset 0 0 0 2px rgba(26, 77, 57, 0.18), 0 8px 16px rgba(26, 77, 57, 0.08);
+}
+
+.emotion-add-button {
+    width: 42px;
+    flex: 0 0 42px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: #FFFFFF;
+    font-size: 24px;
+    line-height: 1;
+}
+
+.emotion-choice:active,
+.emotion-edit-button:active,
+.emotion-add-button:active {
+    transform: scale(0.96);
 }
 
 .calendar-panel {
