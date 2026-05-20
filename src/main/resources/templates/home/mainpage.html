@@ -6,16 +6,16 @@
     <title>LastSys 메인</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
-    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260513a)}" href="../../static/css/mainpage.css?v=20260513a">
-    <script th:src="@{/js/mainpage.js(v=20260513a)}" src="../../static/js/mainpage.js?v=20260513a" defer></script>
+    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260519b)}" href="../../static/css/mainpage.css?v=20260519b">
+    <script th:src="@{/js/mainpage.js(v=20260519b)}" src="../../static/js/mainpage.js?v=20260519b" defer></script>
 </head>
 <body>
 <div class="bg-pattern"></div>
 <div class="bg-shape bg-shape-1"></div>
 <div class="bg-shape bg-shape-2"></div>
+<main class="mobile-page home-app" aria-label="LastSys 메인 화면">
 <div class="bg-shape bg-shape-3"></div>
 
-<main class="mobile-page home-app" aria-label="LastSys 메인 화면">
     <section class="dashboard">
         <header class="app-header">
             <a class="app-brand" th:href="@{/}" href="/">
@@ -45,6 +45,22 @@
             <article class="quote-card" aria-label="오늘의 명언">
                 <p th:text="${quote}">작은 기록이 하루의 방향을 만든다.</p>
             </article>
+
+            <section class="emotion-checkin" aria-labelledby="emotion-checkin-title">
+                <div class="emotion-checkin-head">
+                    <h2 id="emotion-checkin-title">오늘은 어떤 감정을 느끼셨나요?</h2>
+                </div>
+                <div class="emotion-button-box" id="emotion-button-box" aria-label="감정 선택">
+                    <button class="emotion-choice" type="button" data-emotion-id="default-happiness" data-emotion="기쁨" data-tone="joy" aria-pressed="false">기쁨</button>
+                    <button class="emotion-choice" type="button" data-emotion-id="default-anticipation" data-emotion="기대" data-tone="joy" aria-pressed="false">기대</button>
+                    <button class="emotion-choice" type="button" data-emotion-id="default-sadness" data-emotion="슬픔" data-tone="sadness" aria-pressed="false">슬픔</button>
+                    <button class="emotion-choice" type="button" data-emotion-id="default-anger" data-emotion="분노" data-tone="anger" aria-pressed="false">분노</button>
+                    <button class="emotion-choice" type="button" data-emotion-id="default-anxiety" data-emotion="불안" data-tone="melancholy" aria-pressed="false">불안</button>
+                    <button class="emotion-choice" type="button" data-emotion-id="default-embarrassment" data-emotion="당황" data-tone="melancholy" aria-pressed="false">당황</button>
+                    <button class="emotion-choice" type="button" data-emotion-id="default-surprise" data-emotion="놀람" data-tone="joy" aria-pressed="false">놀람</button>
+                    <button class="emotion-choice" type="button" data-emotion-id="default-irritation" data-emotion="짜증" data-tone="anger" aria-pressed="false">짜증</button>
+                </div>
+            </section>
 
             <section class="calendar-panel" aria-label="감정 캘린더">
                 <div class="emotion-calendar-head">

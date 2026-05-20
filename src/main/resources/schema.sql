@@ -12,10 +12,10 @@ create table if not exists users (
 create table if not exists daily_mission_days (
     user_id bigint not null,
     mission_date date not null,
-    success_count int not null default 0,
     created_at timestamp not null default current_timestamp,
     updated_at timestamp not null default current_timestamp,
     primary key (user_id, mission_date),
+    success_count int not null default 0,
     constraint fk_daily_mission_days_user foreign key (user_id) references users (id) on delete cascade
 ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
 
