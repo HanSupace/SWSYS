@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../static/css/home.css?v=20260512b">
     <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260513a)}" href="../static/css/mainpage.css?v=20260513a">
-    <link rel="stylesheet" th:href="@{/css/map.css(v=20260520n)}" href="../static/css/map.css?v=20260520n">
+    <link rel="stylesheet" th:href="@{/css/map.css(v=20260521a)}" href="../static/css/map.css?v=20260521a">
 </head>
 <body>
 <div class="bg-pattern"></div>
@@ -151,7 +151,8 @@
         var markerLocationTimer = null;
         var options = {
             center: defaultPosition,
-            level: 5
+            level: 5,
+            draggable: true
         };
 
         var map = new kakao.maps.Map(container, options);
