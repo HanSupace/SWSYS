@@ -192,6 +192,45 @@ public class DailyMissionRepository {
         );
     }
 
+    public Map<Integer, String> findMissionSlots(Long userId, LocalDate missionDate) {
+        List<DailyMissionSlotAssignment> slots = jdbcTemplate.query(
+                """
+                select slot_index, mission_key
+                from daily_mission_slots
+                where user_id = ? and mission_date = ?
+                """,
+                (resultSet, rowNumber) -> new DailyMissionSlotAssignment(
+                        resultSet.getInt("slot_index"),
+                        resultSet.getString("mission_key")
+                ),
+                userId,
+                missionDate
+        );
+        Map<Integer, String> assignments = new HashMap<>();
+
+        for (DailyMissionSlotAssignment slot : slots) {
+            assignments.put(slot.slotIndex(), slot.missionKey());
+        }
+
+        return assignments;
+    }
+
+    public void saveMissionSlot(Long userId, LocalDate missionDate, int slotIndex, String missionKey) {
+        jdbcTemplate.update(
+                """
+                insert into daily_mission_slots (user_id, mission_date, slot_index, mission_key)
+                values (?, ?, ?, ?)
+                on duplicate key update
+                    mission_key = values(mission_key),
+                    updated_at = current_timestamp
+                """,
+                userId,
+                missionDate,
+                slotIndex,
+                missionKey
+        );
+    }
+
     public List<DailyMissionDay> findSuccessCounts(Long userId, LocalDate startDate, LocalDate endDateExclusive) {
         return jdbcTemplate.query(
                 """
@@ -219,5 +258,8 @@ public class DailyMissionRepository {
     }
 
     private record SlotRerollCount(int slotIndex, int rerollCount) {
+    }
+
+    private record DailyMissionSlotAssignment(int slotIndex, String missionKey) {
     }
 }

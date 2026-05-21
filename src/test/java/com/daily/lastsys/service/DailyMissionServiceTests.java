@@ -46,4 +46,33 @@ class DailyMissionServiceTests {
                 .containsExactly(clickedMission.id());
         assertThat(afterCompletion.todaySuccessCount()).isEqualTo(1);
     }
+
+    @Test
+    void rerollingAnyOneSlotKeepsEveryOtherSlotTheSame() {
+        for (int clickedSlotIndex = 0; clickedSlotIndex < 5; clickedSlotIndex += 1) {
+            long userId = 91020L + clickedSlotIndex;
+            jdbcTemplate.update(
+                    "insert into users (id, username, password_hash, nickname) values (?, ?, ?, ?)",
+                    userId,
+                    "reroll-user-" + clickedSlotIndex,
+                    "hash",
+                    "reroll-nickname-" + clickedSlotIndex
+            );
+
+            DailyMissionListResponse beforeReroll = dailyMissionService.getTodayMissions(userId);
+            DailyMissionListResponse afterReroll = dailyMissionService.rerollMissionSlot(userId, clickedSlotIndex);
+
+            assertThat(afterReroll.missions()).hasSameSizeAs(beforeReroll.missions());
+
+            for (int index = 0; index < beforeReroll.missions().size(); index += 1) {
+                DailyMissionResponse beforeMission = beforeReroll.missions().get(index);
+                DailyMissionResponse afterMission = afterReroll.missions().get(index);
+
+                if (beforeMission.slotIndex() != clickedSlotIndex) {
+                    assertThat(afterMission.id()).isEqualTo(beforeMission.id());
+                    assertThat(afterMission.text()).isEqualTo(beforeMission.text());
+                }
+            }
+        }
+    }
 }

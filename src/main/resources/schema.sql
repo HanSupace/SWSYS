@@ -58,6 +58,17 @@ create table if not exists daily_mission_slot_rerolls (
     constraint fk_daily_mission_slot_rerolls_user foreign key (user_id) references users (id) on delete cascade
 ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
 
+create table if not exists daily_mission_slots (
+    user_id bigint not null,
+    mission_date date not null,
+    slot_index int not null,
+    mission_key varchar(60) not null,
+    updated_at timestamp not null default current_timestamp,
+    primary key (user_id, mission_date, slot_index),
+    unique key uk_daily_mission_slots_key (user_id, mission_date, mission_key),
+    constraint fk_daily_mission_slots_user foreign key (user_id) references users (id) on delete cascade
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
+
 create table if not exists user_progress (
     user_id bigint not null,
     total_xp int not null default 0,
