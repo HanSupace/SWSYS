@@ -4,6 +4,7 @@ import com.daily.lastsys.features.dailymission.DailyMissionService;
 import com.daily.lastsys.features.dailymission.MissionSettingsForm;
 import com.daily.lastsys.features.login.LoginService;
 import com.daily.lastsys.features.login.LoginUser;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -133,5 +134,23 @@ public class ProfileController {
         MissionSettingsForm settingsForm = new MissionSettingsForm(dailyMissionService.getMissionSettings(loginUser.id()));
         model.addAttribute("currentCondition", settingsForm.getConditionType());
         return "home/emotion-records";
+    }
+
+    @PostMapping("/profile/delete-account")
+    public String deleteAccount(
+            @SessionAttribute(name = "loginUser", required = false) LoginUser loginUser,
+            @RequestParam String confirmation,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        if (loginUser == null) return "redirect:/login";
+
+        if (!"탈퇴".equals(confirmation)) {
+            redirectAttributes.addFlashAttribute("deleteErrorMsg", "회원 탈퇴를 진행하려면 '탈퇴'를 정확히 입력해주세요.");
+            return "redirect:/profile";
+        }
+
+        loginService.deleteAccount(loginUser.id());
+        session.invalidate();
+        return "redirect:/";
     }
 }
