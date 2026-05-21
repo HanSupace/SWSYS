@@ -57,7 +57,7 @@ body {
 .logout-btn {
     min-height: 2.25rem;
     padding: 0 0.75rem;
-    border: 1px solid rgba(26, 77, 57, 0.14);
+    border: 0.0625rem solid rgba(26, 77, 57, 0.14);
     border-radius: 0.75rem;
     background: rgba(255, 255, 255, 0.72);
     color: var(--primary-color);
@@ -175,7 +175,7 @@ body {
 .calendar-panel {
     width: 100%;
     background: rgba(255, 255, 255, 0.76);
-    border: 1px solid rgba(255, 255, 255, 0.92);
+    border: 0.0625rem solid rgba(255, 255, 255, 0.92);
     box-shadow: 0 0.75rem 1.5rem rgba(26, 77, 57, 0.06);
 }
 
@@ -223,14 +223,14 @@ body {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: clamp(0.5rem, 2vw, 0.625rem);
-    border: 1px solid rgba(26, 77, 57, 0.08);
+    border: 0.0625rem solid rgba(26, 77, 57, 0.08);
     border-radius: 1.125rem;
     background: rgba(248, 250, 249, 0.78);
 }
 
 .emotion-choice {
     min-height: 2.625rem;
-    border: 1px solid rgba(26, 77, 57, 0.1);
+    border: 0.0625rem solid rgba(26, 77, 57, 0.1);
     font: inherit;
     font-size: 0.875rem;
     font-weight: 850;
@@ -336,7 +336,7 @@ body {
 .emotion-calendar-head button {
     width: 2.25rem;
     height: 2.25rem;
-    border: 1px solid rgba(26, 77, 57, 0.12);
+    border: 0.0625rem solid rgba(26, 77, 57, 0.12);
     border-radius: 50%;
     background: rgba(248, 250, 249, 0.9);
     color: var(--primary-color);
@@ -372,7 +372,7 @@ body {
 .fallback-calendar-head button {
     width: 2.375rem;
     height: 2.375rem;
-    border: 1px solid rgba(26, 77, 57, 0.12);
+    border: 0.0625rem solid rgba(26, 77, 57, 0.12);
     border-radius: 50%;
     background: rgba(248, 250, 249, 0.9);
     color: var(--primary-color);
@@ -405,7 +405,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(26, 77, 57, 0.08);
+    border: 0.0625rem solid rgba(26, 77, 57, 0.08);
     border-radius: clamp(0.625rem, 3.5vw, 0.9375rem);
     background: rgba(248, 250, 249, 0.72);
     color: var(--text-main);
@@ -486,7 +486,7 @@ body {
     padding: 0.5rem;
     border-radius: 1.25rem;
     background: rgba(255, 255, 255, 0.78);
-    border: 1px solid rgba(255, 255, 255, 0.96);
+    border: 0.0625rem solid rgba(255, 255, 255, 0.96);
     box-shadow: 0 1.125rem 2.625rem rgba(26, 77, 57, 0.18), 0 -0.625rem 1.875rem rgba(248, 250, 249, 0.5);
     backdrop-filter: blur(1.375rem);
     -webkit-backdrop-filter: blur(1.375rem);
@@ -545,7 +545,7 @@ body {
     padding: clamp(1rem, 4.5vw, 1.125rem);
     border-radius: 1.375rem;
     background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(255, 255, 255, 0.98);
+    border: 0.0625rem solid rgba(255, 255, 255, 0.98);
     box-shadow: 0 1.375rem 3.125rem rgba(26, 77, 57, 0.18);
     backdrop-filter: blur(1.375rem);
     -webkit-backdrop-filter: blur(1.375rem);
@@ -599,7 +599,7 @@ body {
     width: 2.125rem;
     height: 2.125rem;
     flex: 0 0 auto;
-    border: 1px solid rgba(26, 77, 57, 0.1);
+    border: 0.0625rem solid rgba(26, 77, 57, 0.1);
     border-radius: 50%;
     background: rgba(248, 250, 249, 0.9);
     color: var(--primary-color);
@@ -656,7 +656,7 @@ body {
     padding: 0.6875rem 0.75rem;
     border-radius: 1rem;
     background: rgba(248, 250, 249, 0.88);
-    border: 1px solid rgba(26, 77, 57, 0.08);
+    border: 0.0625rem solid rgba(26, 77, 57, 0.08);
     color: inherit;
     font: inherit;
     text-align: left;
@@ -719,15 +719,15 @@ body {
 }
 
 .mission-item-reroll {
-    width: 42px;
-    height: 48px;
+    width: clamp(2.375rem, 10vw, 2.625rem);
+    height: clamp(2.75rem, 11vw, 3rem);
     flex: 0 0 auto;
-    border: 1px solid rgba(26, 77, 57, 0.1);
-    border-radius: 15px;
+    border: 0.0625rem solid rgba(26, 77, 57, 0.1);
+    border-radius: 0.9375rem;
     background: rgba(248, 250, 249, 0.94);
     color: var(--primary-color);
     font: inherit;
-    font-size: 20px;
+    font-size: 1.25rem;
     font-weight: 850;
     line-height: 1;
     cursor: pointer;
@@ -779,7 +779,7 @@ body {
     position: relative;
     width: min(100%, 22.5rem);
     padding: 1.5rem 1.25rem 1.25rem;
-    border: 1px solid rgba(255, 255, 255, 0.96);
+    border: 0.0625rem solid rgba(255, 255, 255, 0.96);
     border-radius: 1.375rem;
     background: rgba(255, 255, 255, 0.96);
     box-shadow: 0 1.75rem 4.375rem rgba(16, 34, 26, 0.26);
@@ -839,7 +839,7 @@ body {
 }
 
 .mission-confirm-cancel {
-    border: 1px solid rgba(26, 77, 57, 0.12);
+    border: 0.0625rem solid rgba(26, 77, 57, 0.12);
     background: rgba(248, 250, 249, 0.96);
     color: var(--primary-color);
 }

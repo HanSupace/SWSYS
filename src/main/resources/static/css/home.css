@@ -29,8 +29,8 @@ html, body {
 .bg-pattern {
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(rgba(26, 77, 57, 0.06) 1.5px, transparent 1.5px);
-    background-size: 28px 28px;
+    background-image: radial-gradient(rgba(26, 77, 57, 0.06) 0.09375rem, transparent 0.09375rem);
+    background-size: 1.75rem 1.75rem;
     z-index: 0;
 }
 
@@ -38,24 +38,33 @@ html, body {
 .bg-shape {
     position: absolute;
     border-radius: 50%;
-    filter: blur(88px);
+    filter: blur(5.5rem);
     z-index: 0;
     opacity: 0.62;
     animation: floatBg 12s infinite alternate ease-in-out;
 }
 .bg-shape-1 {
-    width: 390px; height: 390px;
+    width: 90vw;
+    height: 90vw;
+    max-width: 24.375rem;
+    max-height: 24.375rem;
     background: #8ED6A3; /* 산뜻한 민트그린 */
     top: -24%; left: -30%;
 }
 .bg-shape-2 {
-    width: 360px; height: 360px;
+    width: 84vw;
+    height: 84vw;
+    max-width: 22.5rem;
+    max-height: 22.5rem;
     background: #C6E8D2; /* 부드러운 세이지 그린 */
     bottom: -22%; right: -30%;
     animation-delay: -4s;
 }
 .bg-shape-3 {
-    width: 260px; height: 260px;
+    width: 60vw;
+    height: 60vw;
+    max-width: 16.25rem;
+    max-height: 16.25rem;
     background: #E7F3EB;
     top: 18%; right: -26%;
     animation-delay: -8s;
@@ -63,33 +72,33 @@ html, body {
 
 @keyframes floatBg {
     0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(40px, -30px) scale(1.15); }
+    100% { transform: translate(9%, -7%) scale(1.15); }
 }
 
 @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(1.25rem); }
     to { opacity: 1; transform: translateY(0); }
 }
 
 /* 로고가 가볍게 둥둥 떠다니는 효과 */
 @keyframes floatLogo {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+    50% { transform: translateY(-8%); }
 }
 
 /* 모바일 페이지 컨테이너: 글래스모피즘 */
 .mobile-page {
-    width: min(100%, 430px);
+    width: min(100%, 26.875rem);
     min-height: 100svh;
-    padding: max(40px, env(safe-area-inset-top)) 28px max(40px, env(safe-area-inset-bottom));
+    padding: max(2.5rem, env(safe-area-inset-top)) clamp(1.25rem, 6.5vw, 1.75rem) max(2.5rem, env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
     justify-content: center; /* 요소들을 화면 중앙으로 모음 */
     background: rgba(255, 255, 255, 0.45);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.7);
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.04), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(1.5rem);
+    -webkit-backdrop-filter: blur(1.5rem);
+    border: 0.0625rem solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 1.875rem 3.75rem rgba(0, 0, 0, 0.04), inset 0 0 0 0.0625rem rgba(255, 255, 255, 0.5);
     z-index: 1;
     animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -107,16 +116,16 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 28px;
+    gap: clamp(1.25rem, 6vw, 1.75rem);
     animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
 }
 
 /* 네모 틀 없이 로고 이미지만 깔끔하게 */
 .logo {
-    width: 110px; /* 로고 크기 조정 */
+    width: clamp(5.625rem, 26vw, 6.875rem);
     height: auto;
     object-fit: contain;
-    filter: drop-shadow(0 16px 24px rgba(26, 77, 57, 0.15)); /* 로고 자체에 예쁜 그림자 */
+    filter: drop-shadow(0 1rem 1.5rem rgba(26, 77, 57, 0.15)); /* 로고 자체에 예쁜 그림자 */
     animation: floatLogo 4s ease-in-out infinite; /* 애니메이션 적용 */
 }
 
@@ -124,18 +133,18 @@ html, body {
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 0.75rem;
 }
 
 .copy h1 {
-    font-size: 38px;
+    font-size: clamp(2rem, 8.8vw, 2.375rem);
     font-weight: 800;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
     color: var(--primary-color);
 }
 
 .copy p {
-    font-size: 16px;
+    font-size: clamp(0.875rem, 3.8vw, 1rem);
     font-weight: 500;
     line-height: 1.5;
     color: var(--text-sub);
@@ -146,21 +155,21 @@ html, body {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 0.875rem;
     animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
 }
 
 .session-summary {
     width: 100%;
-    padding: 16px 18px;
-    border-radius: 16px;
+    padding: 1rem 1.125rem;
+    border-radius: 1rem;
     background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.9);
+    border: 0.0625rem solid rgba(255, 255, 255, 0.9);
     color: var(--text-sub);
-    font-size: 15px;
+    font-size: 0.9375rem;
     font-weight: 600;
     text-align: center;
-    box-shadow: 0 10px 18px rgba(26, 77, 57, 0.06);
+    box-shadow: 0 0.625rem 1.125rem rgba(26, 77, 57, 0.06);
 }
 
 .session-summary strong {
@@ -170,12 +179,12 @@ html, body {
 
 .button {
     width: 100%;
-    height: 60px;
-    border-radius: 18px;
+    height: clamp(3.375rem, 14vw, 3.75rem);
+    border-radius: 1.125rem;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 17px;
+    font-size: clamp(1rem, 4vw, 1.0625rem);
     font-weight: 700;
     text-decoration: none;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -190,61 +199,61 @@ html, body {
 .button-primary {
     background: var(--primary-color);
     color: #FFF;
-    box-shadow: 0 12px 24px rgba(26, 77, 57, 0.15);
+    box-shadow: 0 0.75rem 1.5rem rgba(26, 77, 57, 0.15);
 }
 
 .button-primary:hover {
     background: var(--primary-hover);
-    box-shadow: 0 16px 32px rgba(26, 77, 57, 0.25);
-    transform: translateY(-2px);
+    box-shadow: 0 1rem 2rem rgba(26, 77, 57, 0.25);
+    transform: translateY(-3%);
 }
 
 .button-secondary {
     background: rgba(255, 255, 255, 0.85);
     color: var(--primary-color);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.03);
-    border: 1px solid rgba(255, 255, 255, 1);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.03);
+    border: 0.0625rem solid rgba(255, 255, 255, 1);
 }
 
 .button-secondary:hover {
     background: #FFFFFF;
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
-    transform: translateY(-2px);
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.06);
+    transform: translateY(-3%);
 }
 
-@media (max-width: 360px) {
-    .copy h1 { font-size: 32px; }
-    .copy p { font-size: 14px; }
-    .logo { width: 90px; }
+@media (max-width: 22.5em) {
+    .copy h1 { font-size: 2rem; }
+    .copy p { font-size: 0.875rem; }
+    .logo { width: 5.625rem; }
     .welcome { gap: 6vh; }
-    .button { height: 54px; font-size: 16px; border-radius: 16px; }
+    .button { height: 3.375rem; font-size: 1rem; border-radius: 1rem; }
 }
 
-@media (max-width: 430px) {
+@media (max-width: 26.875em) {
     .bg-shape {
-        filter: blur(54px);
+        filter: blur(3.375rem);
         opacity: 0.72;
     }
 
     .bg-shape-1 {
-        width: 280px;
-        height: 280px;
+        width: 65vw;
+        height: 65vw;
         background: #7FCF95;
         top: -8%;
         left: -42%;
     }
 
     .bg-shape-2 {
-        width: 280px;
-        height: 280px;
+        width: 65vw;
+        height: 65vw;
         background: #C6E8D2;
         right: -42%;
         bottom: -8%;
     }
 
     .bg-shape-3 {
-        width: 220px;
-        height: 220px;
+        width: 52vw;
+        height: 52vw;
         background: #E7F3EB;
         top: 28%;
         right: -46%;
@@ -252,10 +261,10 @@ html, body {
 }
 /* --- 메인 로고 크기 수정 --- */
 .logo {
-    width: 150px; /* 기존 110px에서 훨씬 크게 수정 */
+    width: clamp(7.5rem, 35vw, 9.375rem);
     height: auto;
     object-fit: contain;
-    filter: drop-shadow(0 16px 24px rgba(26, 77, 57, 0.15));
+    filter: drop-shadow(0 1rem 1.5rem rgba(26, 77, 57, 0.15));
     animation: floatLogo 4s ease-in-out infinite;
 }
 
@@ -276,8 +285,8 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 22px;
-    padding-block: 24px;
+    gap: 1.375rem;
+    padding-block: 1.5rem;
 }
 
 /* 인증 화면 로고 */
@@ -286,39 +295,39 @@ html, body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 0.75rem;
     align-self: center;
     color: var(--primary-color);
-    font-size: 22px;
+    font-size: 1.375rem;
     font-weight: 800;
     text-decoration: none;
-    margin-bottom: 6px;
+    margin-bottom: 0.375rem;
 }
 
 .auth-logo {
-    width: 118px;
+    width: clamp(6.5rem, 27vw, 7.375rem);
     height: auto;
     object-fit: contain;
-    filter: drop-shadow(0 14px 22px rgba(26, 77, 57, 0.16));
+    filter: drop-shadow(0 0.875rem 1.375rem rgba(26, 77, 57, 0.16));
 }
 
 .auth-heading {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 6px;
+    gap: 0.5rem;
+    margin-bottom: 0.375rem;
     text-align: center;
 }
 
 .auth-heading h1 {
-    font-size: 32px;
+    font-size: clamp(1.75rem, 7.5vw, 2rem);
     font-weight: 800;
     color: var(--primary-color);
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
 }
 
 .auth-heading p {
-    font-size: 15px;
+    font-size: 0.9375rem;
     color: var(--text-sub);
     font-weight: 500;
 }
@@ -329,40 +338,40 @@ html, body {
 }
 
 .success-logo {
-    width: 132px;
-    margin-bottom: 4px;
+    width: clamp(7rem, 31vw, 8.25rem);
+    margin-bottom: 0.25rem;
 }
 
 /* 입력 폼 레이아웃 */
 .signup-form {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 1rem;
 }
 
 .field {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 0.5rem;
 }
 
 .field span {
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 700;
     color: var(--primary-hover);
-    padding-left: 2px;
+    padding-left: 0.125rem;
 }
 
 /* 트렌디한 입력창(Input) 스타일 */
 .field input {
     width: 100%;
-    height: 52px;
-    padding: 0 16px;
-    border-radius: 14px; /* 버튼과 어울리는 둥근 테두리 */
-    border: 1.5px solid rgba(26, 77, 57, 0.12);
+    height: clamp(3rem, 12vw, 3.25rem);
+    padding: 0 1rem;
+    border-radius: 0.875rem; /* 버튼과 어울리는 둥근 테두리 */
+    border: 0.09375rem solid rgba(26, 77, 57, 0.12);
     background: rgba(255, 255, 255, 0.6); /* 반투명 배경 */
     color: var(--text-main);
-    font-size: 15px;
+    font-size: 0.9375rem;
     font-family: inherit;
     font-weight: 500;
     transition: all 0.25s ease;
@@ -377,42 +386,42 @@ html, body {
 .field input:focus {
     background: #FFFFFF;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(26, 77, 57, 0.1);
+    box-shadow: 0 0 0 0.25rem rgba(26, 77, 57, 0.1);
 }
 
 /* 에러 메시지 */
 .field-error {
     color: #E53E3E; /* 너무 눈부시지 않은 부드러운 레드 */
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 600;
-    padding-left: 2px;
-    margin-top: -4px;
+    padding-left: 0.125rem;
+    margin-top: -0.25rem;
 }
 
 .form-error {
-    padding: 12px 14px;
-    border-radius: 14px;
+    padding: 0.75rem 0.875rem;
+    border-radius: 0.875rem;
     background: rgba(229, 62, 62, 0.1);
     color: #C53030;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 700;
     text-align: center;
 }
 
 /* 폼 안의 제출 버튼 여백 설정 */
 .submit-btn {
-    margin-top: 12px;
+    margin-top: 0.75rem;
 }
 
 /* 하단 뒤로가기 링크 */
 .text-link {
     align-self: center;
     color: var(--text-sub);
-    font-size: 15px;
+    font-size: 0.9375rem;
     font-weight: 600;
     text-decoration: underline;
-    text-underline-offset: 4px;
-    margin-top: 20px;
+    text-underline-offset: 0.25rem;
+    margin-top: 1.25rem;
     transition: color 0.2s ease;
 }
 
