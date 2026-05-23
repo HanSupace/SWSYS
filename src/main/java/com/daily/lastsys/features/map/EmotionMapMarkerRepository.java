@@ -53,9 +53,9 @@ public class EmotionMapMarkerRepository {
         return jdbcTemplate.query(
                 """
                 select id, latitude, longitude, emotion_label, emotion_color,
-                       title, location_name, description, created_at
+                       title, location_name, description, created_at,
+                       case when user_id = ? then true else false end as own
                 from emotion_map_markers
-                where user_id = ?
                 order by created_at desc, id desc
                 """,
                 (resultSet, rowNumber) -> new EmotionMapMarkerResponse(
@@ -67,9 +67,21 @@ public class EmotionMapMarkerRepository {
                         resultSet.getString("title"),
                         resultSet.getString("location_name"),
                         resultSet.getString("description"),
-                        resultSet.getObject("created_at", LocalDateTime.class)
+                        resultSet.getObject("created_at", LocalDateTime.class),
+                        resultSet.getBoolean("own")
                 ),
                 userId
+        );
+    }
+
+    public void deleteById(Long userId, Long markerId) {
+        jdbcTemplate.update(
+                """
+                delete from emotion_map_markers
+                where user_id = ? and id = ?
+                """,
+                userId,
+                markerId
         );
     }
 
@@ -90,7 +102,8 @@ public class EmotionMapMarkerRepository {
                         resultSet.getString("title"),
                         resultSet.getString("location_name"),
                         resultSet.getString("description"),
-                        resultSet.getObject("created_at", LocalDateTime.class)
+                        resultSet.getObject("created_at", LocalDateTime.class),
+                        true
                 ),
                 userId,
                 markerId
