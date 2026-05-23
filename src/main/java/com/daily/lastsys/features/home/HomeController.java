@@ -4,6 +4,7 @@ import com.daily.lastsys.features.login.LoginController;
 import com.daily.lastsys.features.login.LoginUser;
 import com.daily.lastsys.features.userprogress.UserProgressService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-@Controller // 아래 클래스는 웹 요청 담당
+@Controller
 public class HomeController { // 홈페이지 클래스
     private static final List<String> QUOTES = List.of(
             "감정은 없애야 할 문제가 아니라 이해해야 할 신호입니다.",
