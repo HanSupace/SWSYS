@@ -143,7 +143,7 @@
     <a th:href="@{/profile}" href="/profile">프로필</a>
 </nav>
 
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=193ceb4c1a6b6b4e4651b199d5836ee5&libraries=services"></script>
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=193ceb4c1a6b6b4e4651b199d5836ee5&libraries=services,clusterer"></script>
 <script>
     (function () {
         var container = document.getElementById('map');
@@ -190,6 +190,12 @@
         var filterPanelCloseTimer = null;
         var searchTimer = null;
         var markerLocationTimer = null;
+        var markerLayerRefreshFrame = null;
+        var markerVisibilityFrame = null;
+        var emotionFilterRenderFrame = null;
+        var clusteredMarkerSet = new Set();
+        var requestedEmotionId = new URLSearchParams(window.location.search).get('emotionId') || '';
+        var markerClustererMinLevel = 6;
         var options = {
             center: defaultPosition,
             level: 5,
@@ -209,6 +215,64 @@
         var map = new kakao.maps.Map(container, options);
         map.setDraggable(true);
         var places = kakao.maps.services ? new kakao.maps.services.Places() : null;
+        var transparentMarkerImage = new kakao.maps.MarkerImage(
+            'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==',
+            new kakao.maps.Size(1, 1),
+            { offset: new kakao.maps.Point(0, 0) }
+        );
+        var markerClusterer = kakao.maps.MarkerClusterer ? new kakao.maps.MarkerClusterer({
+            map: map,
+            averageCenter: true,
+            minLevel: markerClustererMinLevel,
+            minClusterSize: 2,
+            gridSize: 72,
+            disableClickZoom: true,
+            calculator: [10, 50],
+            texts: function (size) {
+                return '+' + size;
+            },
+            styles: [
+                {
+                    width: '42px',
+                    height: '42px',
+                    border: '2px solid rgba(255, 255, 255, 0.96)',
+                    borderRadius: '999px',
+                    background: 'rgba(26, 77, 57, 0.92)',
+                    color: '#fff',
+                    fontSize: '13px',
+                    fontWeight: '950',
+                    lineHeight: '40px',
+                    textAlign: 'center',
+                    boxShadow: '0 0.75rem 1.625rem rgba(26, 77, 57, 0.24)'
+                },
+                {
+                    width: '48px',
+                    height: '48px',
+                    border: '2px solid rgba(255, 255, 255, 0.96)',
+                    borderRadius: '999px',
+                    background: 'rgba(40, 116, 111, 0.94)',
+                    color: '#fff',
+                    fontSize: '14px',
+                    fontWeight: '950',
+                    lineHeight: '46px',
+                    textAlign: 'center',
+                    boxShadow: '0 0.875rem 1.875rem rgba(26, 77, 57, 0.26)'
+                },
+                {
+                    width: '56px',
+                    height: '56px',
+                    border: '2px solid rgba(255, 255, 255, 0.96)',
+                    borderRadius: '999px',
+                    background: 'rgba(118, 90, 8, 0.94)',
+                    color: '#fff',
+                    fontSize: '15px',
+                    fontWeight: '950',
+                    lineHeight: '54px',
+                    textAlign: 'center',
+                    boxShadow: '0 1rem 2.125rem rgba(26, 77, 57, 0.28)'
+                }
+            ]
+        }) : null;
         var currentLocationElement = document.createElement('div');
         currentLocationElement.className = 'current-location-dot';
         currentLocationElement.setAttribute('aria-label', '현재 위치');
@@ -230,6 +294,27 @@
             window.setTimeout(function () {
                 markerLocationInput.focus();
             }, 120);
+        }
+
+        function selectMarkerEmotion(emotionId) {
+            var emotionOptions = form.querySelectorAll('.emotion-option');
+
+            for (var index = 0; index < emotionOptions.length; index += 1) {
+                if (emotionOptions[index].dataset.emotionId !== emotionId) {
+                    continue;
+                }
+
+                var emotionInput = emotionOptions[index].querySelector('input[name="emotion"]');
+
+                if (!emotionInput) {
+                    return false;
+                }
+
+                emotionInput.checked = true;
+                return true;
+            }
+
+            return false;
         }
 
         function closeMarkerModal() {
@@ -365,24 +450,108 @@
             return activeEmotionFilter === 'ALL' || item.emotionLabel === activeEmotionFilter;
         }
 
-        function applyMarkerFilters() {
+        function visibleMarkerItems() {
+            return emotionMarkerItems.filter(markerMatchesFilter);
+        }
+
+        function hideInfoOverlay(item) {
+            if (!item || activeInfoOverlay !== item.infoOverlay) {
+                return;
+            }
+
+            item.infoOverlay.setMap(null);
+            activeInfoOverlay = null;
+        }
+
+        function clusteringEnabledAtCurrentLevel() {
+            return Boolean(markerClusterer) && map.getLevel() >= markerClustererMinLevel;
+        }
+
+        function markerHiddenByCluster(item) {
+            if (!markerClusterer || !item.clusterMarker) {
+                return false;
+            }
+
+            return clusteringEnabledAtCurrentLevel() && clusteredMarkerSet.has(item.clusterMarker);
+        }
+
+        function syncCustomMarkerVisibility() {
             var visibleCount = 0;
 
             emotionMarkerItems.forEach(function (item) {
-                var visible = markerMatchesFilter(item);
-                item.markerOverlay.setMap(visible ? map : null);
+                var matchesFilter = markerMatchesFilter(item);
+                var shouldShow = matchesFilter && !markerHiddenByCluster(item);
 
-                if (!visible && activeInfoOverlay === item.infoOverlay) {
-                    item.infoOverlay.setMap(null);
-                    activeInfoOverlay = null;
+                item.markerOverlay.setMap(shouldShow ? map : null);
+
+                if (!shouldShow) {
+                    hideInfoOverlay(item);
                 }
 
-                if (visible) {
+                if (matchesFilter) {
                     visibleCount += 1;
                 }
             });
 
             updateFilterMenu(visibleCount);
+        }
+
+        function scheduleCustomMarkerVisibilitySync() {
+            if (markerVisibilityFrame) {
+                return;
+            }
+
+            markerVisibilityFrame = window.requestAnimationFrame(function () {
+                markerVisibilityFrame = null;
+                syncCustomMarkerVisibility();
+            });
+        }
+
+        function refreshMarkerLayers() {
+            var visibleItems = visibleMarkerItems();
+
+            clusteredMarkerSet = new Set();
+
+            emotionMarkerItems.forEach(function (item) {
+                item.markerOverlay.setMap(null);
+
+                if (!markerMatchesFilter(item)) {
+                    hideInfoOverlay(item);
+                }
+            });
+
+            updateFilterMenu(visibleItems.length);
+
+            if (!markerClusterer) {
+                syncCustomMarkerVisibility();
+                return;
+            }
+
+            markerClusterer.clear();
+
+            if (visibleItems.length) {
+                markerClusterer.addMarkers(visibleItems.map(function (item) {
+                    return item.clusterMarker;
+                }).filter(Boolean), true);
+            }
+
+            markerClusterer.redraw();
+            if (!clusteringEnabledAtCurrentLevel()) {
+                syncCustomMarkerVisibility();
+            } else {
+                window.setTimeout(scheduleCustomMarkerVisibilitySync, 0);
+            }
+        }
+
+        function applyMarkerFilters() {
+            if (markerLayerRefreshFrame) {
+                return;
+            }
+
+            markerLayerRefreshFrame = window.requestAnimationFrame(function () {
+                markerLayerRefreshFrame = null;
+                refreshMarkerLayers();
+            });
         }
 
         function updateFilterMenu(visibleCount) {
@@ -410,6 +579,17 @@
                     || emotionLabel && emotionLabel === activeEmotionFilter;
 
                 chip.classList.toggle('is-active', Boolean(isActive));
+            });
+        }
+
+        function scheduleEmotionFiltersRender() {
+            if (emotionFilterRenderFrame) {
+                return;
+            }
+
+            emotionFilterRenderFrame = window.requestAnimationFrame(function () {
+                emotionFilterRenderFrame = null;
+                renderEmotionFilters();
             });
         }
 
@@ -481,6 +661,35 @@
             setFilterPanelOpen(false);
         });
 
+        if (markerClusterer) {
+            kakao.maps.event.addListener(markerClusterer, 'clustered', function (clusters) {
+                clusteredMarkerSet = new Set();
+
+                clusters.forEach(function (cluster) {
+                    if (cluster.getSize() < 2) {
+                        return;
+                    }
+
+                    cluster.getMarkers().forEach(function (marker) {
+                        clusteredMarkerSet.add(marker);
+                    });
+                });
+
+                syncCustomMarkerVisibility();
+            });
+
+            kakao.maps.event.addListener(markerClusterer, 'clusterclick', function (cluster) {
+                if (activeInfoOverlay) {
+                    activeInfoOverlay.setMap(null);
+                    activeInfoOverlay = null;
+                }
+
+                map.setLevel(Math.max(map.getLevel() - 1, 1), {
+                    anchor: cluster.getCenter()
+                });
+            });
+        }
+
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 function (position) {
@@ -507,6 +716,25 @@
 
         kakao.maps.event.addListener(map, 'center_changed', function () {
             selectedPosition = map.getCenter();
+        });
+
+        kakao.maps.event.addListener(map, 'zoom_changed', function () {
+            clusteredMarkerSet = new Set();
+
+            if (!clusteringEnabledAtCurrentLevel()) {
+                syncCustomMarkerVisibility();
+                return;
+            }
+
+            window.setTimeout(scheduleCustomMarkerVisibilitySync, 0);
+        });
+
+        kakao.maps.event.addListener(map, 'idle', function () {
+            if (!clusteringEnabledAtCurrentLevel()) {
+                clusteredMarkerSet = new Set();
+            }
+
+            scheduleCustomMarkerVisibilitySync();
         });
 
         kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
@@ -659,6 +887,9 @@
 
             markerItem.markerOverlay.setMap(null);
             markerItem.infoOverlay.setMap(null);
+            if (markerItem.clusterMarker) {
+                markerItem.clusterMarker.setMap(null);
+            }
             emotionMarkerItems = emotionMarkerItems.filter(function (item) {
                 return item !== markerItem;
             });
@@ -667,7 +898,7 @@
                 activeInfoOverlay = null;
             }
 
-            renderEmotionFilters();
+            scheduleEmotionFiltersRender();
             applyMarkerFilters();
         }
 
@@ -705,6 +936,12 @@
                 zIndex: 7
             });
 
+            var clusterMarker = markerClusterer ? new kakao.maps.Marker({
+                position: position,
+                image: transparentMarkerImage,
+                clickable: false
+            }) : null;
+
             markerElement.addEventListener('click', function () {
                 if (activeInfoOverlay && activeInfoOverlay !== infoOverlay) {
                     activeInfoOverlay.setMap(null);
@@ -719,6 +956,7 @@
                 id: markerId,
                 markerOverlay: markerOverlay,
                 infoOverlay: infoOverlay,
+                clusterMarker: clusterMarker,
                 emotionLabel: emotion.label,
                 own: Boolean(own)
             };
@@ -742,8 +980,8 @@
             }
 
             emotionMarkerItems.push(markerItem);
-            renderEmotionFilters();
-            markerOverlay.setMap(markerMatchesFilter(markerItem) ? map : null);
+            scheduleEmotionFiltersRender();
+            applyMarkerFilters();
 
             if (shouldOpen) {
                 if (activeInfoOverlay) {
@@ -751,6 +989,7 @@
                 }
 
                 if (markerMatchesFilter(markerItem)) {
+                    markerOverlay.setMap(map);
                     infoOverlay.setMap(map);
                     activeInfoOverlay = infoOverlay;
                 }
@@ -882,6 +1121,10 @@
         openMarkerModalButton.addEventListener('click', openMarkerModal);
         closeMarkerModalButton.addEventListener('click', closeMarkerModal);
         markerModalBackdrop.addEventListener('click', closeMarkerModal);
+
+        if (requestedEmotionId && selectMarkerEmotion(requestedEmotionId)) {
+            openMarkerModal();
+        }
 
         window.addEventListener('keydown', function (event) {
             if (event.key === 'Escape' && !markerModal.hidden) {

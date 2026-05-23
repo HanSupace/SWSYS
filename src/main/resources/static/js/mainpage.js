@@ -102,6 +102,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         setSelectedEmotion(emotionButton);
+
+        const mapUrl = new URL('/map', window.location.origin);
+        const emotionId = emotionButton.dataset.emotionId;
+
+        if (emotionId) {
+            mapUrl.searchParams.set('emotionId', emotionId);
+        }
+
+        window.location.assign(mapUrl.toString());
     });
 
     const setMissionPanelOpen = (isOpen) => {
