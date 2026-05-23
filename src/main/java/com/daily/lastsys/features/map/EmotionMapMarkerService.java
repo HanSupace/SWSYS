@@ -20,4 +20,8 @@ public class EmotionMapMarkerService {
     public EmotionMapMarkerResponse createMarker(Long userId, EmotionMapMarkerRequest request) {
         return emotionMapMarkerRepository.save(userId, request);
     }
+
+    public void deleteMarker(Long userId, Long markerId) {
+        emotionMapMarkerRepository.deleteById(userId, markerId);
+    }
 }

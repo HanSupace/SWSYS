@@ -12,6 +12,7 @@ public record EmotionMapMarkerResponse(
         String title,
         String locationName,
         String description,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        boolean own
 ) {
 }

@@ -6,8 +6,8 @@
     <title>LastSys 감정지도</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../static/css/home.css?v=20260512b">
-    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260513a)}" href="../static/css/mainpage.css?v=20260513a">
-    <link rel="stylesheet" th:href="@{/css/map.css(v=20260521a)}" href="../static/css/map.css?v=20260521a">
+    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260519b)}" href="../static/css/mainpage.css?v=20260519b">
+    <link rel="stylesheet" th:href="@{/css/map.css(v=20260523c)}" href="../static/css/map.css?v=20260523c">
 </head>
 <body>
 <div class="bg-pattern"></div>
@@ -46,10 +46,20 @@
                         <span id="map-filter-summary">전체</span>
                     </div>
                     <div class="map-filter-actions">
-                        <button class="map-filter-chip is-active" type="button" data-filter-type="all">전체</button>
-                        <button class="map-filter-chip" type="button" data-filter-type="mine">내 감정핀</button>
+                        <button class="map-filter-chip is-active" type="button" data-filter-type="all" style="--chip-color: var(--primary-color)">
+                            <span>전체</span>
+                            <em id="map-filter-all-count">0</em>
+                        </button>
+                        <button class="map-filter-chip" type="button" data-filter-type="mine" style="--chip-color: var(--primary-color)">
+                            <span>내 감정핀</span>
+                            <em id="map-filter-mine-count">0</em>
+                        </button>
+                        <button class="map-filter-chip" type="button" data-filter-type="emotions" style="--chip-color: #28746F">
+                            <span>감정별</span>
+                            <em id="map-emotion-toggle-mark">+</em>
+                        </button>
+                        <div id="map-emotion-filters" class="map-emotion-filters" aria-label="감정별 핀 보기" hidden></div>
                     </div>
-                    <div id="map-emotion-filters" class="map-emotion-filters" aria-label="감정별 핀 보기"></div>
                 </section>
                 <div id="map-search-results" class="map-search-results" hidden></div>
                 <div class="map-crosshair" aria-hidden="true"></div>
@@ -150,6 +160,9 @@
         var filterBackdrop = document.getElementById('map-filter-backdrop');
         var filterSummary = document.getElementById('map-filter-summary');
         var emotionFilters = document.getElementById('map-emotion-filters');
+        var filterAllCount = document.getElementById('map-filter-all-count');
+        var filterMineCount = document.getElementById('map-filter-mine-count');
+        var emotionToggleMark = document.getElementById('map-emotion-toggle-mark');
 
         if (!window.kakao || !window.kakao.maps) {
             message.textContent = '지도를 불러오지 못했습니다. Kakao JavaScript 키와 도메인 설정을 확인해주세요.';
@@ -173,6 +186,8 @@
         var activeEmotionFilter = 'ALL';
         var showOnlyMine = false;
         var activeInfoOverlay = null;
+        var emotionFiltersOpen = false;
+        var filterPanelCloseTimer = null;
         var searchTimer = null;
         var markerLocationTimer = null;
         var options = {
@@ -311,10 +326,34 @@
                 return;
             }
 
-            filterPanel.hidden = !isOpen;
-            if (filterBackdrop) {
-                filterBackdrop.hidden = !isOpen;
+            window.clearTimeout(filterPanelCloseTimer);
+
+            if (isOpen) {
+                emotionFiltersOpen = false;
+                renderEmotionFilters();
+                filterPanel.hidden = false;
+                if (filterBackdrop) {
+                    filterBackdrop.hidden = false;
+                }
+                window.requestAnimationFrame(function () {
+                    filterPanel.classList.add('is-open');
+                    if (filterBackdrop) {
+                        filterBackdrop.classList.add('is-open');
+                    }
+                });
+            } else {
+                filterPanel.classList.remove('is-open');
+                if (filterBackdrop) {
+                    filterBackdrop.classList.remove('is-open');
+                }
+                filterPanelCloseTimer = window.setTimeout(function () {
+                    filterPanel.hidden = true;
+                    if (filterBackdrop) {
+                        filterBackdrop.hidden = true;
+                    }
+                }, 220);
             }
+
             filterToggleButton.setAttribute('aria-expanded', String(isOpen));
         }
 
@@ -352,11 +391,22 @@
                 filterSummary.textContent = summaryText + ' ' + visibleCount + '개';
             }
 
+            if (filterAllCount) {
+                filterAllCount.textContent = emotionMarkerItems.length;
+            }
+
+            if (filterMineCount) {
+                filterMineCount.textContent = emotionMarkerItems.filter(function (item) {
+                    return item.own;
+                }).length;
+            }
+
             document.querySelectorAll('.map-filter-chip').forEach(function (chip) {
                 var filterType = chip.dataset.filterType;
                 var emotionLabel = chip.dataset.emotionLabel;
                 var isActive = filterType === 'all' && !showOnlyMine && activeEmotionFilter === 'ALL'
                     || filterType === 'mine' && showOnlyMine
+                    || filterType === 'emotions' && emotionFiltersOpen
                     || emotionLabel && emotionLabel === activeEmotionFilter;
 
                 chip.classList.toggle('is-active', Boolean(isActive));
@@ -368,15 +418,29 @@
                 return;
             }
 
+            filterPanel?.classList.toggle('is-emotion-expanded', emotionFiltersOpen);
+            if (emotionToggleMark) {
+                emotionToggleMark.textContent = emotionFiltersOpen ? '-' : '+';
+            }
+
+            if (!emotionFiltersOpen) {
+                emotionFilters.hidden = true;
+                emotionFilters.innerHTML = '';
+                updateFilterMenu(emotionMarkerItems.filter(markerMatchesFilter).length);
+                return;
+            }
+
             var counts = emotionMarkerItems.reduce(function (result, item) {
                 result[item.emotionLabel] = (result[item.emotionLabel] || 0) + 1;
                 return result;
             }, {});
 
+            emotionFilters.hidden = false;
             emotionFilters.innerHTML = emotionFilterOptions.map(function (emotion) {
                 var count = counts[emotion.label] || 0;
-                return '<button class="map-filter-chip" type="button" data-emotion-label="' + escapeHtml(emotion.label) + '" style="--chip-color: ' + emotion.color + '">' +
-                    escapeHtml(emotion.label) + ' ' + count +
+                return '<button class="map-filter-chip map-filter-emotion-chip" type="button" data-emotion-label="' + escapeHtml(emotion.label) + '" style="--chip-color: ' + emotion.color + '">' +
+                    '<span>' + escapeHtml(emotion.label) + '</span>' +
+                    '<em>' + count + '</em>' +
                     '</button>';
             }).join('');
 
@@ -404,12 +468,17 @@
             } else if (filterButton.dataset.filterType === 'mine') {
                 activeEmotionFilter = 'ALL';
                 showOnlyMine = true;
+            } else if (filterButton.dataset.filterType === 'emotions') {
+                emotionFiltersOpen = !emotionFiltersOpen;
+                renderEmotionFilters();
+                return;
             } else if (filterButton.dataset.emotionLabel) {
                 activeEmotionFilter = filterButton.dataset.emotionLabel;
                 showOnlyMine = false;
             }
 
             applyMarkerFilters();
+            setFilterPanelOpen(false);
         });
 
         if (navigator.geolocation) {
@@ -575,7 +644,34 @@
             });
         }
 
-        function createEmotionMarker(position, emotion, title, description, locationName, shouldOpen) {
+        async function deleteEmotionMarker(markerItem) {
+            if (!markerItem || !markerItem.id) {
+                return;
+            }
+
+            var response = await fetch('/api/emotion-map-markers/' + encodeURIComponent(markerItem.id), {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error(String(response.status));
+            }
+
+            markerItem.markerOverlay.setMap(null);
+            markerItem.infoOverlay.setMap(null);
+            emotionMarkerItems = emotionMarkerItems.filter(function (item) {
+                return item !== markerItem;
+            });
+
+            if (activeInfoOverlay === markerItem.infoOverlay) {
+                activeInfoOverlay = null;
+            }
+
+            renderEmotionFilters();
+            applyMarkerFilters();
+        }
+
+        function createEmotionMarker(markerId, position, emotion, title, description, locationName, own, shouldOpen) {
             var markerElement = document.createElement('button');
             markerElement.type = 'button';
             markerElement.className = 'emotion-map-marker';
@@ -598,7 +694,8 @@
                 '<strong>' + escapeHtml(title) + '</strong>' +
                 '<span>' + escapeHtml(emotion.label) + '</span>' +
                 '<small>' + escapeHtml(locationName || formatPosition(position)) + '</small>' +
-                '<p>' + escapeHtml(description) + '</p>';
+                '<p>' + escapeHtml(description) + '</p>' +
+                (own ? '<button class="emotion-marker-delete" type="button">마커 삭제</button>' : '');
 
             var infoOverlay = new kakao.maps.CustomOverlay({
                 position: position,
@@ -619,11 +716,31 @@
             });
 
             var markerItem = {
+                id: markerId,
                 markerOverlay: markerOverlay,
                 infoOverlay: infoOverlay,
                 emotionLabel: emotion.label,
-                own: true
+                own: Boolean(own)
             };
+
+            var deleteButton = infoElement.querySelector('.emotion-marker-delete');
+            if (deleteButton) {
+                deleteButton.addEventListener('click', async function (event) {
+                    event.stopPropagation();
+
+                    try {
+                        await deleteEmotionMarker(markerItem);
+                        showNotice('감정 마커를 삭제했습니다.');
+                    } catch (error) {
+                        if (error.message === '401') {
+                            showError('로그인 후 감정 마커를 삭제할 수 있습니다.');
+                        } else {
+                            showError('감정 마커를 삭제하지 못했습니다. 서버 상태를 확인해주세요.');
+                        }
+                    }
+                });
+            }
+
             emotionMarkerItems.push(markerItem);
             renderEmotionFilters();
             markerOverlay.setMap(markerMatchesFilter(markerItem) ? map : null);
@@ -646,6 +763,7 @@
             }
 
             createEmotionMarker(
+                marker.id,
                 new kakao.maps.LatLng(marker.latitude, marker.longitude),
                 {
                     label: marker.emotionLabel,
@@ -654,6 +772,7 @@
                 marker.title,
                 marker.description || '',
                 marker.locationName || '',
+                marker.own,
                 shouldOpen
             );
         }
