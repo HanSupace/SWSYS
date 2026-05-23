@@ -28,12 +28,29 @@
         </header>
 
         <section class="map-shell" aria-label="감정지도">
+            <div class="map-filter">
+                <button id="map-filter-toggle" class="map-filter-toggle" type="button" aria-label="지도 필터 메뉴" aria-expanded="false" aria-controls="map-filter-panel">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
             <form id="map-search-form" class="map-search-form" autocomplete="off">
                 <input id="map-search-input" type="search" placeholder="위치 검색" aria-label="위치 검색">
                 <button type="submit">검색</button>
             </form>
             <div class="map-stage">
                 <div id="map" class="emotion-map" aria-label="카카오 지도"></div>
+                <button id="map-filter-backdrop" class="map-filter-backdrop" type="button" aria-label="필터 메뉴 닫기" hidden></button>
+                <section id="map-filter-panel" class="map-filter-panel" aria-label="감정핀 필터" hidden>
+                    <div class="map-filter-head">
+                        <strong>감정핀 보기</strong>
+                        <span id="map-filter-summary">전체</span>
+                    </div>
+                    <div class="map-filter-actions">
+                        <button class="map-filter-chip is-active" type="button" data-filter-type="all">전체</button>
+                        <button class="map-filter-chip" type="button" data-filter-type="mine">내 감정핀</button>
+                    </div>
+                    <div id="map-emotion-filters" class="map-emotion-filters" aria-label="감정별 핀 보기"></div>
+                </section>
                 <div id="map-search-results" class="map-search-results" hidden></div>
                 <div class="map-crosshair" aria-hidden="true"></div>
                 <button id="open-marker-modal" class="open-marker-modal" type="button">기록하기</button>
@@ -128,6 +145,11 @@
         var openMarkerModalButton = document.getElementById('open-marker-modal');
         var closeMarkerModalButton = document.getElementById('close-marker-modal');
         var markerModalBackdrop = document.getElementById('marker-modal-backdrop');
+        var filterToggleButton = document.getElementById('map-filter-toggle');
+        var filterPanel = document.getElementById('map-filter-panel');
+        var filterBackdrop = document.getElementById('map-filter-backdrop');
+        var filterSummary = document.getElementById('map-filter-summary');
+        var emotionFilters = document.getElementById('map-emotion-filters');
 
         if (!window.kakao || !window.kakao.maps) {
             message.textContent = '지도를 불러오지 못했습니다. Kakao JavaScript 키와 도메인 설정을 확인해주세요.';
@@ -144,8 +166,12 @@
         var defaultPosition = new kakao.maps.LatLng(37.566826, 126.9786567);
         var currentPosition = defaultPosition;
         var selectedPosition = defaultPosition;
+        var hasCurrentPosition = false;
         var searchedPlaces = [];
         var markerPlaces = [];
+        var emotionMarkerItems = [];
+        var activeEmotionFilter = 'ALL';
+        var showOnlyMine = false;
         var activeInfoOverlay = null;
         var searchTimer = null;
         var markerLocationTimer = null;
@@ -154,6 +180,16 @@
             level: 5,
             draggable: true
         };
+        var emotionFilterOptions = [
+            { label: '기쁨', color: '#765A08' },
+            { label: '기대', color: '#4F711F' },
+            { label: '슬픔', color: '#315C86' },
+            { label: '분노', color: '#9D312B' },
+            { label: '불안', color: '#5C477D' },
+            { label: '당황', color: '#8B3D66' },
+            { label: '놀람', color: '#28746F' },
+            { label: '짜증', color: '#925021' }
+        ];
 
         var map = new kakao.maps.Map(container, options);
         map.setDraggable(true);
@@ -189,6 +225,7 @@
 
         function moveTo(position, level) {
             currentPosition = position;
+            hasCurrentPosition = true;
             currentLocationOverlay.setPosition(position);
             map.setLevel(level);
             map.setCenter(position);
@@ -200,6 +237,39 @@
 
         function formatPlace(place) {
             return place.place_name + ' · ' + (place.road_address_name || place.address_name || '주소 정보 없음');
+        }
+
+        function placeSearchOptions() {
+            var baseLocation = hasCurrentPosition ? currentPosition : map.getCenter();
+            var options = {
+                location: baseLocation
+            };
+
+            if (kakao.maps.services.SortBy) {
+                options.sort = kakao.maps.services.SortBy.DISTANCE;
+            }
+
+            return options;
+        }
+
+        function formatDistance(distance) {
+            var meters = Number(distance);
+
+            if (!Number.isFinite(meters)) {
+                return '';
+            }
+
+            if (meters >= 1000) {
+                return (meters / 1000).toFixed(meters >= 10000 ? 0 : 1) + 'km';
+            }
+
+            return Math.round(meters) + 'm';
+        }
+
+        function placeAddressText(place) {
+            var address = place.road_address_name || place.address_name || '주소 정보 없음';
+            var distance = formatDistance(place.distance);
+            return distance ? distance + ' · ' + address : address;
         }
 
         function chooseMapPlace(index) {
@@ -235,6 +305,112 @@
                 message.hidden = true;
             }, 1800);
         }
+
+        function setFilterPanelOpen(isOpen) {
+            if (!filterToggleButton || !filterPanel) {
+                return;
+            }
+
+            filterPanel.hidden = !isOpen;
+            if (filterBackdrop) {
+                filterBackdrop.hidden = !isOpen;
+            }
+            filterToggleButton.setAttribute('aria-expanded', String(isOpen));
+        }
+
+        function markerMatchesFilter(item) {
+            if (showOnlyMine && !item.own) {
+                return false;
+            }
+
+            return activeEmotionFilter === 'ALL' || item.emotionLabel === activeEmotionFilter;
+        }
+
+        function applyMarkerFilters() {
+            var visibleCount = 0;
+
+            emotionMarkerItems.forEach(function (item) {
+                var visible = markerMatchesFilter(item);
+                item.markerOverlay.setMap(visible ? map : null);
+
+                if (!visible && activeInfoOverlay === item.infoOverlay) {
+                    item.infoOverlay.setMap(null);
+                    activeInfoOverlay = null;
+                }
+
+                if (visible) {
+                    visibleCount += 1;
+                }
+            });
+
+            updateFilterMenu(visibleCount);
+        }
+
+        function updateFilterMenu(visibleCount) {
+            if (filterSummary) {
+                var summaryText = activeEmotionFilter === 'ALL' ? '전체' : activeEmotionFilter;
+                filterSummary.textContent = summaryText + ' ' + visibleCount + '개';
+            }
+
+            document.querySelectorAll('.map-filter-chip').forEach(function (chip) {
+                var filterType = chip.dataset.filterType;
+                var emotionLabel = chip.dataset.emotionLabel;
+                var isActive = filterType === 'all' && !showOnlyMine && activeEmotionFilter === 'ALL'
+                    || filterType === 'mine' && showOnlyMine
+                    || emotionLabel && emotionLabel === activeEmotionFilter;
+
+                chip.classList.toggle('is-active', Boolean(isActive));
+            });
+        }
+
+        function renderEmotionFilters() {
+            if (!emotionFilters) {
+                return;
+            }
+
+            var counts = emotionMarkerItems.reduce(function (result, item) {
+                result[item.emotionLabel] = (result[item.emotionLabel] || 0) + 1;
+                return result;
+            }, {});
+
+            emotionFilters.innerHTML = emotionFilterOptions.map(function (emotion) {
+                var count = counts[emotion.label] || 0;
+                return '<button class="map-filter-chip" type="button" data-emotion-label="' + escapeHtml(emotion.label) + '" style="--chip-color: ' + emotion.color + '">' +
+                    escapeHtml(emotion.label) + ' ' + count +
+                    '</button>';
+            }).join('');
+
+            updateFilterMenu(emotionMarkerItems.filter(markerMatchesFilter).length);
+        }
+
+        filterToggleButton?.addEventListener('click', function () {
+            setFilterPanelOpen(filterPanel.hidden);
+        });
+
+        filterBackdrop?.addEventListener('click', function () {
+            setFilterPanelOpen(false);
+        });
+
+        filterPanel?.addEventListener('click', function (event) {
+            var filterButton = event.target.closest('.map-filter-chip');
+
+            if (!filterButton || !filterPanel.contains(filterButton)) {
+                return;
+            }
+
+            if (filterButton.dataset.filterType === 'all') {
+                activeEmotionFilter = 'ALL';
+                showOnlyMine = false;
+            } else if (filterButton.dataset.filterType === 'mine') {
+                activeEmotionFilter = 'ALL';
+                showOnlyMine = true;
+            } else if (filterButton.dataset.emotionLabel) {
+                activeEmotionFilter = filterButton.dataset.emotionLabel;
+                showOnlyMine = false;
+            }
+
+            applyMarkerFilters();
+        });
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -280,7 +456,7 @@
                 resultButton.className = 'map-search-result';
                 resultButton.innerHTML =
                     '<strong>' + escapeHtml(place.place_name) + '</strong>' +
-                    '<span>' + escapeHtml(place.road_address_name || place.address_name || '주소 정보 없음') + '</span>';
+                    '<span>' + escapeHtml(placeAddressText(place)) + '</span>';
 
                 resultButton.addEventListener('click', function () {
                     chooseMapPlace(index);
@@ -312,7 +488,7 @@
                 }
 
                 renderSearchResults(results);
-            });
+            }, placeSearchOptions());
         }
 
         searchForm.addEventListener('submit', function (event) {
@@ -338,7 +514,7 @@
                 resultButton.className = 'marker-location-result';
                 resultButton.innerHTML =
                     '<strong>' + escapeHtml(place.place_name) + '</strong>' +
-                    '<span>' + escapeHtml(place.road_address_name || place.address_name || '주소 정보 없음') + '</span>';
+                    '<span>' + escapeHtml(placeAddressText(place)) + '</span>';
 
                 resultButton.addEventListener('click', function () {
                     markerLocationInput.value = place.place_name;
@@ -375,7 +551,7 @@
                 }
 
                 renderMarkerLocationResults(results);
-            });
+            }, placeSearchOptions());
         }
 
         markerLocationInput.addEventListener('input', function () {
@@ -442,15 +618,25 @@
                 activeInfoOverlay = isOpen ? null : infoOverlay;
             });
 
-            markerOverlay.setMap(map);
+            var markerItem = {
+                markerOverlay: markerOverlay,
+                infoOverlay: infoOverlay,
+                emotionLabel: emotion.label,
+                own: true
+            };
+            emotionMarkerItems.push(markerItem);
+            renderEmotionFilters();
+            markerOverlay.setMap(markerMatchesFilter(markerItem) ? map : null);
 
             if (shouldOpen) {
                 if (activeInfoOverlay) {
                     activeInfoOverlay.setMap(null);
                 }
 
-                infoOverlay.setMap(map);
-                activeInfoOverlay = infoOverlay;
+                if (markerMatchesFilter(markerItem)) {
+                    infoOverlay.setMap(map);
+                    activeInfoOverlay = infoOverlay;
+                }
             }
         }
 
@@ -505,6 +691,7 @@
             return response.json();
         }
 
+        renderEmotionFilters();
         loadEmotionMarkers();
 
         form.addEventListener('submit', async function (event) {
