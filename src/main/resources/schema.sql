@@ -39,6 +39,17 @@ create table if not exists user_mission_settings (
     constraint fk_user_mission_settings_user foreign key (user_id) references users (id) on delete cascade
 ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
 
+create table if not exists emotion_records (
+    id bigint not null auto_increment,
+    user_id bigint not null,
+    title varchar(120),
+    content text not null,
+    created_at timestamp not null default current_timestamp,
+    primary key (id),
+    key idx_emotion_records_user_created_at (user_id, created_at),
+    constraint fk_emotion_records_user foreign key (user_id) references users (id) on delete cascade
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
+
 create table if not exists daily_mission_rerolls (
     user_id bigint not null,
     mission_date date not null,

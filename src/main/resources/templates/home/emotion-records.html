@@ -5,20 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>나의 감정 기록 - LastSys</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
-    <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}">
-    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260513a)}">
-    
+    <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
+    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260513a)}" href="../../static/css/mainpage.css?v=20260513a">
+
     <style>
-        .emotion-records-section { background: rgba(255, 255, 255, 0.76); border: 1px solid rgba(255, 255, 255, 0.92); border-radius: 20px; padding: 20px; box-shadow: 0 12px 24px rgba(26, 77, 57, 0.06); display: flex; flex-direction: column; gap: 16px; }
-        .emotion-records-head h3 { color: var(--primary-color); font-size: 18px; font-weight: 850; margin-bottom: 4px; }
-        .emotion-records-head p { color: var(--text-sub, #666); font-size: 13px; font-weight: 650; }
-        .record-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
-        .record-item { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-radius: 16px; background: rgba(248, 250, 249, 0.94); border: 1px solid rgba(26, 77, 57, 0.08); }
-        .record-info { display: flex; flex-direction: column; gap: 4px; }
+        .back-btn { display: inline-flex; align-items: center; gap: 6px; width: max-content; max-width: 100%; color: var(--text-main); font-size: 15px; font-weight: 800; text-decoration: none; }
+        .emotion-records-layout { display: flex; flex-direction: column; gap: 16px; }
+        .emotion-records-section, .record-detail-section { width: 100%; display: flex; flex-direction: column; gap: 14px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.92); border-radius: 20px; background: rgba(255, 255, 255, 0.76); box-shadow: 0 12px 24px rgba(26, 77, 57, 0.06); }
+        .emotion-records-head { display: flex; flex-direction: column; gap: 4px; }
+        .emotion-records-head h3, .record-detail-section h3 { color: var(--primary-color); font-size: 18px; font-weight: 850; line-height: 1.35; }
+        .emotion-records-head p { color: var(--text-sub, #666); font-size: 13px; font-weight: 650; line-height: 1.45; }
+        .record-list { display: flex; flex-direction: column; gap: 10px; padding: 0; margin: 0; list-style: none; }
+        .record-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 76px; padding: 14px; border: 1px solid rgba(26, 77, 57, 0.08); border-radius: 16px; background: rgba(248, 250, 249, 0.94); }
+        .record-link { min-width: 0; display: flex; flex-direction: column; gap: 5px; color: inherit; text-decoration: none; }
+        .record-link:active { transform: scale(0.99); }
         .record-date { color: var(--text-sub, #666); font-size: 12px; font-weight: 750; }
-        .record-emotion { color: var(--text-main); font-size: 15px; font-weight: 850; display: flex; align-items: center; gap: 6px; }
-        .back-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--text-main); font-weight: 800; text-decoration: none; margin-bottom: 16px; font-size: 15px; }
-        .empty-state { text-align: center; padding: 40px 0; color: var(--text-sub); font-size: 14px; font-weight: 700; }
+        .record-title { color: var(--text-main); font-size: 15px; font-weight: 850; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .record-summary { color: var(--text-sub, #666); font-size: 13px; font-weight: 650; line-height: 1.45; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .delete-form { margin: 0; }
+        .delete-button { min-width: 52px; min-height: 40px; border: 0; border-radius: 14px; padding: 0 12px; background: #FFEAEA; color: #D93025; font: inherit; font-size: 13px; font-weight: 850; cursor: pointer; }
+        .delete-button:active { transform: scale(0.97); }
+        .empty-state { width: 100%; padding: 36px 0; color: var(--text-sub, #666); font-size: 14px; font-weight: 700; line-height: 1.6; text-align: center; }
+        .record-alert { border-radius: 14px; padding: 12px 14px; font-size: 13px; font-weight: 750; line-height: 1.45; }
+        .record-alert.success { background: #E9F8EE; color: #257040; }
+        .record-alert.error { background: #FFEAEA; color: #D93025; }
+        .record-detail-meta { color: var(--text-sub, #666); font-size: 12px; font-weight: 750; }
+        .record-detail-title { margin: 0; color: var(--text-main); font-size: 17px; font-weight: 850; line-height: 1.35; word-break: keep-all; }
+        .record-detail-content { margin: 0; color: var(--text-main); font-size: 14px; font-weight: 650; line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
+        .confirm-dialog { position: fixed; inset: 0; z-index: 1200; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .confirm-dialog.is-open { display: flex; }
+        .confirm-backdrop { position: absolute; inset: 0; border: 0; background: rgba(20, 36, 29, 0.45); backdrop-filter: blur(6px); cursor: pointer; }
+        .confirm-box { position: relative; width: min(320px, 100%); border: 1px solid rgba(255, 255, 255, 0.96); border-radius: 18px; background: rgba(255, 255, 255, 0.98); padding: 22px; box-shadow: 0 18px 40px rgba(16, 34, 26, 0.22); text-align: center; }
+        .confirm-box h2 { color: var(--text-main); font-size: 18px; font-weight: 850; line-height: 1.35; }
+        .confirm-box p { margin-top: 8px; color: var(--text-sub, #666); font-size: 13px; font-weight: 650; line-height: 1.5; }
+        .confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+        .confirm-actions button { min-height: 44px; border: 0; border-radius: 14px; font: inherit; font-size: 14px; font-weight: 850; cursor: pointer; }
+        .confirm-no { background: #F1F3F5; color: var(--text-main); }
+        .confirm-yes { background: #D93025; color: #FFFFFF; }
     </style>
 </head>
 <body>
@@ -27,60 +50,121 @@
 <div class="bg-shape bg-shape-2"></div>
 <div class="bg-shape bg-shape-3"></div>
 
-<main class="mobile-page home-app">
+<main class="mobile-page home-app" aria-label="LastSys 나의 감정 기록 화면">
     <section class="dashboard">
         <header class="app-header">
-            <a class="app-brand" th:href="@{/}">
-                <img class="app-logo" th:src="@{/images/logo.png}" alt="LastSys 로고">
+            <a class="app-brand" th:href="@{/}" href="/">
+                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" alt="LastSys 로고">
                 <span>LastSys</span>
             </a>
         </header>
 
         <div class="main-content">
-            <a th:href="@{/profile}" class="back-btn">← 프로필로 돌아가기</a>
-            
-            <section class="emotion-records-section">
-                <div class="emotion-records-head">
-                    <h3>나의 감정 기록</h3>
-                    <p>최근 기록된 감정 상태를 확인합니다.</p>
-                </div>
+            <a th:href="@{/profile}" href="/profile" class="back-btn">← 프로필로 돌아가기</a>
 
-                <ul class="record-list">
-                    <li class="record-item" th:if="${currentCondition != null}">
-                        <div class="record-info">
-                            <span class="record-date">최근 설정한 상태</span>
-                            
-                            <span class="record-emotion" th:if="${currentCondition.toString() == 'NORMAL'}">
-                                <span>😊</span> 보통
-                            </span>
-                            <span class="record-emotion" th:if="${currentCondition.toString() == 'SAD'}">
-                                <span>☁️</span> 우울/가라앉음
-                            </span>
-                            <span class="record-emotion" th:if="${currentCondition.toString() == 'TIRED'}">
-                                <span>🥱</span> 피곤함
-                            </span>
-                            <span class="record-emotion" th:if="${currentCondition.toString() == 'STRESSED'}">
-                                <span>⚡</span> 스트레스
-                            </span>
-                        </div>
-                    </li>
+            <div class="emotion-records-layout">
+                <div class="record-alert success" th:if="${successMsg != null}" th:text="${successMsg}">삭제했습니다.</div>
+                <div class="record-alert error" th:if="${errorMsg != null}" th:text="${errorMsg}">삭제할 수 없습니다.</div>
+                <div class="record-alert error" th:if="${recordError != null}" th:text="${recordError}">감정 기록을 찾을 수 없습니다.</div>
 
-                    <li class="record-item" th:if="${currentCondition == null or currentCondition.toString() == 'ANY'}">
-                        <div class="empty-state" style="width: 100%;">
-                            아직 설정된 감정 상태가 없습니다.<br>
-                            <a th:href="@{/profile/mission-settings}" style="color: var(--primary-color); font-weight: 800; text-decoration: underline; margin-top: 10px; display: inline-block;">미션 설정하러 가기</a>
-                        </div>
-                    </li>
-                </ul>
-            </section>
+                <section class="emotion-records-section">
+                    <div class="emotion-records-head">
+                        <h3>내가 작성한 게시글 목록</h3>
+                        <p>작성일, 제목, 내용 요약을 확인할 수 있습니다.</p>
+                    </div>
+
+                    <ul class="record-list" th:if="${not #lists.isEmpty(emotionRecords)}">
+                        <li class="record-item" th:each="record : ${emotionRecords}">
+                            <a class="record-link" th:href="@{/profile/emotion-records/{recordId}(recordId=${record.id()})}">
+                                <span class="record-date" th:text="${record.createdAtText()}">2026.05.27 10:30</span>
+                                <strong class="record-title" th:text="${record.title()}">기록 제목</strong>
+                                <span class="record-summary" th:text="${record.summary()}">내용 요약</span>
+                            </a>
+                            <form class="delete-form" method="post" th:action="@{/profile/emotion-records/{recordId}/delete(recordId=${record.id()})}">
+                                <button class="delete-button" type="button" data-delete-trigger>삭제</button>
+                            </form>
+                        </li>
+                    </ul>
+
+                    <div class="empty-state" th:if="${#lists.isEmpty(emotionRecords)}">
+                        아직 작성한 감정 기록이 없습니다.
+                    </div>
+                </section>
+
+                <section class="record-detail-section" aria-label="감정 기록 상세">
+                    <div th:if="${selectedRecord != null}">
+                        <span class="record-detail-meta" th:text="${selectedRecord.createdAtText()}">2026.05.27 10:30</span>
+                        <h3 class="record-detail-title" th:text="${selectedRecord.title()}">기록 제목</h3>
+                        <p class="record-detail-content" th:text="${selectedRecord.content()}">전체 내용</p>
+                    </div>
+                    <div class="empty-state" th:if="${selectedRecord == null}">
+                        선택된 감정 기록이 없습니다.
+                    </div>
+                </section>
+            </div>
         </div>
     </section>
 </main>
 
-<nav class="bottom-tabs">
-    <a th:href="@{/}">홈</a>
-    <a th:href="@{/map}">감정지도</a>
-    <a class="active" th:href="@{/profile}">프로필</a>
+<section class="confirm-dialog" id="delete-confirm" aria-hidden="true">
+    <button class="confirm-backdrop" type="button" data-confirm-no aria-label="삭제 확인 닫기"></button>
+    <div class="confirm-box" role="dialog" aria-modal="true" aria-labelledby="delete-confirm-title">
+        <h2 id="delete-confirm-title">삭제하시겠습니까?</h2>
+        <p>삭제한 감정 기록은 다시 되돌릴 수 없습니다.</p>
+        <div class="confirm-actions">
+            <button class="confirm-no" type="button" data-confirm-no>아니오</button>
+            <button class="confirm-yes" type="button" id="delete-confirm-yes">예</button>
+        </div>
+    </div>
+</section>
+
+<nav class="bottom-tabs" aria-label="하단 메뉴">
+    <a th:href="@{/}" href="/">홈</a>
+    <a th:href="@{/map}" href="/map">감정지도</a>
+    <a class="active" th:href="@{/profile}" href="/profile">프로필</a>
 </nav>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var dialog = document.getElementById('delete-confirm');
+        var confirmYes = document.getElementById('delete-confirm-yes');
+        var closeTriggers = document.querySelectorAll('[data-confirm-no]');
+        var pendingForm = null;
+
+        function setDialogOpen(isOpen, form) {
+            pendingForm = isOpen ? form : null;
+            dialog.classList.toggle('is-open', isOpen);
+            dialog.setAttribute('aria-hidden', String(!isOpen));
+
+            if (isOpen) {
+                confirmYes.focus();
+            }
+        }
+
+        document.querySelectorAll('[data-delete-trigger]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                setDialogOpen(true, button.closest('form'));
+            });
+        });
+
+        closeTriggers.forEach(function (trigger) {
+            trigger.addEventListener('click', function () {
+                setDialogOpen(false, null);
+            });
+        });
+
+        confirmYes.addEventListener('click', function () {
+            if (pendingForm) {
+                pendingForm.submit();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && dialog.classList.contains('is-open')) {
+                setDialogOpen(false, null);
+            }
+        });
+    });
+</script>
 </body>
 </html>

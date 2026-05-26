@@ -2,6 +2,7 @@ package com.daily.lastsys.features.profile;
 
 import com.daily.lastsys.features.dailymission.DailyMissionService;
 import com.daily.lastsys.features.dailymission.MissionSettingsForm;
+import com.daily.lastsys.features.emotionrecord.EmotionRecordService;
 import com.daily.lastsys.features.login.LoginService;
 import com.daily.lastsys.features.login.LoginUser;
 import jakarta.servlet.http.HttpSession;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
@@ -19,10 +21,16 @@ public class ProfileController {
 
     private final DailyMissionService dailyMissionService;
     private final LoginService loginService; // 🌟 LoginService 의존성 주입
+    private final EmotionRecordService emotionRecordService;
 
-    public ProfileController(DailyMissionService dailyMissionService, LoginService loginService) {
+    public ProfileController(
+            DailyMissionService dailyMissionService,
+            LoginService loginService,
+            EmotionRecordService emotionRecordService
+    ) {
         this.dailyMissionService = dailyMissionService;
         this.loginService = loginService;
+        this.emotionRecordService = emotionRecordService;
     }
 
     @GetMapping("/profile")
@@ -129,11 +137,41 @@ public class ProfileController {
             @SessionAttribute(name = "loginUser", required = false) LoginUser loginUser,
             Model model) {
         if (loginUser == null) return "redirect:/login";
-        model.addAttribute("loginUser", loginUser);
-        
-        MissionSettingsForm settingsForm = new MissionSettingsForm(dailyMissionService.getMissionSettings(loginUser.id()));
-        model.addAttribute("currentCondition", settingsForm.getConditionType());
+        addEmotionRecordModel(loginUser, model);
         return "home/emotion-records";
+    }
+
+    @GetMapping("/profile/emotion-records/{recordId}")
+    public String showEmotionRecordDetail(
+            @SessionAttribute(name = "loginUser", required = false) LoginUser loginUser,
+            @PathVariable Long recordId,
+            Model model) {
+        if (loginUser == null) return "redirect:/login";
+        addEmotionRecordModel(loginUser, model);
+        emotionRecordService.getMyRecord(loginUser.id(), recordId)
+                .ifPresentOrElse(
+                        selectedRecord -> model.addAttribute("selectedRecord", selectedRecord),
+                        () -> model.addAttribute("recordError", "감정 기록을 찾을 수 없습니다.")
+                );
+        return "home/emotion-records";
+    }
+
+    @PostMapping("/profile/emotion-records/{recordId}/delete")
+    public String deleteEmotionRecord(
+            @SessionAttribute(name = "loginUser", required = false) LoginUser loginUser,
+            @PathVariable Long recordId,
+            RedirectAttributes redirectAttributes) {
+        if (loginUser == null) return "redirect:/login";
+
+        boolean deleted = emotionRecordService.deleteMyRecord(loginUser.id(), recordId);
+
+        if (deleted) {
+            redirectAttributes.addFlashAttribute("successMsg", "감정 기록을 삭제했습니다.");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMsg", "삭제할 수 없는 감정 기록입니다.");
+        }
+
+        return "redirect:/profile/emotion-records";
     }
 
     @PostMapping("/profile/delete-account")
@@ -152,5 +190,10 @@ public class ProfileController {
         loginService.deleteAccount(loginUser.id());
         session.invalidate();
         return "redirect:/";
+    }
+
+    private void addEmotionRecordModel(LoginUser loginUser, Model model) {
+        model.addAttribute("loginUser", loginUser);
+        model.addAttribute("emotionRecords", emotionRecordService.getMyRecords(loginUser.id()));
     }
 }
