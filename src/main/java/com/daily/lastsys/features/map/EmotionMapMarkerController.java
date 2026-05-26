@@ -46,6 +46,34 @@ public class EmotionMapMarkerController {
         emotionMapMarkerService.deleteMarker(loginUser.id(), markerId);
     }
 
+    @GetMapping("/api/emotion-map-markers/{markerId}")
+    public EmotionMapRecordDetailResponse markerDetail(@PathVariable Long markerId, HttpSession session) {
+        LoginUser loginUser = requireLogin(session);
+        return emotionMapMarkerService.findRecordDetail(loginUser.id(), markerId);
+    }
+
+    @PostMapping("/api/emotion-map-markers/{markerId}/likes")
+    public EmotionMapLikeToggleResponse toggleLike(@PathVariable Long markerId, HttpSession session) {
+        LoginUser loginUser = requireLogin(session);
+        return emotionMapMarkerService.toggleLike(loginUser.id(), markerId);
+    }
+
+    @GetMapping("/api/emotion-map-markers/{markerId}/comments")
+    public List<EmotionMapCommentResponse> comments(@PathVariable Long markerId, HttpSession session) {
+        LoginUser loginUser = requireLogin(session);
+        return emotionMapMarkerService.findComments(loginUser.id(), markerId);
+    }
+
+    @PostMapping("/api/emotion-map-markers/{markerId}/comments")
+    public EmotionMapCommentResponse createComment(
+            @PathVariable Long markerId,
+            @Valid @RequestBody EmotionMapCommentRequest request,
+            HttpSession session
+    ) {
+        LoginUser loginUser = requireLogin(session);
+        return emotionMapMarkerService.createComment(loginUser.id(), markerId, request);
+    }
+
     private LoginUser requireLogin(HttpSession session) {
         LoginUser loginUser = (LoginUser) session.getAttribute(LoginController.LOGIN_USER_SESSION_KEY);
 

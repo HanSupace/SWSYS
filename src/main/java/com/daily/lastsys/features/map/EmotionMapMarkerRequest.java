@@ -36,7 +36,7 @@ public record EmotionMapMarkerRequest(
         String locationName,
 
         @NotBlank
-        @Size(max = 90)
+        @Size(max = 2000)
         String description
 ) {
 }
