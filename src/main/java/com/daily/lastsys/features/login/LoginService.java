@@ -52,4 +52,9 @@ public class LoginService {
         userRepository.updatePassword(userId, passwordEncoder.encode(newPassword));
         return true;
     }
+
+    @Transactional
+    public void deleteAccount(Long userId) {
+        userRepository.deleteById(userId);
+    }
 }
