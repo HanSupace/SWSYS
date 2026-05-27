@@ -65,3 +65,45 @@ create table if not exists user_progress (
     primary key (user_id),
     constraint fk_user_progress_user foreign key (user_id) references users (id) on delete cascade
 ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
+
+create table if not exists emotion_map_markers (
+    id bigint not null auto_increment,
+    user_id bigint not null,
+    latitude decimal(10, 7) not null,
+    longitude decimal(10, 7) not null,
+    emotion_label varchar(20) not null,
+    emotion_color varchar(20) not null,
+    title varchar(24) not null,
+    location_name varchar(80) not null,
+    description text,
+    created_at timestamp not null default current_timestamp,
+    updated_at timestamp not null default current_timestamp,
+    primary key (id),
+    key idx_emotion_map_markers_user_created (user_id, created_at),
+    constraint fk_emotion_map_markers_user foreign key (user_id) references users (id) on delete cascade
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
+
+create table if not exists likes (
+    id bigint not null auto_increment,
+    record_id bigint not null,
+    user_id bigint not null,
+    created_at timestamp not null default current_timestamp,
+    primary key (id),
+    unique key uk_likes_record_user (record_id, user_id),
+    key idx_likes_record (record_id),
+    constraint fk_likes_record foreign key (record_id) references emotion_map_markers (id) on delete cascade,
+    constraint fk_likes_user foreign key (user_id) references users (id) on delete cascade
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
+
+create table if not exists comments (
+    id bigint not null auto_increment,
+    record_id bigint not null,
+    user_id bigint not null,
+    content varchar(300) not null,
+    created_at timestamp not null default current_timestamp,
+    updated_at timestamp not null default current_timestamp,
+    primary key (id),
+    key idx_comments_record_created (record_id, created_at),
+    constraint fk_comments_record foreign key (record_id) references emotion_map_markers (id) on delete cascade,
+    constraint fk_comments_user foreign key (user_id) references users (id) on delete cascade
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
