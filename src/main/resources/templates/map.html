@@ -257,7 +257,8 @@
         var activeRecordComments = [];
         var recordDetailLoading = false;
         var pendingDeleteRecordId = null;
-        var requestedEmotionId = new URLSearchParams(window.location.search).get('emotionId') || '';
+        var initialSearchParams = new URLSearchParams(window.location.search);
+        var requestedEmotionId = initialSearchParams.get('emotionId') || initialSearchParams.get('emotion') || '';
         var markerVisualSize = 34;
         var markerOverlayZIndex = 6;
         var selectedMarkerOverlayZIndex = 24;
@@ -307,16 +308,21 @@
 
         function selectMarkerEmotion(emotionId) {
             var emotionOptions = form.querySelectorAll('.emotion-option');
+            var requestedEmotion = String(emotionId);
 
             for (var index = 0; index < emotionOptions.length; index += 1) {
-                if (emotionOptions[index].dataset.emotionId !== emotionId) {
-                    continue;
-                }
-
                 var emotionInput = emotionOptions[index].querySelector('input[name="emotion"]');
 
                 if (!emotionInput) {
-                    return false;
+                    continue;
+                }
+
+                var matchesEmotion = emotionOptions[index].dataset.emotionId === requestedEmotion
+                    || emotionInput.value === requestedEmotion
+                    || emotionInput.dataset.label === requestedEmotion;
+
+                if (!matchesEmotion) {
+                    continue;
                 }
 
                 emotionInput.checked = true;
@@ -324,6 +330,15 @@
             }
 
             return false;
+        }
+
+        function clearInitialEmotionQuery() {
+            if (!requestedEmotionId || !window.history || typeof window.history.replaceState !== 'function') {
+                return;
+            }
+
+            window.history.replaceState(window.history.state, document.title, '/map');
+            requestedEmotionId = '';
         }
 
         function closeMarkerModal() {
@@ -1575,6 +1590,7 @@
 
         if (requestedEmotionId && selectMarkerEmotion(requestedEmotionId)) {
             openMarkerModal();
+            clearInitialEmotionQuery();
         }
 
         window.addEventListener('keydown', function (event) {
