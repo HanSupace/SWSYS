@@ -7,12 +7,16 @@ import jakarta.validation.constraints.Size;
 public class SignupForm {
 
     @NotBlank(message = "아이디를 입력해주세요.")
-    @Size(min = 4, max = 30, message = "아이디는 4자 이상 30자 이하로 입력해주세요.")
+    @Size(min = 4, max = 20, message = "아이디는 4자 이상 20자 이하로 입력해주세요.")
     @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "아이디는 영문, 숫자, 밑줄만 사용할 수 있습니다.")
     private String username;
 
     @NotBlank(message = "비밀번호를 입력해주세요.")
-    @Size(min = 8, max = 100, message = "비밀번호는 8자 이상 입력해주세요.")
+    @Size(min = 8, max = 30, message = "비밀번호는 8자 이상 입력해주세요.")
+    @Pattern(
+            regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,}$",
+            message = "비밀번호는 8자 이상이며 대문자와 특수문자를 하나 이상 포함해야 합니다."
+    )
     private String password;
 
     @NotBlank(message = "비밀번호 확인을 입력해주세요.")

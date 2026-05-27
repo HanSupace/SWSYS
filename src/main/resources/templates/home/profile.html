@@ -6,102 +6,17 @@
     <title>LastSys 프로필</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     
-    <!-- 기존 CSS를 그대로 불러와서 통일감을 유지합니다 -->
     <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
-    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260513a)}" href="../../static/css/mainpage.css?v=20260513a">
-    
-    <!-- 프로필 전용 소소한 추가 스타일 (나중에 css 파일로 빼셔도 됩니다) -->
-    <style>
-        .profile-header-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            padding: 30px 20px;
-            text-align: center;
-        }
-        .profile-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: #DDEFD8;
-            border: 3px solid #FFFFFF;
-            box-shadow: 0 8px 16px rgba(26, 77, 57, 0.12);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-        }
-        .profile-info h2 {
-            color: var(--primary-color);
-            font-size: 22px;
-            font-weight: 850;
-        }
-        .profile-info p {
-            color: var(--text-sub, #666);
-            font-size: 14px;
-            margin-top: 4px;
-            font-weight: 600;
-        }
-        .menu-section {
-            background: rgba(255, 255, 255, 0.76);
-            border: 1px solid rgba(255, 255, 255, 0.92);
-            border-radius: 20px;
-            padding: 16px;
-            box-shadow: 0 12px 24px rgba(26, 77, 57, 0.06);
-        }
-        .menu-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .menu-list a, .menu-list button {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px 16px;
-            border-radius: 14px;
-            background: rgba(248, 250, 249, 0.88);
-            border: 1px solid rgba(26, 77, 57, 0.08);
-            color: inherit;
-            font: inherit;
-            font-size: 15px;
-            font-weight: 750;
-            text-decoration: none;
-            cursor: pointer;
-            transition: transform 0.15s ease;
-        }
-        .menu-list a:active, .menu-list button:active {
-            transform: scale(0.98);
-        }
-        .menu-list .icon {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            color: #FFFFFF;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 15px;
-        }
-        .text-danger { color: #e74c3c !important; }
-        .text-danger .icon { background: #ffeaea; color: #e74c3c; }
-        .text-gray .icon { background: #f1f3f5; color: #666; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260519b)}" href="../../static/css/mainpage.css?v=20260519b">
+    <link rel="stylesheet" th:href="@{/css/profile.css(v=20260527a)}" href="../../static/css/profile.css?v=20260527a">
 </head>
 <body>
-<!-- 배경 그래픽 (기존 메인과 동일) -->
 <div class="bg-pattern"></div>
 <div class="bg-shape bg-shape-1"></div>
 <div class="bg-shape bg-shape-2"></div>
-<div class="bg-shape bg-shape-3"></div>
 
 <main class="mobile-page home-app" aria-label="LastSys 프로필 화면">
+    <div class="bg-shape bg-shape-3"></div>
     <section class="dashboard">
         <!-- 상단 헤더 -->
         <header class="app-header">
@@ -112,6 +27,8 @@
         </header>
 
         <div class="main-content">
+            <p class="profile-message" th:if="${deleteErrorMsg}" th:text="${deleteErrorMsg}">회원 탈퇴 오류</p>
+
             <!-- 1. 프로필 상단 정보 (기존 quote-card 디자인 재활용) -->
             <article class="quote-card profile-header-card" aria-label="내 프로필 정보">
                 <div class="profile-avatar">🌿</div>
@@ -141,12 +58,6 @@
                             <span>비밀번호 변경</span>
                         </a>
                     </li>
-                    <li>
-                        <a th:href="@{/profile/emotion-records}" href="/profile/emotion-records">
-                            <span class="icon">📝</span>
-                            <span>나의 감정 기록 보기</span>
-                        </a>
-                    </li>
                 </ul>
             </section>
 
@@ -155,7 +66,7 @@
                 <ul class="menu-list">
                     <li>
                         <!-- 로그아웃은 POST 방식으로 처리하도록 Form 형태 유지 -->
-                        <form th:action="@{/logout}" method="post" style="margin: 0; width: 100%;">
+                        <form th:action="@{/logout}" method="post">
                             <button type="submit" class="text-gray">
                                 <span class="icon">👋</span>
                                 <span>로그아웃</span>
@@ -163,10 +74,10 @@
                         </form>
                     </li>
                     <li>
-                        <a href="#" class="text-danger">
+                        <button id="open-delete-modal" type="button" class="text-danger">
                             <span class="icon">⚠️</span>
                             <span>회원 탈퇴</span>
-                        </a>
+                        </button>
                     </li>
                 </ul>
             </section>
@@ -174,12 +85,63 @@
     </section>
 </main>
 
-<!-- 하단 네비게이션 탭 (프로필에 active 클래스 이동) -->
 <nav class="bottom-tabs" aria-label="하단 메뉴">
     <a th:href="@{/}" href="/">홈</a>
-    <a th:href="@{/map}">감정지도</a>
+    <a th:href="@{/map}" href="/map">감정지도</a>
     <a class="active" th:href="@{/profile}" href="/profile">프로필</a>
 </nav>
 
+<section id="delete-modal" class="delete-modal" hidden aria-labelledby="delete-modal-title" aria-modal="true" role="dialog">
+    <button id="delete-modal-backdrop" class="delete-modal-backdrop" type="button" aria-label="회원 탈퇴 취소"></button>
+    <form class="delete-modal-dialog" th:action="@{/profile/delete-account}" action="/profile/delete-account" method="post" autocomplete="off">
+        <h2 id="delete-modal-title">회원 탈퇴</h2>
+        <p>
+            탈퇴하면 계정과 활동 기록이 삭제됩니다. 계속하려면 아래 입력창에
+            <span class="delete-confirm-word">탈퇴</span>를 입력해주세요.
+        </p>
+        <input id="delete-confirm-input" class="delete-confirm-input" name="confirmation" type="text" placeholder="탈퇴" aria-label="회원 탈퇴 확인 문구">
+        <div class="delete-modal-actions">
+            <button id="delete-modal-cancel" class="delete-cancel" type="button">취소</button>
+            <button id="delete-submit" class="delete-submit" type="submit" disabled>탈퇴하기</button>
+        </div>
+    </form>
+</section>
+
+<script>
+    (function () {
+        var modal = document.getElementById('delete-modal');
+        var openButton = document.getElementById('open-delete-modal');
+        var closeButton = document.getElementById('delete-modal-cancel');
+        var backdrop = document.getElementById('delete-modal-backdrop');
+        var input = document.getElementById('delete-confirm-input');
+        var submit = document.getElementById('delete-submit');
+
+        function openModal() {
+            modal.hidden = false;
+            input.value = '';
+            submit.disabled = true;
+            window.setTimeout(function () {
+                input.focus();
+            }, 80);
+        }
+
+        function closeModal() {
+            modal.hidden = true;
+            openButton.focus();
+        }
+
+        openButton.addEventListener('click', openModal);
+        closeButton.addEventListener('click', closeModal);
+        backdrop.addEventListener('click', closeModal);
+        input.addEventListener('input', function () {
+            submit.disabled = input.value.trim() !== '탈퇴';
+        });
+        window.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && !modal.hidden) {
+                closeModal();
+            }
+        });
+    })();
+</script>
 </body>
 </html>
