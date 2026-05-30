@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const calendarElement = document.getElementById('emotion-calendar');
+    const missionPage = document.querySelector('[data-mission-page]');
     const calendarTitle = document.getElementById('calendar-title');
     const previousButton = document.getElementById('calendar-prev');
     const nextButton = document.getElementById('calendar-next');
@@ -195,7 +196,9 @@ document.addEventListener('DOMContentLoaded', () => {
     missionList?.addEventListener('click', (event) => {
         const rerollButton = event.target.closest('[data-mission-reroll-slot]');
 
-        if (rerollButton) {
+        if (rerollButton && missionList.contains(rerollButton)) {
+            event.preventDefault();
+            event.stopPropagation();
             rerollMissionSlot(rerollButton);
             return;
         }
@@ -210,11 +213,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function rerollMissionSlot(rerollButton) {
-        if (rerollButton.disabled) {
+        if (rerollButton.dataset.rerollAvailable !== 'true') {
             return;
         }
 
-        rerollButton.disabled = true;
+        rerollButton.dataset.rerollAvailable = 'false';
+        rerollButton.classList.add('is-waiting');
 
         try {
             const response = await fetch(`/api/daily-missions/slots/${rerollButton.dataset.missionRerollSlot}/reroll`, {
@@ -231,7 +235,8 @@ document.addEventListener('DOMContentLoaded', () => {
             missionsLoaded = true;
             renderMissionPayload(await response.json());
         } catch (error) {
-            rerollButton.disabled = false;
+            rerollButton.dataset.rerollAvailable = 'true';
+            rerollButton.classList.remove('is-waiting');
             renderMissionMessage('미션을 다시 뽑지 못했습니다. 잠시 후 다시 시도해 주세요.');
         }
     }
@@ -313,10 +318,30 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p>${escapeHtml(mission.text)}</p>
                         <strong>${mission.completed ? '성공' : '도전'}</strong>
                     </button>
-                    <button class="mission-item-reroll" type="button" data-mission-reroll-slot="${mission.slotIndex}" ${mission.completed ? 'disabled' : ''} aria-label="${index + 1}번 미션 다시 뽑기">↻</button>
+                    ${renderMissionRerollButton(mission, index)}
                 </div>
             </li>
         `).join('');
+    }
+
+    function renderMissionRerollButton(mission, index) {
+        const remainingRerolls = Number.isFinite(Number(mission.remainingRerolls))
+            ? Math.max(0, Number(mission.remainingRerolls))
+            : Math.max(0, 3 - Number(mission.rerollCount || 0));
+        const rerollAvailable = typeof mission.rerollAvailable === 'boolean'
+            ? mission.rerollAvailable
+            : !mission.completed && remainingRerolls > 0;
+        const className = [
+            'mission-item-reroll',
+            rerollAvailable ? '' : 'is-disabled'
+        ].filter(Boolean).join(' ');
+
+        return `
+                    <button class="${className}" type="button" data-mission-reroll-slot="${mission.slotIndex}" data-reroll-available="${rerollAvailable}" data-remaining-rerolls="${remainingRerolls}" aria-disabled="${!rerollAvailable}" aria-label="${index + 1}번 미션 다시 뽑기, 남은 횟수 ${remainingRerolls}회">
+                        <span aria-hidden="true">↻</span>
+                        <small>${remainingRerolls}/3</small>
+                    </button>
+        `;
     }
 
     function renderMissionMessage(message) {
@@ -377,6 +402,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeEmotionButtons();
     renderCalendar();
     loadMonthlySuccessCounts();
+
+    if (missionPage) {
+        loadTodayMissions();
+    }
 });
 
 function escapeHtml(value) {

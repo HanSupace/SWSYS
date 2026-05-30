@@ -177,19 +177,22 @@ public class DailyMissionRepository {
         return counts;
     }
 
-    public void increaseSlotRerollCount(Long userId, LocalDate missionDate, int slotIndex) {
-        jdbcTemplate.update(
+    public boolean increaseSlotRerollCount(Long userId, LocalDate missionDate, int slotIndex, int maxRerollCount) {
+        int updated = jdbcTemplate.update(
                 """
                 insert into daily_mission_slot_rerolls (user_id, mission_date, slot_index, reroll_count)
                 values (?, ?, ?, 1)
                 on duplicate key update
-                    reroll_count = reroll_count + 1,
-                    updated_at = current_timestamp
+                    reroll_count = if(reroll_count < ?, reroll_count + 1, reroll_count),
+                    updated_at = if(reroll_count < ?, current_timestamp, updated_at)
                 """,
                 userId,
                 missionDate,
-                slotIndex
+                slotIndex,
+                maxRerollCount,
+                maxRerollCount
         );
+        return updated > 0 && findSlotRerollCounts(userId, missionDate).getOrDefault(slotIndex, 0) <= maxRerollCount;
     }
 
     public List<DailyMissionDay> findSuccessCounts(Long userId, LocalDate startDate, LocalDate endDateExclusive) {

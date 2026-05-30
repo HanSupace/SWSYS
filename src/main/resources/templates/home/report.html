@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>LastSys 신고하기</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}">
+    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260513a)}">
+    <style>
+        .report-card {
+            display: grid;
+            gap: 14px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(255, 255, 255, 0.92);
+            border-radius: 20px;
+            box-shadow: 0 12px 24px rgba(26, 77, 57, 0.06);
+        }
+        .report-title {
+            color: var(--primary-color);
+        }
+        .report-title h1 {
+            font-size: 22px;
+            font-weight: 950;
+            line-height: 1.25;
+        }
+        .report-title p {
+            margin-top: 6px;
+            color: var(--text-sub);
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.45;
+        }
+        .report-form {
+            display: grid;
+            gap: 12px;
+        }
+        .report-field {
+            display: grid;
+            gap: 6px;
+            color: var(--primary-color);
+            font-size: 13px;
+            font-weight: 900;
+        }
+        .report-field input,
+        .report-field select,
+        .report-field textarea {
+            width: 100%;
+            border: 1px solid rgba(26, 77, 57, 0.12);
+            border-radius: 14px;
+            background: rgba(248, 250, 249, 0.94);
+            color: var(--text-main);
+            font: inherit;
+            font-size: 14px;
+            font-weight: 750;
+            outline: none;
+        }
+        .report-field input,
+        .report-field select {
+            height: 48px;
+            padding: 0 14px;
+        }
+        .report-field textarea {
+            min-height: 132px;
+            padding: 12px 14px;
+            resize: vertical;
+            line-height: 1.45;
+        }
+        .report-field input:focus,
+        .report-field select:focus,
+        .report-field textarea:focus {
+            border-color: rgba(26, 77, 57, 0.45);
+            box-shadow: 0 0 0 4px rgba(70, 179, 157, 0.14);
+        }
+        .field-error {
+            color: #c0392b;
+            font-size: 12px;
+            font-weight: 800;
+        }
+        .report-submit {
+            min-height: 50px;
+            border: 0;
+            border-radius: 15px;
+            background: var(--primary-color);
+            color: #FFFFFF;
+            font: inherit;
+            font-size: 15px;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 12px 22px rgba(26, 77, 57, 0.16);
+        }
+        .back-btn {
+            color: var(--primary-color);
+            font-size: 14px;
+            font-weight: 850;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="bg-shape bg-shape-1"></div>
+<div class="bg-shape bg-shape-2"></div>
+<div class="bg-shape bg-shape-3"></div>
+
+<main class="mobile-page home-app" aria-label="신고하기 화면">
+    <section class="dashboard">
+        <header class="app-header">
+            <a class="app-brand" th:href="@{/}" href="/">
+                <img class="app-logo" th:src="@{/images/logo.png}" alt="LastSys 로고">
+                <span>LastSys</span>
+            </a>
+        </header>
+
+        <div class="main-content">
+            <a th:href="@{/profile}" href="/profile" class="back-btn">← 프로필로 돌아가기</a>
+
+            <section class="report-card" aria-labelledby="report-title">
+                <div class="report-title">
+                    <h1 id="report-title">신고하기</h1>
+                    <p>문제가 된 위치와 내용을 남겨주시면 확인하겠습니다.</p>
+                </div>
+
+                <form class="report-form" th:action="@{/profile/report}" th:object="${userReportForm}" method="post" novalidate>
+                    <label class="report-field">
+                        <span>위치</span>
+                        <input type="text" th:field="*{location}" maxlength="80" placeholder="예: 감정지도 마커 위치, 게시 위치">
+                        <small class="field-error" th:if="${#fields.hasErrors('location')}" th:errors="*{location}">위치 오류</small>
+                    </label>
+
+                    <label class="report-field">
+                        <span>제목</span>
+                        <input type="text" th:field="*{title}" maxlength="60" placeholder="신고 제목">
+                        <small class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">제목 오류</small>
+                    </label>
+
+                    <label class="report-field">
+                        <span>신고 카테고리</span>
+                        <select th:field="*{category}">
+                            <option value="">카테고리 선택</option>
+                            <option value="ABUSE">욕설</option>
+                            <option value="SELF_HARM">자해유도</option>
+                            <option value="HATE_SPEECH">혐오표현</option>
+                            <option value="SPAM">스팸</option>
+                            <option value="AD_SUSPECT">광고의심</option>
+                            <option value="OTHER">기타</option>
+                        </select>
+                        <small class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}">카테고리 오류</small>
+                    </label>
+
+                    <label class="report-field">
+                        <span>내용</span>
+                        <textarea th:field="*{content}" maxlength="500" placeholder="신고 내용을 구체적으로 입력해주세요."></textarea>
+                        <small class="field-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}">내용 오류</small>
+                    </label>
+
+                    <button class="report-submit" type="submit">신고 접수</button>
+                </form>
+            </section>
+        </div>
+    </section>
+</main>
+
+<nav class="bottom-tabs" aria-label="하단 메뉴">
+    <a th:href="@{/}" href="/">홈</a>
+    <a th:href="@{/map}" href="/map">감정지도</a>
+    <a class="active" th:href="@{/profile}" href="/profile">프로필</a>
+</nav>
+</body>
+</html>

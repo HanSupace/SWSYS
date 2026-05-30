@@ -52,7 +52,8 @@
                             <span>직업/역할</span>
                             <select th:field="*{lifeStage}" data-rule-field>
                                 <option value="ANY">상관없음</option>
-                                <option value="STUDENT">학생</option>
+                                <option value="PRIMARY_SECONDARY_STUDENT">초중고생</option>
+                                <option value="UNIVERSITY_STUDENT">대학생</option>
                                 <option value="WORKER">직장인</option>
                                 <option value="FREELANCER">프리랜서</option>
                                 <option value="CAREGIVER">돌봄/가사 중심</option>
@@ -63,7 +64,8 @@
                             <span>주로 있는 환경</span>
                             <select th:field="*{environmentType}" data-rule-field>
                                 <option value="ANY">상관없음</option>
-                                <option value="SCHOOL">학교</option>
+                                <option value="PRIMARY_SECONDARY_SCHOOL">초중고</option>
+                                <option value="UNIVERSITY">대학교</option>
                                 <option value="OFFICE">회사</option>
                                 <option value="HOME">집</option>
                                 <option value="OUTSIDE">외부/이동 중</option>
