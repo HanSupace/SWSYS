@@ -826,6 +826,11 @@ body.is-record-delete-modal-open {
     line-height: 1.45;
 }
 
+.marker-form-message.is-info {
+    background: rgba(47, 139, 255, 0.08);
+    color: #27699E;
+}
+
 .marker-location-results {
     display: grid;
     gap: 0.4375rem;

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../static/css/home.css?v=20260512b">
     <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260519b)}" href="../static/css/mainpage.css?v=20260519b">
-    <link rel="stylesheet" th:href="@{/css/map.css(v=20260526f)}" href="../static/css/map.css?v=20260526f">
+    <link rel="stylesheet" th:href="@{/css/map.css(v=20260531a)}" href="../static/css/map.css?v=20260531a">
 </head>
 <body>
 <div class="bg-pattern"></div>
@@ -149,7 +149,7 @@
             <div class="marker-fields">
                 <label>
                     <span>위치</span>
-                    <input id="marker-location" type="text" maxlength="40" placeholder="위치 이름을 적어주세요" required>
+                    <input id="marker-location" type="text" maxlength="80" placeholder="위치 이름을 적어주세요" required>
                     <input id="marker-location-selected" type="hidden">
                 </label>
                 <div id="marker-location-results" class="marker-location-results" hidden></div>
@@ -307,6 +307,11 @@
         var map = new kakao.maps.Map(container, options);
         map.setDraggable(true);
         var places = kakao.maps.services ? new kakao.maps.services.Places() : null;
+        var geocoder = kakao.maps.services ? new kakao.maps.services.Geocoder() : null;
+        var markerLocationDefaultPlaceholder = markerLocationInput.getAttribute('placeholder') || '';
+        var markerLocationRequestId = 0;
+        var isResolvingMarkerLocation = false;
+        var markerLocationEditedDuringResolve = false;
         var currentLocationElement = document.createElement('div');
         currentLocationElement.className = 'current-location-dot';
         currentLocationElement.setAttribute('aria-label', hasRequestedPosition ? '선택한 힐링 스팟 위치' : '현재 위치');
@@ -326,6 +331,7 @@
         function openMarkerModal() {
             markerModal.hidden = false;
             document.body.classList.add('is-marker-modal-open');
+            fillMarkerLocationFromCurrentPosition();
             window.setTimeout(function () {
                 markerLocationInput.focus();
             }, 120);
@@ -353,6 +359,10 @@
         }
 
         function closeMarkerModal() {
+            markerLocationRequestId += 1;
+            isResolvingMarkerLocation = false;
+            markerLocationEditedDuringResolve = false;
+            markerLocationInput.placeholder = markerLocationDefaultPlaceholder;
             markerModal.hidden = true;
             document.body.classList.remove('is-marker-modal-open');
             openMarkerModalButton.focus();
@@ -366,35 +376,174 @@
             map.setCenter(position);
         }
 
+        function getCurrentKakaoPosition() {
+            return new Promise(function (resolve, reject) {
+                if (!navigator.geolocation) {
+                    reject(new Error('geolocation-unsupported'));
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        resolve(new kakao.maps.LatLng(
+                            position.coords.latitude,
+                            position.coords.longitude
+                        ));
+                    },
+                    function (error) {
+                        reject(error || new Error('geolocation-failed'));
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 8000,
+                        maximumAge: 0
+                    }
+                );
+            });
+        }
+
         function moveToCurrentLocation() {
-            if (!navigator.geolocation) {
-                showError('이 브라우저에서는 현재 위치 기능을 지원하지 않습니다.');
-                return;
-            }
-
-            navigator.geolocation.getCurrentPosition(
-                function (position) {
-                    var userPosition = new kakao.maps.LatLng(
-                        position.coords.latitude,
-                        position.coords.longitude
-                    );
-
+            getCurrentKakaoPosition()
+                .then(function (userPosition) {
                     moveTo(userPosition, 4);
                     message.hidden = true;
-                },
-                function () {
+                })
+                .catch(function () {
                     showError('현재 위치를 가져오지 못했습니다. 브라우저 위치 권한을 허용해주세요.');
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 8000,
-                    maximumAge: 60000
-                }
-            );
+                });
         }
 
         function formatPosition(position) {
             return position.getLat().toFixed(6) + ', ' + position.getLng().toFixed(6);
+        }
+
+        function trimmedLocationName(value) {
+            var maxLength = Number(markerLocationInput.getAttribute('maxlength')) || 80;
+            return String(value || '').trim().slice(0, maxLength);
+        }
+
+        function addressNameFromResult(results) {
+            var firstResult = results && results[0];
+
+            if (!firstResult) {
+                return '';
+            }
+
+            if (firstResult.road_address && firstResult.road_address.address_name) {
+                return firstResult.road_address.address_name;
+            }
+
+            if (firstResult.address && firstResult.address.address_name) {
+                return firstResult.address.address_name;
+            }
+
+            return '';
+        }
+
+        function addressFromPosition(position) {
+            return new Promise(function (resolve, reject) {
+                if (!geocoder) {
+                    reject(new Error('geocoder-unavailable'));
+                    return;
+                }
+
+                geocoder.coord2Address(position.getLng(), position.getLat(), function (results, status) {
+                    var addressName = addressNameFromResult(results);
+
+                    if (status === kakao.maps.services.Status.OK && addressName) {
+                        resolve(addressName);
+                        return;
+                    }
+
+                    reject(new Error('address-not-found'));
+                });
+            });
+        }
+
+        function setMarkerFormMessage(text, variant) {
+            markerFormMessage.textContent = text || '';
+            markerFormMessage.hidden = !text;
+            markerFormMessage.classList.toggle('is-info', variant === 'info');
+        }
+
+        function showMarkerFormInfo(text) {
+            setMarkerFormMessage(text, 'info');
+        }
+
+        function failMarkerLocationAutofill() {
+            if (markerLocationEditedDuringResolve) {
+                hideMarkerFormMessage();
+                return;
+            }
+
+            markerLocationInput.value = '';
+            markerLocationSelectedInput.value = '';
+            selectedMarkerLocationPosition = null;
+            showMarkerFormInfo('현재 위치를 가져오지 못했습니다. 위치를 직접 입력해주세요.');
+        }
+
+        function fillMarkerLocationFromCurrentPosition() {
+            var requestId = markerLocationRequestId + 1;
+            markerLocationRequestId = requestId;
+            isResolvingMarkerLocation = true;
+            markerLocationEditedDuringResolve = false;
+            markerPlaces = [];
+            markerLocationResults.hidden = true;
+            markerLocationInput.value = '';
+            markerLocationSelectedInput.value = '';
+            selectedMarkerLocationPosition = null;
+            markerLocationInput.placeholder = '현재 위치를 확인하는 중...';
+            showMarkerFormInfo('현재 위치를 확인하는 중...');
+
+            getCurrentKakaoPosition()
+                .then(function (userPosition) {
+                    if (requestId !== markerLocationRequestId) {
+                        return null;
+                    }
+
+                    moveTo(userPosition, 4);
+                    return addressFromPosition(userPosition)
+                        .then(function (locationName) {
+                            return {
+                                position: userPosition,
+                                locationName: locationName
+                            };
+                        });
+                })
+                .then(function (result) {
+                    if (!result || requestId !== markerLocationRequestId) {
+                        return;
+                    }
+
+                    isResolvingMarkerLocation = false;
+                    markerLocationInput.placeholder = markerLocationDefaultPlaceholder;
+
+                    if (markerLocationEditedDuringResolve) {
+                        hideMarkerFormMessage();
+                        return;
+                    }
+
+                    var locationName = trimmedLocationName(result.locationName);
+
+                    if (!locationName) {
+                        failMarkerLocationAutofill();
+                        return;
+                    }
+
+                    markerLocationInput.value = locationName;
+                    markerLocationSelectedInput.value = locationName;
+                    selectedMarkerLocationPosition = result.position;
+                    hideMarkerFormMessage();
+                })
+                .catch(function () {
+                    if (requestId !== markerLocationRequestId) {
+                        return;
+                    }
+
+                    isResolvingMarkerLocation = false;
+                    markerLocationInput.placeholder = markerLocationDefaultPlaceholder;
+                    failMarkerLocationAutofill();
+                });
         }
 
         function formatPlace(place) {
@@ -561,13 +710,11 @@
         }
 
         function showMarkerDistanceError() {
-            markerFormMessage.textContent = '마커 위치에서 2km 이내의 위치만 선택할 수 있습니다.';
-            markerFormMessage.hidden = false;
+            setMarkerFormMessage('마커 위치에서 2km 이내의 위치만 선택할 수 있습니다.');
         }
 
         function hideMarkerFormMessage() {
-            markerFormMessage.hidden = true;
-            markerFormMessage.textContent = '';
+            setMarkerFormMessage('');
         }
 
         function chooseMapPlace(index) {
@@ -1290,7 +1437,7 @@
 
         if (hasRequestedPosition) {
             map.setCenter(requestedPosition);
-        } else {
+        } else if (!requestedEmotionId) {
             moveToCurrentLocation();
         }
 
@@ -1439,6 +1586,12 @@
 
         markerLocationInput.addEventListener('input', function () {
             window.clearTimeout(markerLocationTimer);
+
+            if (isResolvingMarkerLocation) {
+                markerLocationEditedDuringResolve = true;
+                markerLocationInput.placeholder = markerLocationDefaultPlaceholder;
+            }
+
             markerLocationSelectedInput.value = '';
             selectedMarkerLocationPosition = null;
             hideMarkerFormMessage();
@@ -1659,16 +1812,20 @@
             event.preventDefault();
 
             var checkedEmotion = form.querySelector('input[name="emotion"]:checked');
-            var markerPosition = map.getCenter();
             var locationName = markerLocationInput.value.trim();
             var selectedLocationName = markerLocationSelectedInput.value.trim();
             var title = titleInput.value.trim();
             var description = descriptionInput.value.trim();
 
-            if (!locationName || locationName !== selectedLocationName) {
+            if (!locationName) {
                 markerLocationInput.focus();
-                showError('위치 리스트에서 위치를 선택해주세요.');
+                showError('위치를 입력해주세요.');
                 return;
+            }
+
+            if (selectedLocationName && locationName !== selectedLocationName) {
+                markerLocationSelectedInput.value = '';
+                selectedMarkerLocationPosition = null;
             }
 
             if (selectedMarkerLocationPosition && !isWithinMarkerDistance(selectedMarkerLocationPosition)) {
@@ -1689,6 +1846,7 @@
             }
 
             try {
+                var markerPosition = selectedMarkerLocationPosition || map.getCenter();
                 var savedMarker = await saveEmotionMarker({
                     latitude: markerPosition.getLat(),
                     longitude: markerPosition.getLng(),
@@ -1778,6 +1936,8 @@
 
         if (requestedEmotionId && selectMarkerEmotion(requestedEmotionId)) {
             openMarkerModal();
+        } else if (requestedEmotionId && !hasRequestedPosition) {
+            moveToCurrentLocation();
         }
 
         window.addEventListener('keydown', function (event) {
