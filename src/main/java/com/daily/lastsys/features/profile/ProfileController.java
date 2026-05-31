@@ -4,8 +4,10 @@ import com.daily.lastsys.features.dailymission.DailyMissionService;
 import com.daily.lastsys.features.dailymission.MissionSettingsForm;
 import com.daily.lastsys.features.login.LoginService;
 import com.daily.lastsys.features.login.LoginUser;
+import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -19,10 +21,16 @@ public class ProfileController {
 
     private final DailyMissionService dailyMissionService;
     private final LoginService loginService; // 🌟 LoginService 의존성 주입
+    private final UserReportRepository userReportRepository;
 
-    public ProfileController(DailyMissionService dailyMissionService, LoginService loginService) {
+    public ProfileController(
+            DailyMissionService dailyMissionService,
+            LoginService loginService,
+            UserReportRepository userReportRepository
+    ) {
         this.dailyMissionService = dailyMissionService;
         this.loginService = loginService;
+        this.userReportRepository = userReportRepository;
     }
 
     @GetMapping("/profile")
@@ -134,6 +142,39 @@ public class ProfileController {
         MissionSettingsForm settingsForm = new MissionSettingsForm(dailyMissionService.getMissionSettings(loginUser.id()));
         model.addAttribute("currentCondition", settingsForm.getConditionType());
         return "home/emotion-records";
+    }
+
+    @GetMapping("/profile/report")
+    public String showReportForm(
+            @SessionAttribute(name = "loginUser", required = false) LoginUser loginUser,
+            Model model) {
+        if (loginUser == null) return "redirect:/login";
+        model.addAttribute("loginUser", loginUser);
+
+        if (!model.containsAttribute("userReportForm")) {
+            model.addAttribute("userReportForm", new UserReportForm());
+        }
+
+        return "home/report";
+    }
+
+    @PostMapping("/profile/report")
+    public String submitReport(
+            @SessionAttribute(name = "loginUser", required = false) LoginUser loginUser,
+            @Valid @ModelAttribute("userReportForm") UserReportForm userReportForm,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        if (loginUser == null) return "redirect:/login";
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("loginUser", loginUser);
+            return "home/report";
+        }
+
+        userReportRepository.save(loginUser.id(), userReportForm);
+        redirectAttributes.addFlashAttribute("reportSuccessMsg", "신고가 접수되었습니다.");
+        return "redirect:/profile";
     }
 
     @PostMapping("/profile/delete-account")

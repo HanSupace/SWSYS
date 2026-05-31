@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const userXp = document.getElementById('user-xp');
     const userXpBar = document.getElementById('user-xp-bar');
     const emotionButtonBox = document.getElementById('emotion-button-box');
+    const missionProgressCount = document.getElementById('mission-progress-count');
+    const missionProgressBar = document.getElementById('mission-progress-bar');
     let missionsLoaded = false;
     let missionSuccessCounts = new Map();
     let pendingMissionButton = null;
@@ -379,9 +381,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             missionSuccessCounts = new Map((await response.json()).map((day) => [day.date, day.successCount]));
+
+            if (visibleMonth.getFullYear() === today.getFullYear() && visibleMonth.getMonth() === today.getMonth()) {
+                updateMissionActionProgress(missionSuccessCounts.get(toIsoDate(today)) || 0);
+            }
+
             renderCalendar();
         } catch (error) {
             missionSuccessCounts = new Map();
+
+            if (visibleMonth.getFullYear() === today.getFullYear() && visibleMonth.getMonth() === today.getMonth()) {
+                updateMissionActionProgress();
+            }
+
             renderCalendar();
         }
     }
@@ -393,13 +405,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const todayKey = toIsoDate(today);
         missionSuccessCounts.set(todayKey, todaySuccessCount);
+        updateMissionActionProgress(todaySuccessCount);
 
         if (visibleMonth.getFullYear() === today.getFullYear() && visibleMonth.getMonth() === today.getMonth()) {
             renderCalendar();
         }
     }
 
+    function updateMissionActionProgress(successCount = 0, totalCount = 5) {
+        if (!missionProgressCount && !missionProgressBar) {
+            return;
+        }
+
+        const completed = Math.max(0, Math.min(totalCount, Number(successCount) || 0));
+        const percent = totalCount > 0 ? (completed / totalCount) * 100 : 0;
+
+        if (missionProgressCount) {
+            missionProgressCount.textContent = `${completed}/${totalCount}`;
+        }
+
+        if (missionProgressBar) {
+            missionProgressBar.style.width = `${percent}%`;
+        }
+    }
+
     initializeEmotionButtons();
+    updateMissionActionProgress();
     renderCalendar();
     loadMonthlySuccessCounts();
 

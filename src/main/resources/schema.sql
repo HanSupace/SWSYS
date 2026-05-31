@@ -107,3 +107,16 @@ create table if not exists comments (
     constraint fk_comments_record foreign key (record_id) references emotion_map_markers (id) on delete cascade,
     constraint fk_comments_user foreign key (user_id) references users (id) on delete cascade
 ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
+
+create table if not exists user_reports (
+    id bigint not null auto_increment,
+    user_id bigint not null,
+    location_name varchar(80) not null,
+    title varchar(60) not null,
+    content varchar(500) not null,
+    category varchar(30) not null,
+    created_at timestamp not null default current_timestamp,
+    primary key (id),
+    key idx_user_reports_user_created (user_id, created_at),
+    constraint fk_user_reports_user foreign key (user_id) references users (id) on delete cascade
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
