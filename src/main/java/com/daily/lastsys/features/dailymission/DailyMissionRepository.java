@@ -195,19 +195,34 @@ public class DailyMissionRepository {
         return updated > 0 && findSlotRerollCounts(userId, missionDate).getOrDefault(slotIndex, 0) <= maxRerollCount;
     }
 
-    public List<DailyMissionDay> findSuccessCounts(Long userId, LocalDate startDate, LocalDate endDateExclusive) {
+    public List<DailyMissionDay> findRepresentativeEmotions(Long userId, LocalDate startDate, LocalDate endDateExclusive) {
         return jdbcTemplate.query(
                 """
-                select mission_date, success_count
-                from daily_mission_days
-                where user_id = ?
-                  and mission_date >= ?
-                  and mission_date < ?
-                order by mission_date
+                select record_date, emotion_label, emotion_color
+                from (
+                    select
+                        date(created_at) as record_date,
+                        emotion_label,
+                        emotion_color,
+                        count(*) as emotion_count,
+                        max(created_at) as latest_created_at,
+                        row_number() over (
+                            partition by date(created_at)
+                            order by count(*) desc, max(created_at) desc
+                        ) as ranking
+                    from emotion_map_markers
+                    where user_id = ?
+                      and created_at >= ?
+                      and created_at < ?
+                    group by date(created_at), emotion_label, emotion_color
+                ) daily_emotions
+                where ranking = 1
+                order by record_date
                 """,
                 (resultSet, rowNumber) -> new DailyMissionDay(
-                        resultSet.getObject("mission_date", LocalDate.class),
-                        resultSet.getInt("success_count")
+                        resultSet.getObject("record_date", LocalDate.class),
+                        resultSet.getString("emotion_label"),
+                        resultSet.getString("emotion_color")
                 ),
                 userId,
                 startDate,
@@ -218,7 +233,7 @@ public class DailyMissionRepository {
     public record DailyMissionSeed(String key, String text) {
     }
 
-    public record DailyMissionDay(LocalDate date, int successCount) {
+    public record DailyMissionDay(LocalDate date, String emotionLabel, String emotionColor) {
     }
 
     private record SlotRerollCount(int slotIndex, int rerollCount) {

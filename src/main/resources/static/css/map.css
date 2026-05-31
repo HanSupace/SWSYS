@@ -472,6 +472,35 @@ body.is-record-delete-modal-open {
     box-shadow: 0 0.875rem 1.75rem rgba(26, 77, 57, 0.18);
 }
 
+.move-current-location {
+    position: absolute;
+    right: calc(clamp(1rem, 4vw, 1.25rem) + env(safe-area-inset-right));
+    bottom: clamp(1.25rem, 6vw, 2.125rem);
+    z-index: 3;
+    display: inline-flex;
+    width: clamp(2.75rem, 12vw, 3rem);
+    height: clamp(2.75rem, 12vw, 3rem);
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(26, 77, 57, 0.12);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.96);
+    color: var(--primary-color);
+    font: inherit;
+    font-size: clamp(2.125rem, 9vw, 2.5rem);
+    font-weight: 950;
+    line-height: 0.8;
+}
+
+.move-current-location:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(70, 179, 157, 0.16);
+}
+
+.move-current-location:active {
+    transform: scale(0.96);
+}
+
 .map-message {
     position: absolute;
     left: clamp(0.75rem, 3.5vw, 1rem);

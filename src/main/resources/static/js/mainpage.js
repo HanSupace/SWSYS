@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const missionProgressCount = document.getElementById('mission-progress-count');
     const missionProgressBar = document.getElementById('mission-progress-bar');
     let missionsLoaded = false;
-    let missionSuccessCounts = new Map();
+    let calendarEmotionDays = new Map();
     let pendingMissionButton = null;
     const selectedEmotionStorageKey = 'lastsys.selectedEmotion';
 
@@ -82,19 +82,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         updateCalendarTitle(calendarTitle, visibleMonth);
-        renderFallbackCalendar(calendarElement, visibleMonth, today, missionSuccessCounts);
+        renderFallbackCalendar(calendarElement, visibleMonth, today, calendarEmotionDays);
     };
 
     previousButton?.addEventListener('click', () => {
         visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1);
         renderCalendar();
-        loadMonthlySuccessCounts();
+        loadMonthlyCalendarEmotions();
     });
 
     nextButton?.addEventListener('click', () => {
         visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 1);
         renderCalendar();
-        loadMonthlySuccessCounts();
+        loadMonthlyCalendarEmotions();
     });
 
     emotionButtonBox?.addEventListener('click', (event) => {
@@ -277,11 +277,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function loadTodayMissions() {
-        if (!missionList) {
+        if (!missionList && !missionProgressCount && !missionProgressBar) {
             return;
         }
 
-        renderMissionMessage('오늘의 미션을 불러오는 중입니다.');
+        if (missionList) {
+            renderMissionMessage('오늘의 미션을 불러오는 중입니다.');
+        }
 
         try {
             const response = await fetch('/api/daily-missions', {
@@ -297,7 +299,9 @@ document.addEventListener('DOMContentLoaded', () => {
             missionsLoaded = true;
             renderMissionPayload(await response.json());
         } catch (error) {
-            renderMissionMessage('미션을 불러오지 못했습니다. 다시 열어 주세요.');
+            if (missionList) {
+                renderMissionMessage('미션을 불러오지 못했습니다. 다시 열어 주세요.');
+            }
         }
     }
 
@@ -364,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
         userXpBar.style.width = `${Math.max(0, Math.min(100, progress.progressPercent))}%`;
     }
 
-    async function loadMonthlySuccessCounts() {
+    async function loadMonthlyCalendarEmotions() {
         if (!calendarElement) {
             return;
         }
@@ -380,20 +384,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('calendar load failed');
             }
 
-            missionSuccessCounts = new Map((await response.json()).map((day) => [day.date, day.successCount]));
-
-            if (visibleMonth.getFullYear() === today.getFullYear() && visibleMonth.getMonth() === today.getMonth()) {
-                updateMissionActionProgress(missionSuccessCounts.get(toIsoDate(today)) || 0);
-            }
+            calendarEmotionDays = new Map((await response.json()).map((day) => [day.date, day]));
 
             renderCalendar();
         } catch (error) {
-            missionSuccessCounts = new Map();
-
-            if (visibleMonth.getFullYear() === today.getFullYear() && visibleMonth.getMonth() === today.getMonth()) {
-                updateMissionActionProgress();
-            }
-
+            calendarEmotionDays = new Map();
             renderCalendar();
         }
     }
@@ -403,13 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const todayKey = toIsoDate(today);
-        missionSuccessCounts.set(todayKey, todaySuccessCount);
         updateMissionActionProgress(todaySuccessCount);
-
-        if (visibleMonth.getFullYear() === today.getFullYear() && visibleMonth.getMonth() === today.getMonth()) {
-            renderCalendar();
-        }
     }
 
     function updateMissionActionProgress(successCount = 0, totalCount = 5) {
@@ -432,9 +421,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeEmotionButtons();
     updateMissionActionProgress();
     renderCalendar();
-    loadMonthlySuccessCounts();
+    loadMonthlyCalendarEmotions();
 
-    if (missionPage) {
+    if (missionPage || missionProgressCount || missionProgressBar) {
         loadTodayMissions();
     }
 });
@@ -456,7 +445,7 @@ function updateCalendarTitle(calendarTitle, date) {
     calendarTitle.textContent = `${date.getFullYear()}. ${String(date.getMonth() + 1).padStart(2, '0')}`;
 }
 
-function renderFallbackCalendar(calendarElement, visibleMonth, today, missionSuccessCounts) {
+function renderFallbackCalendar(calendarElement, visibleMonth, today, calendarEmotionDays) {
     const year = visibleMonth.getFullYear();
     const month = visibleMonth.getMonth();
     const firstDay = new Date(year, month, 1).getDay();
@@ -472,17 +461,21 @@ function renderFallbackCalendar(calendarElement, visibleMonth, today, missionSuc
     for (let date = 1; date <= lastDate; date += 1) {
         const isToday = year === today.getFullYear() && month === today.getMonth() && date === today.getDate();
         const isoDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-        const successCount = missionSuccessCounts.get(isoDate) || 0;
+        const representativeEmotion = calendarEmotionDays.get(isoDate);
+        const emotionColor = normalizeCalendarEmotionColor(representativeEmotion?.emotionColor);
+        const emotionLabel = representativeEmotion?.emotionLabel || '';
         const className = [
             isToday ? 'today' : '',
-            getSuccessClassName(successCount)
+            emotionColor ? 'has-emotion-record' : ''
         ].filter(Boolean).join(' ');
-        const tooltip = `완료 미션 ${successCount}개`;
+        const tooltip = emotionLabel ? `대표 감정 ${emotionLabel}` : '감정 기록 없음';
+        const style = emotionColor ? ` style="--calendar-emotion-color: ${emotionColor}"` : '';
         cells.push(`
             <span
                 class="calendar-day ${className}"
-                data-tooltip="${tooltip}"
-                aria-label="${isoDate} ${tooltip}"
+                data-tooltip="${escapeHtml(tooltip)}"
+                aria-label="${isoDate} ${escapeHtml(tooltip)}"
+                ${style}
             >${date}</span>
         `);
     }
@@ -506,24 +499,9 @@ function renderFallbackCalendar(calendarElement, visibleMonth, today, missionSuc
 
 }
 
-function toIsoDate(date) {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
-
-function getSuccessClassName(successCount) {
-    if (successCount >= 5) {
-        return 'mission-success-3';
-    }
-
-    if (successCount >= 3) {
-        return 'mission-success-2';
-    }
-
-    if (successCount >= 1) {
-        return 'mission-success-1';
-    }
-
-    return '';
+function normalizeCalendarEmotionColor(value) {
+    const color = String(value || '').trim();
+    return /^#[0-9a-fA-F]{6}$/.test(color) ? color : '';
 }
 
 function getKoreaToday() {

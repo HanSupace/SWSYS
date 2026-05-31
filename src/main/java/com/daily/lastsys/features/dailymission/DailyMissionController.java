@@ -23,13 +23,13 @@ public class DailyMissionController {
     }
 
     @GetMapping("/api/daily-missions/calendar")
-    public List<DailyMissionDayResponse> monthlySuccessCounts(
+    public List<DailyMissionDayResponse> monthlyCalendarEmotions(
             @RequestParam int year,
             @RequestParam int month,
             HttpSession session
     ) {
         LoginUser loginUser = requireLogin(session);
-        return dailyMissionService.getMonthlySuccessCounts(loginUser.id(), year, month);
+        return dailyMissionService.getMonthlyCalendarEmotions(loginUser.id(), year, month);
     }
 
     @PostMapping("/api/daily-missions/{missionKey}/complete")

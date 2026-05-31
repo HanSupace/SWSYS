@@ -91,6 +91,9 @@
                 <div id="map-search-results" class="map-search-results" hidden></div>
                 <div class="map-crosshair" aria-hidden="true"></div>
                 <button id="open-marker-modal" class="open-marker-modal" type="button">기록하기</button>
+                <button id="move-current-location" class="move-current-location" type="button" aria-label="현재 위치로 이동">
+                    <span aria-hidden="true">⌖</span>
+                </button>
             </div>
             <div id="map-message" class="map-message" role="status">지도를 불러오는 중입니다.</div>
         </section>
@@ -193,6 +196,7 @@
         var searchResults = document.getElementById('map-search-results');
         var markerModal = document.getElementById('marker-modal');
         var openMarkerModalButton = document.getElementById('open-marker-modal');
+        var moveCurrentLocationButton = document.getElementById('move-current-location');
         var closeMarkerModalButton = document.getElementById('close-marker-modal');
         var markerModalBackdrop = document.getElementById('marker-modal-backdrop');
         var filterToggleButton = document.getElementById('map-filter-toggle');
@@ -343,6 +347,33 @@
             currentLocationOverlay.setPosition(position);
             map.setLevel(level);
             map.setCenter(position);
+        }
+
+        function moveToCurrentLocation() {
+            if (!navigator.geolocation) {
+                showError('이 브라우저에서는 현재 위치 기능을 지원하지 않습니다.');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    var userPosition = new kakao.maps.LatLng(
+                        position.coords.latitude,
+                        position.coords.longitude
+                    );
+
+                    moveTo(userPosition, 4);
+                    message.hidden = true;
+                },
+                function () {
+                    showError('현재 위치를 가져오지 못했습니다. 브라우저 위치 권한을 허용해주세요.');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 8000,
+                    maximumAge: 60000
+                }
+            );
         }
 
         function formatPosition(position) {
@@ -1240,29 +1271,7 @@
             openRecordDetail(recordButton.dataset.recordId);
         });
 
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function (position) {
-                    var userPosition = new kakao.maps.LatLng(
-                        position.coords.latitude,
-                        position.coords.longitude
-                    );
-
-                    moveTo(userPosition, 4);
-                    message.hidden = true;
-                },
-                function () {
-                    showError('현재 위치를 가져오지 못했습니다. 브라우저 위치 권한을 허용해주세요.');
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 8000,
-                    maximumAge: 60000
-                }
-            );
-        } else {
-            showError('이 브라우저에서는 현재 위치 기능을 지원하지 않습니다.');
-        }
+        moveToCurrentLocation();
 
         kakao.maps.event.addListener(map, 'center_changed', function () {
             selectedPosition = map.getCenter();
@@ -1700,6 +1709,7 @@
         });
 
         openMarkerModalButton.addEventListener('click', openMarkerModal);
+        moveCurrentLocationButton.addEventListener('click', moveToCurrentLocation);
         closeMarkerModalButton.addEventListener('click', closeMarkerModal);
         markerModalBackdrop.addEventListener('click', closeMarkerModal);
         clusterPanelCloseButton?.addEventListener('click', closeClusterPanel);

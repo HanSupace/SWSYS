@@ -577,21 +577,9 @@ body {
     color: var(--primary-color);
 }
 
-.fallback-days .mission-success-1 {
-    background: #DDEFD8;
-    border-color: rgba(49, 112, 74, 0.18);
-    color: #24553A;
-}
-
-.fallback-days .mission-success-2 {
-    background: #9ED3AA;
-    border-color: rgba(49, 112, 74, 0.24);
-    color: #153D2A;
-}
-
-.fallback-days .mission-success-3 {
-    background: #31704A;
-    border-color: #31704A;
+.fallback-days .has-emotion-record {
+    background: var(--calendar-emotion-color);
+    border-color: var(--calendar-emotion-color);
     color: #FFFFFF;
 }
 
