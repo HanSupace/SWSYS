@@ -150,6 +150,7 @@
                     <input id="marker-location-selected" type="hidden">
                 </label>
                 <div id="marker-location-results" class="marker-location-results" hidden></div>
+                <p id="marker-form-message" class="marker-form-message" role="status" hidden></p>
                 <label>
                     <span>제목</span>
                     <input id="marker-title" type="text" maxlength="24" placeholder="지금의 마음" required>
@@ -230,6 +231,7 @@
         var markerLocationInput = document.getElementById('marker-location');
         var markerLocationSelectedInput = document.getElementById('marker-location-selected');
         var markerLocationResults = document.getElementById('marker-location-results');
+        var markerFormMessage = document.getElementById('marker-form-message');
         var titleInput = document.getElementById('marker-title');
         var descriptionInput = document.getElementById('marker-description');
         var defaultPosition = new kakao.maps.LatLng(37.566826, 126.9786567);
@@ -238,6 +240,7 @@
         var hasCurrentPosition = false;
         var searchedPlaces = [];
         var markerPlaces = [];
+        var selectedMarkerLocationPosition = null;
         var emotionMarkerItems = [];
         var activeEmotionFilter = 'ALL';
         var showOnlyMine = false;
@@ -259,6 +262,8 @@
         var pendingDeleteRecordId = null;
         var requestedEmotionId = new URLSearchParams(window.location.search).get('emotionId') || '';
         var markerVisualSize = 34;
+        var EARTH_RADIUS_METERS = 6371000;
+        var MAX_DISTANCE_METERS = 2000;
         var markerOverlayZIndex = 6;
         var selectedMarkerOverlayZIndex = 24;
         var clusterOverlayZIndex = 12;
@@ -350,15 +355,15 @@
 
         function placeSearchOptions() {
             var baseLocation = hasCurrentPosition ? currentPosition : map.getCenter();
-            var options = {
+            return {
                 location: baseLocation
             };
+        }
 
-            if (kakao.maps.services.SortBy) {
-                options.sort = kakao.maps.services.SortBy.DISTANCE;
-            }
-
-            return options;
+        function markerPlaceSearchOptions() {
+            return {
+                location: map.getCenter()
+            };
         }
 
         function formatDistance(distance) {
@@ -381,6 +386,142 @@
             return distance ? distance + ' · ' + address : address;
         }
 
+        function normalizeSearchText(value) {
+            return String(value || '').trim().toLowerCase();
+        }
+
+        function relevanceTokens(value) {
+            return normalizeSearchText(value)
+                .split(/[\s,./|·:;!?()[\]{}"'`~_-]+/)
+                .filter(function (token) {
+                    return token.length >= 2;
+                });
+        }
+
+        function selectedEmotionLabel() {
+            var checkedEmotion = form.querySelector('input[name="emotion"]:checked');
+            return checkedEmotion ? checkedEmotion.dataset.label : '';
+        }
+
+        function placeRelevanceScore(place, keyword, contextValue) {
+            var normalizedKeyword = normalizeSearchText(keyword);
+            var placeName = normalizeSearchText(place.place_name);
+            var categoryName = normalizeSearchText(place.category_name);
+            var address = normalizeSearchText((place.road_address_name || '') + ' ' + (place.address_name || ''));
+            var searchContext = relevanceTokens([keyword, contextValue].join(' '));
+            var score = 0;
+
+            if (normalizedKeyword && placeName === normalizedKeyword) {
+                score += 120;
+            }
+
+            if (normalizedKeyword && placeName.startsWith(normalizedKeyword)) {
+                score += 80;
+            }
+
+            if (normalizedKeyword && placeName.includes(normalizedKeyword)) {
+                score += 60;
+            }
+
+            searchContext.forEach(function (token) {
+                if (placeName.includes(token)) {
+                    score += 30;
+                }
+
+                if (categoryName.includes(token)) {
+                    score += 18;
+                }
+
+                if (address.includes(token)) {
+                    score += 8;
+                }
+            });
+
+            return score;
+        }
+
+        function markerLocationRelevanceScore(place, keyword) {
+            return placeRelevanceScore(place, keyword, [
+                titleInput.value,
+                descriptionInput.value,
+                selectedEmotionLabel()
+            ].join(' '));
+        }
+
+        function comparePlaceRelevance(firstEntry, secondEntry) {
+            if (firstEntry.relevanceScore !== secondEntry.relevanceScore) {
+                return secondEntry.relevanceScore - firstEntry.relevanceScore;
+            }
+
+            var firstDistance = Number(firstEntry.place.distance);
+            var secondDistance = Number(secondEntry.place.distance);
+            var hasFirstDistance = Number.isFinite(firstDistance);
+            var hasSecondDistance = Number.isFinite(secondDistance);
+
+            if (hasFirstDistance && hasSecondDistance && firstDistance !== secondDistance) {
+                return firstDistance - secondDistance;
+            }
+
+            if (hasFirstDistance !== hasSecondDistance) {
+                return hasFirstDistance ? -1 : 1;
+            }
+
+            return firstEntry.index - secondEntry.index;
+        }
+
+        function sortMarkerLocationResultsByRelevance(results, keyword) {
+            return results.map(function (place, index) {
+                return {
+                    place: place,
+                    relevanceScore: markerLocationRelevanceScore(place, keyword) + Math.max(0, results.length - index),
+                    index: index
+                };
+            }).sort(comparePlaceRelevance).map(function (entry) {
+                return entry.place;
+            });
+        }
+
+        function sortMapSearchResultsByRelevance(results, keyword) {
+            return results.map(function (place, index) {
+                return {
+                    place: place,
+                    relevanceScore: placeRelevanceScore(place, keyword, '') + Math.max(0, results.length - index),
+                    index: index
+                };
+            }).sort(comparePlaceRelevance).map(function (entry) {
+                return entry.place;
+            });
+        }
+
+        function distanceBetweenPositions(firstPosition, secondPosition) {
+            var firstLatitude = firstPosition.getLat() * Math.PI / 180;
+            var secondLatitude = secondPosition.getLat() * Math.PI / 180;
+            var latitudeDelta = secondLatitude - firstLatitude;
+            var longitudeDelta = (secondPosition.getLng() - firstPosition.getLng()) * Math.PI / 180;
+            var haversineValue = Math.sin(latitudeDelta / 2) ** 2
+                + Math.cos(firstLatitude) * Math.cos(secondLatitude) * Math.sin(longitudeDelta / 2) ** 2;
+            var normalizedHaversineValue = Math.min(1, haversineValue);
+
+            return EARTH_RADIUS_METERS * 2 * Math.atan2(
+                Math.sqrt(normalizedHaversineValue),
+                Math.sqrt(1 - normalizedHaversineValue)
+            );
+        }
+
+        function isWithinMarkerDistance(position) {
+            return distanceBetweenPositions(map.getCenter(), position) < MAX_DISTANCE_METERS;
+        }
+
+        function showMarkerDistanceError() {
+            markerFormMessage.textContent = '마커 위치에서 2km 이내의 위치만 선택할 수 있습니다.';
+            markerFormMessage.hidden = false;
+        }
+
+        function hideMarkerFormMessage() {
+            markerFormMessage.hidden = true;
+            markerFormMessage.textContent = '';
+        }
+
         function chooseMapPlace(index) {
             var place = searchedPlaces[index];
 
@@ -390,7 +531,13 @@
 
             var searchedPosition = new kakao.maps.LatLng(place.y, place.x);
 
+            if (!isWithinMarkerDistance(searchedPosition)) {
+                showMarkerDistanceError();
+                return;
+            }
+
             selectedPosition = searchedPosition;
+            hideMarkerFormMessage();
             map.setLevel(4);
             map.setCenter(searchedPosition);
             searchInput.value = place.place_name;
@@ -1130,16 +1277,22 @@
         });
 
         kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
+            if (!isWithinMarkerDistance(mouseEvent.latLng)) {
+                showMarkerDistanceError();
+                return;
+            }
+
             selectedPosition = mouseEvent.latLng;
+            hideMarkerFormMessage();
             map.panTo(selectedPosition);
             searchResults.hidden = true;
             closeClusterPanel();
             closeRecordPanel();
         });
 
-        function renderSearchResults(results) {
+        function renderSearchResults(results, keyword) {
             searchResults.innerHTML = '';
-            searchedPlaces = results.slice(0, 5);
+            searchedPlaces = sortMapSearchResultsByRelevance(results, keyword).slice(0, 5);
 
             searchedPlaces.forEach(function (place, index) {
                 var resultButton = document.createElement('button');
@@ -1178,7 +1331,7 @@
                     return;
                 }
 
-                renderSearchResults(results);
+                renderSearchResults(results, keyword);
             }, placeSearchOptions());
         }
 
@@ -1195,9 +1348,9 @@
             }, 220);
         });
 
-        function renderMarkerLocationResults(results) {
+        function renderMarkerLocationResults(results, keyword) {
             markerLocationResults.innerHTML = '';
-            markerPlaces = results.slice(0, 5);
+            markerPlaces = sortMarkerLocationResultsByRelevance(results, keyword).slice(0, 5);
 
             markerPlaces.forEach(function (place) {
                 var resultButton = document.createElement('button');
@@ -1208,8 +1361,17 @@
                     '<span>' + escapeHtml(placeAddressText(place)) + '</span>';
 
                 resultButton.addEventListener('click', function () {
+                    var markerLocationPosition = new kakao.maps.LatLng(place.y, place.x);
+
+                    if (!isWithinMarkerDistance(markerLocationPosition)) {
+                        showMarkerDistanceError();
+                        return;
+                    }
+
                     markerLocationInput.value = place.place_name;
                     markerLocationSelectedInput.value = place.place_name;
+                    selectedMarkerLocationPosition = markerLocationPosition;
+                    hideMarkerFormMessage();
                     markerLocationResults.hidden = true;
                     titleInput.focus();
                 });
@@ -1241,13 +1403,15 @@
                     return;
                 }
 
-                renderMarkerLocationResults(results);
-            }, placeSearchOptions());
+                renderMarkerLocationResults(results, keyword);
+            }, markerPlaceSearchOptions());
         }
 
         markerLocationInput.addEventListener('input', function () {
             window.clearTimeout(markerLocationTimer);
             markerLocationSelectedInput.value = '';
+            selectedMarkerLocationPosition = null;
+            hideMarkerFormMessage();
 
             markerLocationTimer = window.setTimeout(function () {
                 searchMarkerLocations();
@@ -1477,6 +1641,12 @@
                 return;
             }
 
+            if (selectedMarkerLocationPosition && !isWithinMarkerDistance(selectedMarkerLocationPosition)) {
+                markerLocationInput.focus();
+                showMarkerDistanceError();
+                return;
+            }
+
             if (!title) {
                 titleInput.focus();
                 return;
@@ -1515,6 +1685,8 @@
             descriptionInput.value = '';
             markerLocationInput.value = '';
             markerLocationSelectedInput.value = '';
+            selectedMarkerLocationPosition = null;
+            hideMarkerFormMessage();
             markerLocationResults.hidden = true;
             markerPlaces = [];
             closeMarkerModal();

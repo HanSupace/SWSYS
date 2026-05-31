@@ -10,8 +10,9 @@ import java.util.List;
 public class HealingSpotRepository {
 
     private static final double EARTH_RADIUS_IN_METERS = 6371000;
-    private static final int SEARCH_RADIUS_IN_METERS = 2000;
+    private static final int SEARCH_RADIUS_IN_METERS = 20000;
     private static final int SEARCH_LIMIT = 3;
+    private static final int DISTANCE_SCORE_DECAY_IN_METERS = 5000;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -26,8 +27,10 @@ public class HealingSpotRepository {
                     min(distance_in_meters) as distance_in_meters,
                     max(emotion_label) as emotion_label,
                     location_name,
-                    max(latitude) as latitude,
-                    max(longitude) as longitude
+                    avg(latitude) as latitude,
+                    avg(longitude) as longitude,
+                    count(*) as positive_count,
+                    count(*) / (1 + (min(distance_in_meters) / ?)) as healing_score
                 from (
                     select
                         (? * 2 * asin(sqrt(
@@ -44,7 +47,7 @@ public class HealingSpotRepository {
                 ) nearby_spots
                 where distance_in_meters <= ?
                 group by location_name
-                order by distance_in_meters asc
+                order by healing_score desc, positive_count desc, distance_in_meters asc
                 limit ?
                 """,
                 (resultSet, rowNumber) -> new HealingSpotCandidate(
@@ -52,8 +55,10 @@ public class HealingSpotRepository {
                         resultSet.getString("emotion_label"),
                         resultSet.getString("location_name"),
                         resultSet.getObject("latitude", BigDecimal.class),
-                        resultSet.getObject("longitude", BigDecimal.class)
+                        resultSet.getObject("longitude", BigDecimal.class),
+                        resultSet.getInt("positive_count")
                 ),
+                DISTANCE_SCORE_DECAY_IN_METERS,
                 EARTH_RADIUS_IN_METERS,
                 latitude,
                 latitude,
@@ -68,7 +73,8 @@ public class HealingSpotRepository {
             String emotionLabel,
             String locationName,
             BigDecimal latitude,
-            BigDecimal longitude
+            BigDecimal longitude,
+            int positiveCount
     ) {
     }
 }

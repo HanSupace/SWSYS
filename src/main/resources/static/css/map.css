@@ -782,6 +782,21 @@ body.is-record-delete-modal-open {
     display: none;
 }
 
+.marker-form-message[hidden] {
+    display: none;
+}
+
+.marker-form-message {
+    margin: -0.125rem 0 0;
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.75rem;
+    background: rgba(183, 53, 53, 0.08);
+    color: #B73535;
+    font-size: 0.75rem;
+    font-weight: 900;
+    line-height: 1.45;
+}
+
 .marker-location-results {
     display: grid;
     gap: 0.4375rem;

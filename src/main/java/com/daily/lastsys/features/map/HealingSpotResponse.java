@@ -7,6 +7,7 @@ public record HealingSpotResponse(
         String emotion,
         String name,
         BigDecimal lat,
-        BigDecimal lng
+        BigDecimal lng,
+        int positiveCount
 ) {
 }

@@ -23,7 +23,8 @@ public class HealingSpotService {
                         emotionEmoji(candidate.emotionLabel()),
                         candidate.locationName(),
                         candidate.latitude(),
-                        candidate.longitude()
+                        candidate.longitude(),
+                        candidate.positiveCount()
                 ))
                 .toList();
     }
