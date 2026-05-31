@@ -226,9 +226,10 @@ document.addEventListener('DOMContentLoaded', () => {
         spots.forEach((spot) => {
             const item = document.createElement('li');
             item.className = 'record-item';
+            item.setAttribute('style', 'cursor: pointer;');
             item.tabIndex = 0;
             item.setAttribute('role', 'link');
-            item.addEventListener('click', () => openSpotOnMap(spot));
+            item.onclick = () => openSpotOnMap(spot);
             item.addEventListener('keydown', (event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
@@ -237,9 +238,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             item.innerHTML = `
                 <div class="record-info">
-                    <span class="record-date">현위치에서 ${escapeHtml(spot.distance)} · 긍정 기록 ${escapeHtml(spot.positiveCount)}개</span>
+                    <span class="record-date">현위치에서 ${escapeHtml(spot.distance)}</span>
                     <span class="record-emotion">
-                        <span>${escapeHtml(spot.emotion)}</span> ${escapeHtml(spot.name)}
+                        ${escapeHtml(spot.name)}
                     </span>
                 </div>
             `;
@@ -248,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openSpotOnMap(spot) {
-        window.location.href = `/map?lat=${encodeURIComponent(spot.lat)}&lng=${encodeURIComponent(spot.lng)}`;
+        window.location.href = '/map?lat=' + spot.lat + '&lng=' + spot.lng;
     }
 
     function escapeHtml(value) {

@@ -24,6 +24,9 @@
                 <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" alt="LastSys 로고">
                 <span>LastSys</span>
             </a>
+            <form th:action="@{/logout}" method="post">
+                <button class="logout-btn" type="submit">로그아웃</button>
+            </form>
         </header>
 
         <div class="main-content">

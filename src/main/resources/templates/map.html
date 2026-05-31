@@ -239,9 +239,25 @@
         var titleInput = document.getElementById('marker-title');
         var descriptionInput = document.getElementById('marker-description');
         var defaultPosition = new kakao.maps.LatLng(37.566826, 126.9786567);
-        var currentPosition = defaultPosition;
-        var selectedPosition = defaultPosition;
-        var hasCurrentPosition = false;
+        var urlParams = new URLSearchParams(window.location.search);
+        var requestedLatParam = urlParams.get('lat');
+        var requestedLngParam = urlParams.get('lng');
+        var requestedLat = Number(requestedLatParam);
+        var requestedLng = Number(requestedLngParam);
+        var hasRequestedPosition = requestedLatParam !== null
+            && requestedLngParam !== null
+            && requestedLatParam.trim() !== ''
+            && requestedLngParam.trim() !== ''
+            && Number.isFinite(requestedLat)
+            && Number.isFinite(requestedLng)
+            && requestedLat >= -90
+            && requestedLat <= 90
+            && requestedLng >= -180
+            && requestedLng <= 180;
+        var requestedPosition = hasRequestedPosition ? new kakao.maps.LatLng(requestedLat, requestedLng) : null;
+        var currentPosition = requestedPosition || defaultPosition;
+        var selectedPosition = currentPosition;
+        var hasCurrentPosition = hasRequestedPosition;
         var searchedPlaces = [];
         var markerPlaces = [];
         var selectedMarkerLocationPosition = null;
@@ -264,7 +280,7 @@
         var activeRecordComments = [];
         var recordDetailLoading = false;
         var pendingDeleteRecordId = null;
-        var requestedEmotionId = new URLSearchParams(window.location.search).get('emotionId') || '';
+        var requestedEmotionId = urlParams.get('emotionId') || '';
         var markerVisualSize = 34;
         var EARTH_RADIUS_METERS = 6371000;
         var MAX_DISTANCE_METERS = 2000;
@@ -273,7 +289,7 @@
         var clusterOverlayZIndex = 12;
         var infoOverlayZIndex = 48;
         var options = {
-            center: defaultPosition,
+            center: currentPosition,
             level: 5,
             draggable: true
         };
@@ -293,7 +309,7 @@
         var places = kakao.maps.services ? new kakao.maps.services.Places() : null;
         var currentLocationElement = document.createElement('div');
         currentLocationElement.className = 'current-location-dot';
-        currentLocationElement.setAttribute('aria-label', '현재 위치');
+        currentLocationElement.setAttribute('aria-label', hasRequestedPosition ? '선택한 힐링 스팟 위치' : '현재 위치');
 
         var currentLocationOverlay = new kakao.maps.CustomOverlay({
             position: currentPosition,
@@ -304,7 +320,8 @@
         });
 
         currentLocationOverlay.setMap(map);
-        message.textContent = '현재 위치를 확인하는 중입니다.';
+        message.textContent = hasRequestedPosition ? '선택한 힐링 스팟 위치를 표시했습니다.' : '현재 위치를 확인하는 중입니다.';
+        message.hidden = hasRequestedPosition;
 
         function openMarkerModal() {
             markerModal.hidden = false;
@@ -1271,7 +1288,11 @@
             openRecordDetail(recordButton.dataset.recordId);
         });
 
-        moveToCurrentLocation();
+        if (hasRequestedPosition) {
+            map.setCenter(requestedPosition);
+        } else {
+            moveToCurrentLocation();
+        }
 
         kakao.maps.event.addListener(map, 'center_changed', function () {
             selectedPosition = map.getCenter();
