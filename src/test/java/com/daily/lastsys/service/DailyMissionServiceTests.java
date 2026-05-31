@@ -1,5 +1,6 @@
 package com.daily.lastsys.service;
 
+import com.daily.lastsys.features.dailymission.DailyMissionDayResponse;
 import com.daily.lastsys.features.dailymission.DailyMissionListResponse;
 import com.daily.lastsys.features.dailymission.DailyMissionResponse;
 import com.daily.lastsys.features.dailymission.DailyMissionService;
@@ -45,5 +46,72 @@ class DailyMissionServiceTests {
                 .extracting(DailyMissionResponse::id)
                 .containsExactly(clickedMission.id());
         assertThat(afterCompletion.todaySuccessCount()).isEqualTo(1);
+    }
+
+    @Test
+    void monthlyCalendarEmotionsUseRepresentativeEmotionPerUserAndDate() {
+        long firstUserId = 91011L;
+        long secondUserId = 91012L;
+        insertUser(firstUserId, "calendar-user-a", "calendar-nickname-a");
+        insertUser(secondUserId, "calendar-user-b", "calendar-nickname-b");
+
+        insertEmotionMarker(firstUserId, "2026-05-10 09:00:00", "기쁨", "#765A08");
+        insertEmotionMarker(firstUserId, "2026-05-10 10:00:00", "슬픔", "#315C86");
+        insertEmotionMarker(firstUserId, "2026-05-10 11:00:00", "슬픔", "#315C86");
+        insertEmotionMarker(firstUserId, "2026-05-11 09:00:00", "기쁨", "#765A08");
+        insertEmotionMarker(firstUserId, "2026-05-11 10:00:00", "기대", "#4F711F");
+        insertEmotionMarker(secondUserId, "2026-05-10 09:00:00", "기대", "#4F711F");
+
+        List<DailyMissionDayResponse> firstUserDays = dailyMissionService.getMonthlyCalendarEmotions(firstUserId, 2026, 5);
+        List<DailyMissionDayResponse> secondUserDays = dailyMissionService.getMonthlyCalendarEmotions(secondUserId, 2026, 5);
+
+        assertThat(firstUserDays)
+                .extracting(DailyMissionDayResponse::date)
+                .doesNotContain(java.time.LocalDate.of(2026, 5, 12));
+        assertThat(firstUserDays)
+                .filteredOn(day -> day.date().equals(java.time.LocalDate.of(2026, 5, 10)))
+                .singleElement()
+                .satisfies(day -> {
+                    assertThat(day.emotionLabel()).isEqualTo("슬픔");
+                    assertThat(day.emotionColor()).isEqualTo("#315C86");
+                });
+        assertThat(firstUserDays)
+                .filteredOn(day -> day.date().equals(java.time.LocalDate.of(2026, 5, 11)))
+                .singleElement()
+                .satisfies(day -> assertThat(day.emotionLabel()).isEqualTo("기대"));
+        assertThat(secondUserDays)
+                .filteredOn(day -> day.date().equals(java.time.LocalDate.of(2026, 5, 10)))
+                .singleElement()
+                .satisfies(day -> {
+                    assertThat(day.emotionLabel()).isEqualTo("기대");
+                    assertThat(day.emotionColor()).isEqualTo("#4F711F");
+                });
+    }
+
+    private void insertUser(long userId, String username, String nickname) {
+        jdbcTemplate.update(
+                "insert into users (id, username, password_hash, nickname) values (?, ?, ?, ?)",
+                userId,
+                username,
+                "hash",
+                nickname
+        );
+    }
+
+    private void insertEmotionMarker(long userId, String createdAt, String emotionLabel, String emotionColor) {
+        jdbcTemplate.update(
+                """
+                insert into emotion_map_markers (
+                    user_id, latitude, longitude, emotion_label, emotion_color,
+                    title, location_name, description, created_at, updated_at
+                )
+                values (?, 37.566826, 126.9786567, ?, ?, 'title', 'location', 'description', ?, ?)
+                """,
+                userId,
+                emotionLabel,
+                emotionColor,
+                createdAt,
+                createdAt
+        );
     }
 }

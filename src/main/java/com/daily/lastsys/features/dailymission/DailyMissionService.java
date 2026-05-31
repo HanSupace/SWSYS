@@ -227,12 +227,12 @@ public class DailyMissionService {
     }
 
     @Transactional(readOnly = true)
-    public List<DailyMissionDayResponse> getMonthlySuccessCounts(Long userId, int year, int month) {
+    public List<DailyMissionDayResponse> getMonthlyCalendarEmotions(Long userId, int year, int month) {
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDateExclusive = startDate.plusMonths(1);
 
-        return dailyMissionRepository.findSuccessCounts(userId, startDate, endDateExclusive).stream()
-                .map(day -> new DailyMissionDayResponse(day.date(), day.successCount()))
+        return dailyMissionRepository.findRepresentativeEmotions(userId, startDate, endDateExclusive).stream()
+                .map(day -> new DailyMissionDayResponse(day.date(), day.emotionLabel(), day.emotionColor()))
                 .toList();
     }
 
