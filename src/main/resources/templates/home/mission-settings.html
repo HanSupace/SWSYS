@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>선행 미션 설정 - LastSys</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
+    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260519b)}" href="../../static/css/mainpage.css?v=20260519b">
+    <link rel="stylesheet" th:href="@{/css/profile.css(v=20260527a)}" href="../../static/css/profile.css?v=20260527a">
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="bg-shape bg-shape-1"></div>
+<div class="bg-shape bg-shape-2"></div>
+
+<main class="mobile-page home-app" aria-label="LastSys 선행 미션 설정 화면">
+    <div class="bg-shape bg-shape-3"></div>
+    <section class="dashboard">
+        <header class="app-header">
+            <a class="app-brand" th:href="@{/}" href="/">
+                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" alt="LastSys 로고">
+                <span>LastSys</span>
+            </a>
+        </header>
+
+        <div class="main-content">
+            <a th:href="@{/profile}" href="/profile" class="back-btn">← 프로필로 돌아가기</a>
+            
+            <section class="mission-settings">
+                <div class="mission-settings-head">
+                    <h3>선행 미션 방식</h3>
+                    <p>평범 모드는 랜덤 미션을, 규칙 기반 모드는 현재 역할과 상황에 맞는 미션을 우선 보여줍니다.</p>
+                </div>
+                
+                <p class="mission-settings-saved" th:if="${param.missionSettingsSaved}">미션 설정이 저장되었습니다.</p>
+
+                <form th:action="@{/profile/mission-settings}" th:object="${missionSettingsForm}" method="post">
+                    <div class="mission-mode-options">
+                        <label>
+                            <input type="radio" th:field="*{mode}" value="PLAIN">
+                            <span>평범 모드</span>
+                        </label>
+                        <label>
+                            <input type="radio" th:field="*{mode}" value="RULE_BASED">
+                            <span>규칙 기반 모드</span>
+                        </label>
+                    </div>
+
+                    <div class="mission-setting-grid" id="mission-rule-fields">
+                        <label class="mission-setting-field">
+                            <span>직업/역할</span>
+                            <select th:field="*{lifeStage}" data-rule-field>
+                                <option value="ANY">상관없음</option>
+                                <option value="PRIMARY_SECONDARY_STUDENT">초중고생</option>
+                                <option value="UNIVERSITY_STUDENT">대학생</option>
+                                <option value="WORKER">직장인</option>
+                                <option value="FREELANCER">프리랜서</option>
+                                <option value="CAREGIVER">돌봄/가사 중심</option>
+                            </select>
+                        </label>
+
+                        <label class="mission-setting-field">
+                            <span>주로 있는 환경</span>
+                            <select th:field="*{environmentType}" data-rule-field>
+                                <option value="ANY">상관없음</option>
+                                <option value="PRIMARY_SECONDARY_SCHOOL">초중고</option>
+                                <option value="UNIVERSITY">대학교</option>
+                                <option value="OFFICE">회사</option>
+                                <option value="HOME">집</option>
+                                <option value="OUTSIDE">외부/이동 중</option>
+                            </select>
+                        </label>
+
+                        <label class="mission-setting-field">
+                            <span>오늘의 상태</span>
+                            <select th:field="*{conditionType}" data-rule-field>
+                                <option value="NORMAL">보통</option>
+                                <option value="SAD">우울/가라앉음</option>
+                                <option value="TIRED">피곤함</option>
+                                <option value="STRESSED">스트레스</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <button class="mission-settings-submit" type="submit">저장하기</button>
+                </form>
+            </section>
+        </div>
+    </section>
+</main>
+
+<nav class="bottom-tabs" aria-label="하단 메뉴">
+    <a th:href="@{/}" href="/">홈</a>
+    <a th:href="@{/map}" href="/map">감정지도</a>
+    <a class="active" th:href="@{/profile}" href="/profile">프로필</a>
+</nav>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modeInputs = document.querySelectorAll('input[name="mode"]');
+        const ruleFields = document.querySelectorAll('[data-rule-field]');
+        const ruleFieldGroup = document.getElementById('mission-rule-fields');
+
+        const updateRuleFields = () => {
+            const selectedMode = document.querySelector('input[name="mode"]:checked')?.value || 'PLAIN';
+            const disabled = selectedMode !== 'RULE_BASED';
+
+            ruleFields.forEach((field) => field.disabled = disabled);
+            ruleFieldGroup?.classList.toggle('is-disabled', disabled);
+        };
+
+        modeInputs.forEach((input) => input.addEventListener('change', updateRuleFields));
+        updateRuleFields();
+    });
+</script>
+</body>
+</html>

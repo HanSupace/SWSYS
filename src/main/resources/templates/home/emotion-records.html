@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>나의 감정 분석 - LastSys</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
+    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260519b)}" href="../../static/css/mainpage.css?v=20260519b">
+    <link rel="stylesheet" th:href="@{/css/profile.css(v=20260527a)}" href="../../static/css/profile.css?v=20260527a">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="bg-shape bg-shape-1"></div>
+<div class="bg-shape bg-shape-2"></div>
+
+<main class="mobile-page home-app" aria-label="LastSys 나의 감정 분석 화면">
+    <div class="bg-shape bg-shape-3"></div>
+    <section class="dashboard">
+        <header class="app-header">
+            <a class="app-brand" th:href="@{/}" href="/">
+                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" alt="LastSys 로고">
+                <span>LastSys</span>
+            </a>
+        </header>
+
+        <div class="main-content">
+            <a th:href="@{/}" href="/" class="back-btn">← 메인 페이지로 돌아가기</a>
+            
+            <section class="emotion-summary-section">
+                <div class="emotion-records-head">
+                    <h3>📊 나의 감정 요약</h3>
+                    <p>최근 7일 동안 어떤 감정을 가장 많이 느꼈을까요?</p>
+                </div>
+                
+                <div style="width: 100%; max-width: 300px; margin: 0 auto;">
+                    <canvas id="myEmotionChart"></canvas>
+                </div>
+            </section>
+
+            <hr style="border: 0; height: 1px; background: #eee; margin: 30px 0;">
+
+            <section class="healing-spot-section">
+                <div class="emotion-records-head">
+                    <h3>✨ 내 주변 힐링 스팟</h3>
+                    <p>지금 내 위치 주변에 긍정적인 감정이 가득한 곳이에요!</p>
+                </div>
+                
+                <ul class="record-list" id="healing-spot-list">
+                    <li class="record-item" id="loading-message">
+                        <div class="record-info">
+                            <span class="record-date">⏳ 현재 위치를 파악하고 주변 데이터를 불러오는 중...</span>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+        </div>
+    </section>
+</main>
+
+<nav class="bottom-tabs" aria-label="하단 메뉴">
+    <a th:href="@{/}" href="/">홈</a>
+    <a th:href="@{/map}" href="/map">감정지도</a>
+    <a class="active" th:href="@{/profile}" href="/profile">프로필</a>
+</nav>
+
+<script>
+    const emotionChartColors = ['#4CAF50', '#FF9800', '#2196F3', '#F44336', '#9C27B0', '#00BCD4', '#795548', '#607D8B'];
+
+    async function loadEmotionSummaryChart() {
+        const ctx = document.getElementById('myEmotionChart').getContext('2d');
+
+        try {
+            const response = await fetch('/api/emotions/summary');
+
+            if (!response.ok) {
+                throw new Error('Failed to load emotion summary.');
+            }
+
+            const summary = await response.json();
+            const labels = summary.map(item => item.label);
+            const data = summary.map(item => item.count);
+            const hasData = data.length > 0;
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: hasData ? labels : ['기록 없음'],
+                    datasets: [{
+                        data: hasData ? data : [1],
+                        backgroundColor: hasData ? labels.map((label, index) => emotionChartColors[index % emotionChartColors.length]) : ['#E0E0E0'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        } catch (chartError) {
+            console.error(chartError);
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['불러오기 실패'],
+                    datasets: [{
+                        data: [1],
+                        backgroundColor: ['#E0E0E0'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+    }
+
+    // ==========================================
+    // 2. 위치 기반 힐링 스팟 불러오기 로직
+    // ==========================================
+    function loadHealingSpots() {
+        // 1. 브라우저가 GPS(Geolocation)를 지원하는지 확인
+        if (!navigator.geolocation) {
+            document.getElementById('loading-message').innerHTML = "GPS를 지원하지 않는 기기/브라우저입니다.";
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                try {
+                    const params = new URLSearchParams({
+                        lat: lat.toString(),
+                        lng: lng.toString()
+                    });
+                    const response = await fetch('/api/spots/healing?' + params.toString());
+
+                    if (!response.ok) {
+                        throw new Error('Failed to load healing spots.');
+                    }
+
+                    const healingSpots = await response.json();
+                    renderHealingSpots(healingSpots);
+                } catch (fetchError) {
+                    console.error(fetchError);
+                    document.getElementById('loading-message').innerHTML = "주변 힐링 스팟을 불러오지 못했습니다.";
+                }
+            },
+            (error) => {
+                document.getElementById('loading-message').innerHTML = "위치 권한을 허용해 주세요.";
+            }
+        );
+    }
+
+    // 받아온 데이터를 HTML로 그려주는 함수
+    function renderHealingSpots(spots) {
+        const listElement = document.getElementById('healing-spot-list');
+        listElement.innerHTML = ''; // 로딩 메시지 지우기
+
+        if (spots.length === 0) {
+            listElement.innerHTML = '<li class="record-item"><div class="record-info">주변에 아직 힐링 스팟이 없어요. 첫 긍정 마커를 남겨보세요!</div></li>';
+            return;
+        }
+
+        // 데이터 개수만큼 <li> 태그를 만들어서 리스트에 추가
+        spots.forEach(spot => {
+            const li = document.createElement('li');
+            li.className = 'record-item';
+            li.style.cursor = 'pointer';
+            li.onclick = () => {
+                window.location.href = '/map?lat=' + encodeURIComponent(spot.lat) + '&lng=' + encodeURIComponent(spot.lng);
+            };
+            li.innerHTML = `
+                <div class="record-info">
+                    <span class="record-date">📍 현위치에서 ${spot.distance}</span>
+                    <span class="record-emotion">
+                        <span>${spot.emotion}</span> ${spot.name}
+                    </span>
+                </div>
+            `;
+            listElement.appendChild(li);
+        });
+    }
+
+    loadEmotionSummaryChart();
+    loadHealingSpots();
+</script>
+</body>
+</html>
