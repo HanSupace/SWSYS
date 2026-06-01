@@ -52,7 +52,6 @@ public class UserRepository {
         }
     }
 
-    // 🌟 추가됨: ID로 유저 찾기
     public Optional<UserAccount> findById(Long id) {
         try {
             UserAccount user = jdbcTemplate.queryForObject(
