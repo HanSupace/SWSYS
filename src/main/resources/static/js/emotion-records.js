@@ -244,6 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             item.innerHTML = `
+                <span class="record-icon" aria-hidden="true">${escapeHtml(spot.emotion || '•')}</span>
                 <div class="record-info">
                     <span class="record-date">현위치에서 ${escapeHtml(spot.distance)}</span>
                     <span class="record-emotion">
