@@ -341,7 +341,11 @@
             zIndex: 4
         });
 
-        currentLocationOverlay.setMap(map);
+        function syncCurrentLocationOverlay() {
+            currentLocationOverlay.setMap(currentViewMode === 'map' && hasCurrentPosition ? map : null);
+        }
+
+        syncCurrentLocationOverlay();
         message.textContent = hasRequestedPosition ? '선택한 힐링 스팟 위치를 표시했습니다.' : '현재 위치를 확인하는 중입니다.';
         message.hidden = hasRequestedPosition;
 
@@ -405,7 +409,9 @@
         function moveTo(position, level) {
             currentPosition = position;
             hasCurrentPosition = true;
+            currentLocationElement.setAttribute('aria-label', '현재 위치');
             currentLocationOverlay.setPosition(position);
+            syncCurrentLocationOverlay();
             map.setLevel(level);
             map.setCenter(position);
         }
@@ -437,6 +443,10 @@
         }
 
         function moveToCurrentLocation() {
+            message.textContent = '현재 위치를 확인하는 중입니다.';
+            message.classList.remove('is-error');
+            message.hidden = false;
+
             getCurrentKakaoPosition()
                 .then(function (userPosition) {
                     moveTo(userPosition, 4);
@@ -851,7 +861,7 @@
             }
             openMarkerModalButton.hidden = isFeedView;
             moveCurrentLocationButton.hidden = isFeedView;
-            currentLocationOverlay.setMap(isFeedView ? null : map);
+            syncCurrentLocationOverlay();
 
             if (isFeedView) {
                 closeClusterPanel();
