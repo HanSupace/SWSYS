@@ -1,10 +1,13 @@
 package com.daily.lastsys.features.map;
 
+import com.daily.lastsys.features.emotion.EmotionCatalog;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class HealingSpotRepository {
@@ -21,6 +24,20 @@ public class HealingSpotRepository {
     }
 
     public List<HealingSpotCandidate> findNearbyPositiveSpots(BigDecimal latitude, BigDecimal longitude) {
+        List<String> positiveLabels = EmotionCatalog.positiveLabels();
+        String positiveLabelPlaceholders = positiveLabels.stream()
+                .map(label -> "?")
+                .collect(Collectors.joining(", "));
+        List<Object> parameters = new ArrayList<>();
+        parameters.add(DISTANCE_SCORE_DECAY_IN_METERS);
+        parameters.add(EARTH_RADIUS_IN_METERS);
+        parameters.add(latitude);
+        parameters.add(latitude);
+        parameters.add(longitude);
+        parameters.addAll(positiveLabels);
+        parameters.add(SEARCH_RADIUS_IN_METERS);
+        parameters.add(SEARCH_LIMIT);
+
         return jdbcTemplate.query(
                 """
                 select
@@ -43,13 +60,13 @@ public class HealingSpotRepository {
                         latitude,
                         longitude
                     from emotion_map_markers
-                    where emotion_label in ('기쁨', '평온', '기대', '놀람')
+                    where emotion_label in (%s)
                 ) nearby_spots
                 where distance_in_meters <= ?
                 group by location_name
                 order by healing_score desc, positive_count desc, distance_in_meters asc
                 limit ?
-                """,
+                """.formatted(positiveLabelPlaceholders),
                 (resultSet, rowNumber) -> new HealingSpotCandidate(
                         resultSet.getDouble("distance_in_meters"),
                         resultSet.getString("emotion_label"),
@@ -58,13 +75,7 @@ public class HealingSpotRepository {
                         resultSet.getObject("longitude", BigDecimal.class),
                         resultSet.getInt("positive_count")
                 ),
-                DISTANCE_SCORE_DECAY_IN_METERS,
-                EARTH_RADIUS_IN_METERS,
-                latitude,
-                latitude,
-                longitude,
-                SEARCH_RADIUS_IN_METERS,
-                SEARCH_LIMIT
+                parameters.toArray()
         );
     }
 

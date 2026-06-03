@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>나의 감정 분석 - LastSys</title>
+    <meta name="application-name" th:content="${appName}" content="Plia">
+    <title th:text="|나의 감정 분석 - ${appName}|">나의 감정 분석 - Plia</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
     <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260531b)}" href="../../static/css/mainpage.css?v=20260531b">
     <link rel="stylesheet" th:href="@{/css/profile.css(v=20260531a)}" href="../../static/css/profile.css?v=20260531a">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <th:block th:replace="~{fragments/emotions :: assets}"></th:block>
     <script th:src="@{/js/emotion-records.js(v=20260531b)}" src="../../static/js/emotion-records.js?v=20260531b" defer></script>
 </head>
 <body>
@@ -16,13 +18,13 @@
 <div class="bg-shape bg-shape-1"></div>
 <div class="bg-shape bg-shape-2"></div>
 
-<main class="mobile-page home-app emotion-records-page" aria-label="LastSys 나의 감정 분석 화면">
+<main class="mobile-page home-app emotion-records-page" th:aria-label="|${appName} 나의 감정 분석 화면|" aria-label="Plia 나의 감정 분석 화면">
     <div class="bg-shape bg-shape-3"></div>
     <section class="dashboard">
         <header class="app-header">
             <a class="app-brand" th:href="@{/}" href="/">
-                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" alt="LastSys 로고">
-                <span>LastSys</span>
+                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" th:alt="|${appName} 로고|" alt="Plia 로고">
+                <span th:text="${appName}">Plia</span>
             </a>
             <form th:action="@{/logout}" method="post">
                 <button class="logout-btn" type="submit">로그아웃</button>

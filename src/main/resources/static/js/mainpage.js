@@ -21,7 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let missionsLoaded = false;
     let calendarEmotionDays = new Map();
     let pendingMissionButton = null;
-    const selectedEmotionStorageKey = 'lastsys.selectedEmotion';
+    const selectedEmotionStorageKey = 'plia.selectedEmotion';
+    const legacySelectedEmotionStorageKey = 'lastsys.selectedEmotion';
 
     const today = getKoreaToday();
     let visibleMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -55,7 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let selectedEmotion = '';
 
         try {
-            selectedEmotion = localStorage.getItem(selectedEmotionStorageKey) || '';
+            selectedEmotion = localStorage.getItem(selectedEmotionStorageKey)
+                || localStorage.getItem(legacySelectedEmotionStorageKey)
+                || '';
         } catch (error) {
             selectedEmotion = '';
         }
@@ -462,14 +465,16 @@ function renderFallbackCalendar(calendarElement, visibleMonth, today, calendarEm
         const isToday = year === today.getFullYear() && month === today.getMonth() && date === today.getDate();
         const isoDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
         const representativeEmotion = calendarEmotionDays.get(isoDate);
-        const emotionColor = normalizeCalendarEmotionColor(representativeEmotion?.emotionColor);
+        const emotionStyle = calendarEmotionStyleFor(representativeEmotion?.emotionLabel, representativeEmotion?.emotionColor);
         const emotionLabel = representativeEmotion?.emotionLabel || '';
         const className = [
             isToday ? 'today' : '',
-            emotionColor ? 'has-emotion-record' : ''
+            emotionStyle ? 'has-emotion-record' : ''
         ].filter(Boolean).join(' ');
         const tooltip = emotionLabel ? `대표 감정 ${emotionLabel}` : '감정 기록 없음';
-        const style = emotionColor ? ` style="--calendar-emotion-color: ${emotionColor}"` : '';
+        const style = emotionStyle
+            ? ` style="--calendar-emotion-bg: ${emotionStyle.background}; --calendar-emotion-border: ${emotionStyle.border}; --calendar-emotion-text: ${emotionStyle.color};"`
+            : '';
         cells.push(`
             <span
                 class="calendar-day ${className}"
@@ -499,9 +504,31 @@ function renderFallbackCalendar(calendarElement, visibleMonth, today, calendarEm
 
 }
 
-function normalizeCalendarEmotionColor(value) {
+function calendarEmotionStyleFor(label, value) {
     const color = String(value || '').trim();
-    return /^#[0-9a-fA-F]{6}$/.test(color) ? color : '';
+    const fallbackColor = /^#[0-9a-fA-F]{6}$/.test(color) ? color : '';
+
+    if (window.PLIA_EMOTION && typeof window.PLIA_EMOTION.metaForLabel === 'function') {
+        const emotion = window.PLIA_EMOTION.metaForLabel(label, fallbackColor);
+
+        if (emotion && emotion.color) {
+            return {
+                background: emotion.background || emotion.color,
+                border: emotion.border || emotion.color,
+                color: emotion.color
+            };
+        }
+    }
+
+    if (!fallbackColor) {
+        return null;
+    }
+
+    return {
+        background: fallbackColor,
+        border: fallbackColor,
+        color: '#FFFFFF'
+    };
 }
 
 function getKoreaToday() {

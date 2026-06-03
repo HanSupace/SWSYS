@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>LastSys 감정지도</title>
+    <title th:text="|${appName} 감정지도|">Plia 감정지도</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../static/css/home.css?v=20260512b">
     <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260519b)}" href="../static/css/mainpage.css?v=20260519b">
     <link rel="stylesheet" th:href="@{/css/map.css(v=20260531a)}" href="../static/css/map.css?v=20260531a">
+    <th:block th:replace="~{fragments/emotions :: assets}"></th:block>
 </head>
 <body>
 <div class="bg-pattern"></div>
@@ -15,12 +16,12 @@
 <div class="bg-shape bg-shape-2"></div>
 <div class="bg-shape bg-shape-3"></div>
 
-<main class="mobile-page home-app map-app" aria-label="LastSys 감정지도 화면">
+<main class="mobile-page home-app map-app" th:aria-label="|${appName} 감정지도 화면|" aria-label="Plia 감정지도 화면">
     <section class="dashboard map-dashboard">
         <header class="app-header">
             <a class="app-brand" th:href="@{/}" href="/">
-                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" alt="LastSys 로고">
-                <span>LastSys</span>
+                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" th:alt="|${appName} 로고|" alt="Plia 로고">
+                <span th:text="${appName}">Plia</span>
             </a>
             <form th:action="@{/logout}" method="post">
                 <button class="logout-btn" type="submit">로그아웃</button>
@@ -37,8 +38,27 @@
                 <input id="map-search-input" type="search" placeholder="위치 검색" aria-label="위치 검색">
                 <button type="submit">검색</button>
             </form>
+            <div class="map-view-switch" role="group" aria-label="보기 방식 전환">
+                <button id="map-view-map" class="map-view-toggle" type="button" data-map-view="map" aria-pressed="true" aria-label="지도로 보기">
+                    <span class="map-view-icon map-view-icon-map" aria-hidden="true"></span>
+                    <em>지도</em>
+                </button>
+                <button id="map-view-feed" class="map-view-toggle" type="button" data-map-view="feed" aria-pressed="false" aria-label="피드로 보기">
+                    <span class="map-view-icon map-view-icon-feed" aria-hidden="true"></span>
+                    <em>피드</em>
+                </button>
+            </div>
             <div class="map-stage">
                 <div id="map" class="emotion-map" aria-label="카카오 지도"></div>
+                <section id="map-feed-panel" class="map-feed-panel" aria-label="감정 피드" hidden>
+                    <div class="map-feed-head">
+                        <div>
+                            <strong>감정 피드</strong>
+                            <span id="map-feed-summary">전체 기록 0개</span>
+                        </div>
+                    </div>
+                    <div id="map-feed-list" class="map-feed-list" aria-live="polite"></div>
+                </section>
                 <aside id="map-cluster-panel" class="map-cluster-panel" aria-label="클러스터 기록 리스트" hidden>
                     <div class="map-cluster-panel-head">
                         <div>
@@ -81,7 +101,7 @@
                             <span>내 감정핀</span>
                             <em id="map-filter-mine-count">0</em>
                         </button>
-                        <button class="map-filter-chip" type="button" data-filter-type="emotions" style="--chip-color: #28746F">
+                        <button class="map-filter-chip" type="button" data-filter-type="emotions" style="--chip-color: var(--primary-color)">
                             <span>감정별</span>
                             <em id="map-emotion-toggle-mark">+</em>
                         </button>
@@ -113,37 +133,25 @@
 
         <form id="emotion-marker-form" class="emotion-marker-form" autocomplete="off">
             <div class="emotion-picker" role="radiogroup" aria-label="감정 선택">
-                <label class="emotion-option" data-emotion-id="default-happiness">
-                    <input type="radio" name="emotion" value="happiness" data-label="기쁨" data-color="#765A08" checked>
-                    <span>기쁨</span>
-                </label>
-                <label class="emotion-option" data-emotion-id="default-anticipation">
-                    <input type="radio" name="emotion" value="anticipation" data-label="기대" data-color="#4F711F">
-                    <span>기대</span>
-                </label>
-                <label class="emotion-option" data-emotion-id="default-sadness">
-                    <input type="radio" name="emotion" value="sadness" data-label="슬픔" data-color="#315C86">
-                    <span>슬픔</span>
-                </label>
-                <label class="emotion-option" data-emotion-id="default-anger">
-                    <input type="radio" name="emotion" value="anger" data-label="분노" data-color="#9D312B">
-                    <span>분노</span>
-                </label>
-                <label class="emotion-option" data-emotion-id="default-anxiety">
-                    <input type="radio" name="emotion" value="anxiety" data-label="불안" data-color="#5C477D">
-                    <span>불안</span>
-                </label>
-                <label class="emotion-option" data-emotion-id="default-embarrassment">
-                    <input type="radio" name="emotion" value="embarrassment" data-label="당황" data-color="#8B3D66">
-                    <span>당황</span>
-                </label>
-                <label class="emotion-option" data-emotion-id="default-surprise">
-                    <input type="radio" name="emotion" value="surprise" data-label="놀람" data-color="#28746F">
-                    <span>놀람</span>
-                </label>
-                <label class="emotion-option" data-emotion-id="default-irritation">
-                    <input type="radio" name="emotion" value="irritation" data-label="짜증" data-color="#925021">
-                    <span>짜증</span>
+                <label class="emotion-option"
+                       th:each="emotion, emotionStatus : ${emotions}"
+                       th:data-emotion-id="${emotion.id()}"
+                       th:data-emotion-code="${emotion.code()}"
+                       th:style="|--emotion-bg: ${emotion.background()}; --emotion-border: ${emotion.border()}; --emotion-text: ${emotion.color()};|"
+                       data-emotion-id="default-happiness"
+                       data-emotion-code="HAPPY">
+                    <input type="radio"
+                           name="emotion"
+                           th:value="${emotion.value()}"
+                           th:data-emotion-code="${emotion.code()}"
+                           th:data-label="${emotion.label()}"
+                           th:data-color="${emotion.color()}"
+                           th:checked="${emotionStatus.index == 0}"
+                           value="happiness"
+                           data-emotion-code="HAPPY"
+                           data-label="기쁨"
+                           checked>
+                    <span th:text="${emotion.label()}">기쁨</span>
                 </label>
             </div>
             <div class="marker-fields">
@@ -194,6 +202,11 @@
         var searchForm = document.getElementById('map-search-form');
         var searchInput = document.getElementById('map-search-input');
         var searchResults = document.getElementById('map-search-results');
+        var mapViewButtons = document.querySelectorAll('[data-map-view]');
+        var feedPanel = document.getElementById('map-feed-panel');
+        var feedSummary = document.getElementById('map-feed-summary');
+        var feedList = document.getElementById('map-feed-list');
+        var mapCrosshair = document.querySelector('.map-crosshair');
         var markerModal = document.getElementById('marker-modal');
         var openMarkerModalButton = document.getElementById('open-marker-modal');
         var moveCurrentLocationButton = document.getElementById('move-current-location');
@@ -224,6 +237,19 @@
         var recordDeleteBackdrop = document.getElementById('record-delete-backdrop');
         var recordDeleteCancelButton = document.getElementById('record-delete-cancel');
         var recordDeleteConfirmButton = document.getElementById('record-delete-confirm');
+        var mapViewStorageKey = 'plia.mapViewMode';
+        var currentViewMode = loadMapViewMode();
+        var isInitialFeedView = currentViewMode === 'feed';
+        document.body.classList.toggle('is-feed-view', isInitialFeedView);
+        container.classList.toggle('is-feed-hidden', isInitialFeedView);
+        container.setAttribute('aria-hidden', String(isInitialFeedView));
+        feedPanel.hidden = !isInitialFeedView;
+        searchForm.hidden = isInitialFeedView;
+        openMarkerModalButton.hidden = isInitialFeedView;
+        moveCurrentLocationButton.hidden = isInitialFeedView;
+        if (mapCrosshair) {
+            mapCrosshair.hidden = isInitialFeedView;
+        }
 
         if (!window.kakao || !window.kakao.maps) {
             message.textContent = '지도를 불러오지 못했습니다. Kakao JavaScript 키와 도메인 설정을 확인해주세요.';
@@ -293,16 +319,7 @@
             level: 5,
             draggable: true
         };
-        var emotionFilterOptions = [
-            { label: '기쁨', color: '#765A08' },
-            { label: '기대', color: '#4F711F' },
-            { label: '슬픔', color: '#315C86' },
-            { label: '분노', color: '#9D312B' },
-            { label: '불안', color: '#5C477D' },
-            { label: '당황', color: '#8B3D66' },
-            { label: '놀람', color: '#28746F' },
-            { label: '짜증', color: '#925021' }
-        ];
+        var emotionFilterOptions = Array.isArray(window.PLIA_EMOTIONS) ? window.PLIA_EMOTIONS : [];
 
         var map = new kakao.maps.Map(container, options);
         map.setDraggable(true);
@@ -324,7 +341,11 @@
             zIndex: 4
         });
 
-        currentLocationOverlay.setMap(map);
+        function syncCurrentLocationOverlay() {
+            currentLocationOverlay.setMap(currentViewMode === 'map' && hasCurrentPosition ? map : null);
+        }
+
+        syncCurrentLocationOverlay();
         message.textContent = hasRequestedPosition ? '선택한 힐링 스팟 위치를 표시했습니다.' : '현재 위치를 확인하는 중입니다.';
         message.hidden = hasRequestedPosition;
 
@@ -358,6 +379,23 @@
             return false;
         }
 
+        function clearRequestedEmotionIntent() {
+            if (!requestedEmotionId || !window.history || !window.history.replaceState) {
+                requestedEmotionId = '';
+                return;
+            }
+
+            try {
+                var nextUrl = new URL(window.location.href);
+                nextUrl.searchParams.delete('emotionId');
+                window.history.replaceState(window.history.state, '', nextUrl.pathname + nextUrl.search + nextUrl.hash);
+            } catch (error) {
+                // URL 정리에 실패해도 현재 자동 열림 상태는 한 번만 소비합니다.
+            }
+
+            requestedEmotionId = '';
+        }
+
         function closeMarkerModal() {
             markerLocationRequestId += 1;
             isResolvingMarkerLocation = false;
@@ -371,7 +409,9 @@
         function moveTo(position, level) {
             currentPosition = position;
             hasCurrentPosition = true;
+            currentLocationElement.setAttribute('aria-label', '현재 위치');
             currentLocationOverlay.setPosition(position);
+            syncCurrentLocationOverlay();
             map.setLevel(level);
             map.setCenter(position);
         }
@@ -403,6 +443,10 @@
         }
 
         function moveToCurrentLocation() {
+            message.textContent = '현재 위치를 확인하는 중입니다.';
+            message.classList.remove('is-error');
+            message.hidden = false;
+
             getCurrentKakaoPosition()
                 .then(function (userPosition) {
                     moveTo(userPosition, 4);
@@ -600,6 +644,24 @@
             return checkedEmotion ? checkedEmotion.dataset.label : '';
         }
 
+        function emotionMetaForLabel(label, fallbackColor) {
+            if (window.PLIA_EMOTION && typeof window.PLIA_EMOTION.metaForLabel === 'function') {
+                return window.PLIA_EMOTION.metaForLabel(label, fallbackColor || '');
+            }
+
+            return {
+                label: String(label || '').trim(),
+                color: fallbackColor || ''
+            };
+        }
+
+        function normalizeRecordDetail(recordDetail) {
+            var emotion = emotionMetaForLabel(recordDetail.emotionLabel, recordDetail.emotionColor);
+            recordDetail.emotionLabel = emotion.label || recordDetail.emotionLabel;
+            recordDetail.emotionColor = emotion.color || recordDetail.emotionColor;
+            return recordDetail;
+        }
+
         function placeRelevanceScore(place, keyword, contextValue) {
             var normalizedKeyword = normalizeSearchText(keyword);
             var placeName = normalizeSearchText(place.place_name);
@@ -757,6 +819,114 @@
             }, 1800);
         }
 
+        function loadMapViewMode() {
+            try {
+                var storedViewMode = localStorage.getItem(mapViewStorageKey);
+                return storedViewMode === 'feed' ? 'feed' : 'map';
+            } catch (error) {
+                return 'map';
+            }
+        }
+
+        function persistMapViewMode(viewMode) {
+            try {
+                localStorage.setItem(mapViewStorageKey, viewMode);
+            } catch (error) {
+                // 저장이 막혀도 현재 화면 전환은 유지합니다.
+            }
+        }
+
+        function setMapViewMode(viewMode, shouldPersist) {
+            currentViewMode = viewMode === 'feed' ? 'feed' : 'map';
+
+            if (shouldPersist !== false) {
+                persistMapViewMode(currentViewMode);
+            }
+
+            mapViewButtons.forEach(function (button) {
+                var isActive = button.dataset.mapView === currentViewMode;
+                button.classList.toggle('is-active', isActive);
+                button.setAttribute('aria-pressed', String(isActive));
+            });
+
+            var isFeedView = currentViewMode === 'feed';
+            document.body.classList.toggle('is-feed-view', isFeedView);
+            container.classList.toggle('is-feed-hidden', isFeedView);
+            container.setAttribute('aria-hidden', String(isFeedView));
+            feedPanel.hidden = !isFeedView;
+            searchForm.hidden = isFeedView;
+            searchResults.hidden = true;
+            if (mapCrosshair) {
+                mapCrosshair.hidden = isFeedView;
+            }
+            openMarkerModalButton.hidden = isFeedView;
+            moveCurrentLocationButton.hidden = isFeedView;
+            syncCurrentLocationOverlay();
+
+            if (isFeedView) {
+                closeClusterPanel();
+                if (activeMarkerItem) {
+                    closeInfoOverlay(activeMarkerItem);
+                }
+                removeClusterOverlays();
+                emotionMarkerItems.forEach(function (item) {
+                    item.markerOverlay.setMap(null);
+                });
+                renderFeedList();
+                updateFilterMenu(visibleMarkerItems().length);
+                return;
+            }
+
+            feedPanel.hidden = true;
+            kakao.maps.event.trigger(map, 'resize');
+            map.setCenter(currentPosition);
+            refreshMarkerLayers();
+        }
+
+        function renderFeedList() {
+            if (!feedList || !feedSummary) {
+                return;
+            }
+
+            var items = visibleMarkerItems();
+            var summaryText = activeEmotionFilter === 'ALL' ? '전체 기록' : activeEmotionFilter + ' 기록';
+            feedSummary.textContent = summaryText + ' ' + items.length + '개';
+
+            if (!items.length) {
+                feedList.innerHTML = '<p class="map-feed-empty">조건에 맞는 감정 기록이 없습니다.</p>';
+                return;
+            }
+
+            feedList.innerHTML = items.map(function (item) {
+                var summary = summarizeText(item.description || item.title || '');
+                return '<article class="map-feed-item" tabindex="0" role="button" data-record-id="' + escapeHtml(item.id) + '" style="--feed-color: ' + escapeHtml(item.emotionColor) + '">' +
+                    '<div class="map-feed-item-top">' +
+                    '<span>' + escapeHtml(item.emotionLabel) + '</span>' +
+                    '<time>' + escapeHtml(formatMarkerDate(item.createdAt)) + '</time>' +
+                    '</div>' +
+                    '<h3>' + escapeHtml(item.title) + '</h3>' +
+                    '<p>' + escapeHtml(summary) + '</p>' +
+                    '<div class="map-feed-meta">' +
+                    '<strong>' + escapeHtml(item.authorNickname || '사용자') + '</strong>' +
+                    '</div>' +
+                    '<div class="map-feed-bottom">' +
+                    '<small class="map-feed-location">' + escapeHtml(item.locationName || formatPosition(item.position)) + '</small>' +
+                    (item.own ? '<button class="map-feed-delete" type="button" data-feed-delete-id="' + escapeHtml(item.id) + '" aria-label="기록 삭제">삭제</button>' : '') +
+                    '</div>' +
+                    '</article>';
+            }).join('');
+        }
+
+        function summarizeText(value) {
+            var text = String(value || '').replace(/\s+/g, ' ').trim();
+
+            if (text.length <= 90) {
+                return text;
+            }
+
+            return text.slice(0, 90) + '...';
+        }
+
         function setFilterPanelOpen(isOpen) {
             if (!filterToggleButton || !filterPanel) {
                 return;
@@ -870,7 +1040,17 @@
                 return;
             }
 
-            pendingDeleteRecordId = activeRecordDetail.id;
+            openDeleteConfirmForRecord(activeRecordDetail.id);
+        }
+
+        function openDeleteConfirmForRecord(recordId) {
+            var markerItem = findMarkerItem(recordId);
+
+            if (!markerItem || !markerItem.own) {
+                return;
+            }
+
+            pendingDeleteRecordId = markerItem.id;
             recordDeleteModal.hidden = false;
             document.body.classList.add('is-record-delete-modal-open');
             window.setTimeout(function () {
@@ -900,7 +1080,9 @@
 
             emotionMarkerItems.forEach(function (item) {
                 var matchesFilter = markerMatchesFilter(item);
-                var shouldShow = matchesFilter && (!markerHiddenByCluster(item) || item === activeMarkerItem);
+                var shouldShow = currentViewMode === 'map'
+                    && matchesFilter
+                    && (!markerHiddenByCluster(item) || item === activeMarkerItem);
 
                 item.markerOverlay.setMap(shouldShow ? map : null);
 
@@ -914,6 +1096,7 @@
             });
 
             updateFilterMenu(visibleCount);
+            renderFeedList();
         }
 
         function removeClusterOverlays() {
@@ -933,6 +1116,11 @@
         function markerScreenPoint(item) {
             var projection = map.getProjection();
             var point = projection.containerPointFromCoords(item.position);
+
+            if (!point) {
+                return null;
+            }
+
             return {
                 x: point.x,
                 y: point.y
@@ -969,6 +1157,8 @@
                     item: item,
                     screenPoint: markerScreenPoint(item)
                 };
+            }).filter(function (entry) {
+                return entry.screenPoint;
             }).filter(function (entry) {
                 return isPointInViewport(entry.screenPoint);
             });
@@ -1013,9 +1203,10 @@
         function dominantEmotion(clusterItems) {
             var counts = {};
             var firstByEmotion = {};
+            var firstEmotion = emotionMetaForLabel(clusterItems[0].emotionLabel, clusterItems[0].emotionColor);
             var bestEmotion = {
-                label: clusterItems[0].emotionLabel,
-                color: clusterItems[0].emotionColor
+                label: firstEmotion.label || clusterItems[0].emotionLabel,
+                color: firstEmotion.color || clusterItems[0].emotionColor
             };
 
             clusterItems.forEach(function (item, index) {
@@ -1029,9 +1220,10 @@
                     || counts[item.emotionLabel] === counts[bestEmotion.label]
                     && firstByEmotion[item.emotionLabel] < firstByEmotion[bestEmotion.label]
                 ) {
+                    var emotion = emotionMetaForLabel(item.emotionLabel, item.emotionColor);
                     bestEmotion = {
-                        label: item.emotionLabel,
-                        color: item.emotionColor
+                        label: emotion.label || item.emotionLabel,
+                        color: emotion.color || item.emotionColor
                     };
                 }
             });
@@ -1145,7 +1337,7 @@
                     throw new Error(String(response.status));
                 }
 
-                activeRecordDetail = await response.json();
+                activeRecordDetail = normalizeRecordDetail(await response.json());
                 activeRecordComments = [];
                 renderRecordDetail();
                 await loadRecordComments(recordId);
@@ -1190,7 +1382,9 @@
         }
 
         async function deleteActiveRecord() {
-            if (!activeRecordDetail || !activeRecordDetail.own || !pendingDeleteRecordId) {
+            var markerItem = findMarkerItem(pendingDeleteRecordId);
+
+            if (!pendingDeleteRecordId || !markerItem || !markerItem.own) {
                 return;
             }
 
@@ -1256,6 +1450,10 @@
         function renderViewportClusters() {
             removeClusterOverlays();
 
+            if (currentViewMode !== 'map') {
+                return;
+            }
+
             var clusters = buildViewportClusters(visibleMarkerItems());
             clusters.forEach(function (clusterItems) {
                 clusterItems.forEach(function (item) {
@@ -1275,6 +1473,14 @@
             }
         }
 
+        function renderViewportClustersSafely() {
+            try {
+                renderViewportClusters();
+            } catch (error) {
+                removeClusterOverlays();
+            }
+        }
+
         function scheduleCustomMarkerVisibilitySync() {
             if (markerVisibilityFrame) {
                 return;
@@ -1282,7 +1488,11 @@
 
             markerVisibilityFrame = window.requestAnimationFrame(function () {
                 markerVisibilityFrame = null;
-                renderViewportClusters();
+                if (currentViewMode !== 'map') {
+                    syncCustomMarkerVisibility();
+                    return;
+                }
+                renderViewportClustersSafely();
                 syncCustomMarkerVisibility();
             });
         }
@@ -1301,7 +1511,13 @@
             });
 
             updateFilterMenu(visibleItems.length);
-            renderViewportClusters();
+            renderFeedList();
+
+            if (currentViewMode !== 'map') {
+                return;
+            }
+
+            renderViewportClustersSafely();
             syncCustomMarkerVisibility();
         }
 
@@ -1421,6 +1637,46 @@
 
             applyMarkerFilters();
             setFilterPanelOpen(false);
+        });
+
+        mapViewButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                setMapViewMode(button.dataset.mapView);
+            });
+        });
+
+        feedList?.addEventListener('click', function (event) {
+            var deleteButton = event.target.closest('[data-feed-delete-id]');
+
+            if (deleteButton && feedList.contains(deleteButton)) {
+                event.preventDefault();
+                event.stopPropagation();
+                openDeleteConfirmForRecord(deleteButton.dataset.feedDeleteId);
+                return;
+            }
+
+            var feedItem = event.target.closest('.map-feed-item');
+
+            if (!feedItem || !feedList.contains(feedItem)) {
+                return;
+            }
+
+            openRecordDetail(feedItem.dataset.recordId);
+        });
+
+        feedList?.addEventListener('keydown', function (event) {
+            if (event.key !== 'Enter' && event.key !== ' ') {
+                return;
+            }
+
+            var feedItem = event.target.closest('.map-feed-item');
+
+            if (!feedItem || !feedList.contains(feedItem) || event.target.closest('[data-feed-delete-id]')) {
+                return;
+            }
+
+            event.preventDefault();
+            openRecordDetail(feedItem.dataset.recordId);
         });
 
         clusterRecords?.addEventListener('click', function (event) {
@@ -1658,11 +1914,12 @@
                 closeClusterPanel();
             }
 
+            renderFeedList();
             scheduleEmotionFiltersRender();
             applyMarkerFilters();
         }
 
-        function createEmotionMarker(markerId, position, emotion, title, description, locationName, createdAt, own, shouldOpen) {
+        function createEmotionMarker(markerId, position, emotion, title, description, locationName, authorNickname, createdAt, own, shouldOpen) {
             var markerElement = document.createElement('button');
             markerElement.type = 'button';
             markerElement.className = 'emotion-map-marker';
@@ -1719,6 +1976,7 @@
                 title: title,
                 description: description,
                 locationName: locationName,
+                authorNickname: authorNickname,
                 createdAt: createdAt,
                 own: Boolean(own)
             };
@@ -1736,10 +1994,19 @@
             });
 
             emotionMarkerItems.push(markerItem);
+            if (currentViewMode === 'map' && markerMatchesFilter(markerItem)) {
+                markerOverlay.setMap(map);
+            }
+            renderFeedList();
             scheduleEmotionFiltersRender();
             applyMarkerFilters();
 
             if (shouldOpen) {
+                if (currentViewMode === 'feed') {
+                    openRecordDetail(markerItem.id);
+                    return markerItem;
+                }
+
                 if (activeInfoOverlay) {
                     activeInfoOverlay.setMap(null);
                 }
@@ -1749,23 +2016,28 @@
                     openInfoOverlay(markerItem);
                 }
             }
+
+            return markerItem;
         }
 
         function markerFromResponse(marker, shouldOpen) {
-            if (!marker.latitude || !marker.longitude || !marker.emotionLabel || !marker.title) {
-                return;
+            if (marker.latitude == null || marker.longitude == null || !marker.emotionLabel || !marker.title) {
+                return null;
             }
 
-            createEmotionMarker(
+            var emotion = emotionMetaForLabel(marker.emotionLabel, marker.emotionColor);
+
+            return createEmotionMarker(
                 marker.id,
                 new kakao.maps.LatLng(marker.latitude, marker.longitude),
                 {
-                    label: marker.emotionLabel,
-                    color: marker.emotionColor
+                    label: emotion.label || marker.emotionLabel,
+                    color: emotion.color || marker.emotionColor
                 },
                 marker.title,
                 marker.description || '',
                 marker.locationName || '',
+                marker.authorNickname || '',
                 marker.createdAt || '',
                 marker.own,
                 shouldOpen
@@ -1777,13 +2049,18 @@
                 var response = await fetch('/api/emotion-map-markers');
 
                 if (!response.ok) {
-                    return;
+                    throw new Error(String(response.status));
                 }
 
                 var markers = await response.json();
                 markers.forEach(function (marker) {
                     markerFromResponse(marker, false);
                 });
+                if (currentViewMode === 'map') {
+                    refreshMarkerLayers();
+                }
+                renderFeedList();
+                updateFilterMenu(visibleMarkerItems().length);
             } catch (error) {
                 showError('저장된 감정 마커를 불러오지 못했습니다.');
             }
@@ -1805,6 +2082,7 @@
             return response.json();
         }
 
+        setMapViewMode(currentViewMode, false);
         renderEmotionFilters();
         loadEmotionMarkers();
 
@@ -1847,11 +2125,12 @@
 
             try {
                 var markerPosition = selectedMarkerLocationPosition || map.getCenter();
+                var selectedEmotion = emotionMetaForLabel(checkedEmotion.dataset.label, checkedEmotion.dataset.color);
                 var savedMarker = await saveEmotionMarker({
                     latitude: markerPosition.getLat(),
                     longitude: markerPosition.getLng(),
-                    emotionLabel: checkedEmotion.dataset.label,
-                    emotionColor: checkedEmotion.dataset.color,
+                    emotionLabel: selectedEmotion.label || checkedEmotion.dataset.label,
+                    emotionColor: selectedEmotion.color || checkedEmotion.dataset.color,
                     title: title,
                     locationName: locationName,
                     description: description
@@ -1935,9 +2214,13 @@
         });
 
         if (requestedEmotionId && selectMarkerEmotion(requestedEmotionId)) {
+            clearRequestedEmotionIntent();
             openMarkerModal();
         } else if (requestedEmotionId && !hasRequestedPosition) {
+            clearRequestedEmotionIntent();
             moveToCurrentLocation();
+        } else if (requestedEmotionId) {
+            clearRequestedEmotionIntent();
         }
 
         window.addEventListener('keydown', function (event) {
@@ -1949,6 +2232,10 @@
         });
 
         window.addEventListener('resize', function () {
+            if (currentViewMode !== 'map') {
+                return;
+            }
+
             kakao.maps.event.trigger(map, 'resize');
             map.setCenter(currentPosition);
             scheduleCustomMarkerVisibilitySync();
