@@ -7,6 +7,7 @@ public record EmotionMapMarkerResponse(
         Long id,
         BigDecimal latitude,
         BigDecimal longitude,
+        String authorNickname,
         String emotionLabel,
         String emotionColor,
         String title,

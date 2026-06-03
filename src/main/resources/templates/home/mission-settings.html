@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>선행 미션 설정 - LastSys</title>
+    <meta name="application-name" th:content="${appName}" content="Plia">
+    <title th:text="|선행 미션 설정 - ${appName}|">선행 미션 설정 - Plia</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
     <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260519b)}" href="../../static/css/mainpage.css?v=20260519b">
@@ -14,13 +15,13 @@
 <div class="bg-shape bg-shape-1"></div>
 <div class="bg-shape bg-shape-2"></div>
 
-<main class="mobile-page home-app" aria-label="LastSys 선행 미션 설정 화면">
+<main class="mobile-page home-app" th:aria-label="|${appName} 선행 미션 설정 화면|" aria-label="Plia 선행 미션 설정 화면">
     <div class="bg-shape bg-shape-3"></div>
     <section class="dashboard">
         <header class="app-header">
             <a class="app-brand" th:href="@{/}" href="/">
-                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" alt="LastSys 로고">
-                <span>LastSys</span>
+                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" th:alt="|${appName} 로고|" alt="Plia 로고">
+                <span th:text="${appName}">Plia</span>
             </a>
         </header>
 

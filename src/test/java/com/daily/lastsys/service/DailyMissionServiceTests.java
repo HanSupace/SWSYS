@@ -4,6 +4,7 @@ import com.daily.lastsys.features.dailymission.DailyMissionDayResponse;
 import com.daily.lastsys.features.dailymission.DailyMissionListResponse;
 import com.daily.lastsys.features.dailymission.DailyMissionResponse;
 import com.daily.lastsys.features.dailymission.DailyMissionService;
+import com.daily.lastsys.features.emotion.EmotionCatalog;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -55,36 +56,46 @@ class DailyMissionServiceTests {
         insertUser(firstUserId, "calendar-user-a", "calendar-nickname-a");
         insertUser(secondUserId, "calendar-user-b", "calendar-nickname-b");
 
-        insertEmotionMarker(firstUserId, "2026-05-10 09:00:00", "기쁨", "#765A08");
-        insertEmotionMarker(firstUserId, "2026-05-10 10:00:00", "슬픔", "#315C86");
-        insertEmotionMarker(firstUserId, "2026-05-10 11:00:00", "슬픔", "#315C86");
-        insertEmotionMarker(firstUserId, "2026-05-11 09:00:00", "기쁨", "#765A08");
-        insertEmotionMarker(firstUserId, "2026-05-11 10:00:00", "기대", "#4F711F");
-        insertEmotionMarker(secondUserId, "2026-05-10 09:00:00", "기대", "#4F711F");
+        insertEmotionMarker(firstUserId, "2026-05-10 09:00:00", "기쁨", emotionColor("기쁨"));
+        insertEmotionMarker(firstUserId, "2026-05-10 10:00:00", "슬픔", emotionColor("슬픔"));
+        insertEmotionMarker(firstUserId, "2026-05-10 11:00:00", "슬픔", emotionColor("슬픔"));
+        insertEmotionMarker(firstUserId, "2026-05-11 09:00:00", "기쁨", emotionColor("기쁨"));
+        insertEmotionMarker(firstUserId, "2026-05-11 10:00:00", "기대", emotionColor("기대"));
+        insertEmotionMarker(firstUserId, "2026-05-12 09:00:00", "슬픔", "#000000");
+        insertEmotionMarker(firstUserId, "2026-05-12 10:00:00", "슬픔", emotionColor("슬픔"));
+        insertEmotionMarker(firstUserId, "2026-05-12 11:00:00", "분노", emotionColor("분노"));
+        insertEmotionMarker(secondUserId, "2026-05-10 09:00:00", "기대", emotionColor("기대"));
 
         List<DailyMissionDayResponse> firstUserDays = dailyMissionService.getMonthlyCalendarEmotions(firstUserId, 2026, 5);
         List<DailyMissionDayResponse> secondUserDays = dailyMissionService.getMonthlyCalendarEmotions(secondUserId, 2026, 5);
 
         assertThat(firstUserDays)
                 .extracting(DailyMissionDayResponse::date)
-                .doesNotContain(java.time.LocalDate.of(2026, 5, 12));
+                .doesNotContain(java.time.LocalDate.of(2026, 5, 13));
         assertThat(firstUserDays)
                 .filteredOn(day -> day.date().equals(java.time.LocalDate.of(2026, 5, 10)))
                 .singleElement()
                 .satisfies(day -> {
                     assertThat(day.emotionLabel()).isEqualTo("슬픔");
-                    assertThat(day.emotionColor()).isEqualTo("#315C86");
+                    assertThat(day.emotionColor()).isEqualTo(emotionColor("슬픔"));
                 });
         assertThat(firstUserDays)
                 .filteredOn(day -> day.date().equals(java.time.LocalDate.of(2026, 5, 11)))
                 .singleElement()
                 .satisfies(day -> assertThat(day.emotionLabel()).isEqualTo("기대"));
+        assertThat(firstUserDays)
+                .filteredOn(day -> day.date().equals(java.time.LocalDate.of(2026, 5, 12)))
+                .singleElement()
+                .satisfies(day -> {
+                    assertThat(day.emotionLabel()).isEqualTo("슬픔");
+                    assertThat(day.emotionColor()).isEqualTo(emotionColor("슬픔"));
+                });
         assertThat(secondUserDays)
                 .filteredOn(day -> day.date().equals(java.time.LocalDate.of(2026, 5, 10)))
                 .singleElement()
                 .satisfies(day -> {
                     assertThat(day.emotionLabel()).isEqualTo("기대");
-                    assertThat(day.emotionColor()).isEqualTo("#4F711F");
+                    assertThat(day.emotionColor()).isEqualTo(emotionColor("기대"));
                 });
     }
 
@@ -113,5 +124,11 @@ class DailyMissionServiceTests {
                 createdAt,
                 createdAt
         );
+    }
+
+    private String emotionColor(String label) {
+        return EmotionCatalog.findByLabel(label)
+                .orElseThrow()
+                .color();
     }
 }

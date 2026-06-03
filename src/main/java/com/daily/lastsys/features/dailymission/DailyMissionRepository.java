@@ -203,7 +203,7 @@ public class DailyMissionRepository {
                     select
                         date(created_at) as record_date,
                         emotion_label,
-                        emotion_color,
+                        max(emotion_color) as emotion_color,
                         count(*) as emotion_count,
                         max(created_at) as latest_created_at,
                         row_number() over (
@@ -214,7 +214,7 @@ public class DailyMissionRepository {
                     where user_id = ?
                       and created_at >= ?
                       and created_at < ?
-                    group by date(created_at), emotion_label, emotion_color
+                    group by date(created_at), emotion_label
                 ) daily_emotions
                 where ranking = 1
                 order by record_date

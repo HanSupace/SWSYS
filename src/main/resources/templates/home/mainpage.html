@@ -3,24 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>LastSys 메인</title>
+    <meta name="application-name" th:content="${appName}" content="Plia">
+    <title th:text="|${appName} 메인|">Plia 메인</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
     <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260531d)}" href="../../static/css/mainpage.css?v=20260531d">
+    <th:block th:replace="~{fragments/emotions :: assets}"></th:block>
     <script th:src="@{/js/mainpage.js(v=20260531d)}" src="../../static/js/mainpage.js?v=20260531d" defer></script>
 </head>
 <body>
 <div class="bg-pattern"></div>
 <div class="bg-shape bg-shape-1"></div>
 <div class="bg-shape bg-shape-2"></div>
-<main class="mobile-page home-app" aria-label="LastSys 메인 화면">
+<main class="mobile-page home-app" th:aria-label="|${appName} 메인 화면|" aria-label="Plia 메인 화면">
 <div class="bg-shape bg-shape-3"></div>
 
     <section class="dashboard">
         <header class="app-header">
             <a class="app-brand" th:href="@{/}" href="/">
-                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" alt="LastSys 로고">
-                <span>LastSys</span>
+                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" th:alt="|${appName} 로고|" alt="Plia 로고">
+                <span th:text="${appName}">Plia</span>
             </a>
             <form th:action="@{/logout}" method="post">
                 <button class="logout-btn" type="submit">로그아웃</button>
@@ -47,14 +49,18 @@
                     <h2 id="emotion-checkin-title">오늘은 어떤 감정을 느끼셨나요?</h2>
                 </div>
                 <div class="emotion-button-box" id="emotion-button-box" aria-label="감정 선택">
-                    <button class="emotion-choice" type="button" data-emotion-id="default-happiness" data-emotion="기쁨" data-tone="joy" aria-pressed="false">기쁨</button>
-                    <button class="emotion-choice" type="button" data-emotion-id="default-anticipation" data-emotion="기대" data-tone="joy" aria-pressed="false">기대</button>
-                    <button class="emotion-choice" type="button" data-emotion-id="default-sadness" data-emotion="슬픔" data-tone="sadness" aria-pressed="false">슬픔</button>
-                    <button class="emotion-choice" type="button" data-emotion-id="default-anger" data-emotion="분노" data-tone="anger" aria-pressed="false">분노</button>
-                    <button class="emotion-choice" type="button" data-emotion-id="default-anxiety" data-emotion="불안" data-tone="melancholy" aria-pressed="false">불안</button>
-                    <button class="emotion-choice" type="button" data-emotion-id="default-embarrassment" data-emotion="당황" data-tone="melancholy" aria-pressed="false">당황</button>
-                    <button class="emotion-choice" type="button" data-emotion-id="default-surprise" data-emotion="놀람" data-tone="joy" aria-pressed="false">놀람</button>
-                    <button class="emotion-choice" type="button" data-emotion-id="default-irritation" data-emotion="짜증" data-tone="anger" aria-pressed="false">짜증</button>
+                    <button class="emotion-choice"
+                            th:each="emotion : ${emotions}"
+                            type="button"
+                            th:data-emotion-id="${emotion.id()}"
+                            th:data-emotion-code="${emotion.code()}"
+                            th:data-emotion="${emotion.label()}"
+                            th:style="|--emotion-bg: ${emotion.background()}; --emotion-border: ${emotion.border()}; --emotion-text: ${emotion.color()};|"
+                            th:text="${emotion.label()}"
+                            data-emotion-id="default-happiness"
+                            data-emotion-code="HAPPY"
+                            data-emotion="기쁨"
+                            aria-pressed="false">기쁨</button>
                 </div>
             </section>
 

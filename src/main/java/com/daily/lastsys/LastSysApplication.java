@@ -1,13 +1,11 @@
 package com.daily.lastsys;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication
+/**
+ * Compatibility entry point for existing IDE run configurations.
+ */
 public class LastSysApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(LastSysApplication.class, args);
+        PliaApplication.main(args);
     }
-
 }

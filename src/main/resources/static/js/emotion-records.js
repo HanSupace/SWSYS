@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const emotionChartColors = ['#2F7650', '#8DBA75', '#6D93BA', '#D88B74', '#A78BC7', '#70B8B0', '#B99B75', '#87939A'];
     let emotionChart = null;
 
     async function loadEmotionSummaryChart() {
@@ -47,8 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     datasets: [{
                         label: '기록 수',
                         data,
-                        backgroundColor: labels.map((label, index) => emotionChartColors[index % emotionChartColors.length]),
-                        borderColor: labels.map((label, index) => emotionChartColors[index % emotionChartColors.length]),
+                        backgroundColor: labels.map((label) => emotionColorFor(label)),
+                        borderColor: labels.map((label) => emotionColorFor(label)),
                         borderWidth: 1,
                         borderRadius: 10,
                         borderSkipped: false,
@@ -152,6 +151,14 @@ document.addEventListener('DOMContentLoaded', () => {
         emptyElement.hidden = false;
         emptyElement.querySelector('strong').textContent = title;
         emptyElement.querySelector('span').textContent = message;
+    }
+
+    function emotionColorFor(label) {
+        if (window.PLIA_EMOTION && typeof window.PLIA_EMOTION.colorFor === 'function') {
+            return window.PLIA_EMOTION.colorFor(label, '#2F7650');
+        }
+
+        return '#2F7650';
     }
 
     function loadHealingSpots() {

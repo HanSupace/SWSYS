@@ -1,6 +1,7 @@
 package com.daily.lastsys.features.dailymission;
 
 import com.daily.lastsys.features.dailymission.DailyMissionRepository.DailyMissionSeed;
+import com.daily.lastsys.features.emotion.EmotionCatalog;
 import com.daily.lastsys.features.userprogress.UserProgressService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -232,7 +233,11 @@ public class DailyMissionService {
         LocalDate endDateExclusive = startDate.plusMonths(1);
 
         return dailyMissionRepository.findRepresentativeEmotions(userId, startDate, endDateExclusive).stream()
-                .map(day -> new DailyMissionDayResponse(day.date(), day.emotionLabel(), day.emotionColor()))
+                .map(day -> new DailyMissionDayResponse(
+                        day.date(),
+                        day.emotionLabel(),
+                        EmotionCatalog.colorForLabelOrDefault(day.emotionLabel(), day.emotionColor())
+                ))
                 .toList();
     }
 

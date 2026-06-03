@@ -1,5 +1,6 @@
 package com.daily.lastsys.features.map;
 
+import com.daily.lastsys.features.emotion.EmotionCatalog;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -41,12 +42,8 @@ public class HealingSpotService {
     }
 
     private String emotionEmoji(String emotionLabel) {
-        return switch (emotionLabel) {
-            case "기쁨" -> "😊";
-            case "평온" -> "🕊️";
-            case "기대" -> "🌿";
-            case "놀람" -> "✨";
-            default -> "🙂";
-        };
+        return EmotionCatalog.findByLabel(emotionLabel)
+                .map(EmotionCatalog.EmotionMeta::icon)
+                .orElse("🙂");
     }
 }
