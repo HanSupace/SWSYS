@@ -282,7 +282,24 @@
     justify-content: space-between;
 }
 
+.record-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: 0 0 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    background: rgba(26, 77, 57, 0.08);
+    color: var(--primary-color);
+    font-size: 1rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
 .record-info {
+    min-width: 0;
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;

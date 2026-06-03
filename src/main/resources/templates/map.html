@@ -29,24 +29,26 @@
         </header>
 
         <section class="map-shell" aria-label="감정지도">
-            <div class="map-filter">
-                <button id="map-filter-toggle" class="map-filter-toggle" type="button" aria-label="지도 필터 메뉴" aria-expanded="false" aria-controls="map-filter-panel">
-                    <span aria-hidden="true"></span>
-                </button>
-            </div>
-            <form id="map-search-form" class="map-search-form" autocomplete="off">
-                <input id="map-search-input" type="search" placeholder="위치 검색" aria-label="위치 검색">
-                <button type="submit">검색</button>
-            </form>
-            <div class="map-view-switch" role="group" aria-label="보기 방식 전환">
-                <button id="map-view-map" class="map-view-toggle" type="button" data-map-view="map" aria-pressed="true" aria-label="지도로 보기">
-                    <span class="map-view-icon map-view-icon-map" aria-hidden="true"></span>
-                    <em>지도</em>
-                </button>
-                <button id="map-view-feed" class="map-view-toggle" type="button" data-map-view="feed" aria-pressed="false" aria-label="피드로 보기">
-                    <span class="map-view-icon map-view-icon-feed" aria-hidden="true"></span>
-                    <em>피드</em>
-                </button>
+            <div class="map-control-header">
+                <div class="map-filter">
+                    <button id="map-filter-toggle" class="map-filter-toggle" type="button" aria-label="지도 필터 메뉴" aria-expanded="false" aria-controls="map-filter-panel">
+                        <span aria-hidden="true"></span>
+                    </button>
+                </div>
+                <form id="map-search-form" class="map-search-form" autocomplete="off">
+                    <input id="map-search-input" type="search" placeholder="위치 검색" aria-label="위치 검색">
+                    <button type="submit">검색</button>
+                </form>
+                <div class="map-view-switch" role="group" aria-label="보기 방식 전환">
+                    <button id="map-view-map" class="map-view-toggle" type="button" data-map-view="map" aria-pressed="true" aria-label="지도로 보기">
+                        <span class="map-view-icon" aria-hidden="true">📍</span>
+                        <em>지도</em>
+                    </button>
+                    <button id="map-view-feed" class="map-view-toggle" type="button" data-map-view="feed" aria-pressed="false" aria-label="피드로 보기">
+                        <span class="map-view-icon" aria-hidden="true">📝</span>
+                        <em>피드</em>
+                    </button>
+                </div>
             </div>
             <div class="map-stage">
                 <div id="map" class="emotion-map" aria-label="카카오 지도"></div>
@@ -244,7 +246,7 @@
         container.classList.toggle('is-feed-hidden', isInitialFeedView);
         container.setAttribute('aria-hidden', String(isInitialFeedView));
         feedPanel.hidden = !isInitialFeedView;
-        searchForm.hidden = isInitialFeedView;
+        searchForm.hidden = false;
         openMarkerModalButton.hidden = isInitialFeedView;
         moveCurrentLocationButton.hidden = isInitialFeedView;
         if (mapCrosshair) {
@@ -646,12 +648,31 @@
 
         function emotionMetaForLabel(label, fallbackColor) {
             if (window.PLIA_EMOTION && typeof window.PLIA_EMOTION.metaForLabel === 'function') {
-                return window.PLIA_EMOTION.metaForLabel(label, fallbackColor || '');
+                var emotion = window.PLIA_EMOTION.metaForLabel(label, fallbackColor || '');
+                return normalizeEmotionMeta(emotion.label || label, emotion.color || fallbackColor);
             }
 
+            return normalizeEmotionMeta(label, fallbackColor);
+        }
+
+        function normalizeEmotionMeta(label, fallbackColor) {
+            var normalizedLabel = String(label || '').trim();
+            var normalizedKey = normalizedLabel.toLowerCase();
+            var emotionColors = {
+                '\uae30\uc068': '#2F9E44',
+                happy: '#2F9E44',
+                happiness: '#2F9E44',
+                '\ub180\ub78c': '#F08C00',
+                surprised: '#F08C00',
+                surprise: '#F08C00',
+                '\ubd88\uc548': '#2F8BFF',
+                anxious: '#2F8BFF',
+                anxiety: '#2F8BFF'
+            };
+
             return {
-                label: String(label || '').trim(),
-                color: fallbackColor || ''
+                label: normalizedLabel,
+                color: emotionColors[normalizedLabel] || emotionColors[normalizedKey] || fallbackColor || '#2F7650'
             };
         }
 
@@ -854,7 +875,7 @@
             container.classList.toggle('is-feed-hidden', isFeedView);
             container.setAttribute('aria-hidden', String(isFeedView));
             feedPanel.hidden = !isFeedView;
-            searchForm.hidden = isFeedView;
+            searchForm.hidden = false;
             searchResults.hidden = true;
             if (mapCrosshair) {
                 mapCrosshair.hidden = isFeedView;
@@ -888,7 +909,10 @@
                 return;
             }
 
-            var items = visibleMarkerItems();
+            var keyword = normalizeSearchText(searchInput ? searchInput.value : '');
+            var items = visibleMarkerItems().filter(function (item) {
+                return !keyword || normalizeSearchText(item.locationName).includes(keyword);
+            });
             var summaryText = activeEmotionFilter === 'ALL' ? '전체 기록' : activeEmotionFilter + ' 기록';
             feedSummary.textContent = summaryText + ' ' + items.length + '개';
 
@@ -1748,6 +1772,12 @@
         function searchPlaces() {
             var keyword = searchInput.value.trim();
 
+            if (currentViewMode === 'feed') {
+                searchResults.hidden = true;
+                renderFeedList();
+                return;
+            }
+
             if (keyword.length < 2) {
                 searchResults.hidden = true;
                 return;
@@ -1775,6 +1805,12 @@
 
         searchInput.addEventListener('input', function () {
             window.clearTimeout(searchTimer);
+
+            if (currentViewMode === 'feed') {
+                searchResults.hidden = true;
+                renderFeedList();
+                return;
+            }
 
             searchTimer = window.setTimeout(function () {
                 searchPlaces();
