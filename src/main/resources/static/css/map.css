@@ -34,7 +34,18 @@ body.is-record-delete-modal-open {
 }
 
 .map-app .app-header {
-    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 99999;
+    width: 100%;
+    height: 60px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--page-gutter);
+    background-color: #ffffff;
 }
 
 .map-badge {
@@ -58,7 +69,7 @@ body.is-record-delete-modal-open {
     display: flex;
     flex-direction: column;
     gap: clamp(0.75rem, 3.5vw, 0.875rem);
-    padding-top: var(--map-control-header-height);
+    padding-top: 200px;
 }
 
 .map-title {
@@ -90,18 +101,18 @@ body.is-record-delete-modal-open {
 
 .map-control-header {
     position: fixed;
-    top: 0;
-    left: 50%;
-    z-index: 1000;
+    top: 60px;
+    left: 0;
+    z-index: 99998;
     width: 100%;
-    max-width: var(--page-max-width, 26.875rem);
+    box-sizing: border-box;
     display: grid;
     grid-template-columns: 3.25rem 1fr;
     gap: 0.5rem 0.625rem;
     padding: max(0.75rem, env(safe-area-inset-top)) var(--page-gutter) 0.75rem;
-    background: linear-gradient(180deg, rgba(248, 252, 247, 0.98) 0%, rgba(248, 252, 247, 0.92) 72%, rgba(248, 252, 247, 0) 100%);
+    background-color: #ffffff;
     backdrop-filter: blur(10px);
-    transform: translateX(-50%);
+    box-shadow: 0 0.625rem 1.375rem rgba(26, 77, 57, 0.08);
 }
 
 .map-filter {
@@ -357,6 +368,9 @@ body.is-record-delete-modal-open {
     min-height: 0;
     display: grid;
     grid-template-rows: auto 1fr;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    box-sizing: border-box;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.98);
     border-radius: 1.25rem;
@@ -589,13 +603,14 @@ body.is-record-delete-modal-open {
 }
 
 .map-view-switch {
-    grid-column: 2;
+    grid-column: 1 / -1; 
     width: 100%;
     min-height: 3.25rem;
     margin-left: 0;
     padding: 0.3125rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
     gap: 0.3125rem;
     border: 1px solid rgba(26, 77, 57, 0.12);
     border-radius: 1rem;
@@ -604,12 +619,16 @@ body.is-record-delete-modal-open {
 }
 
 .map-view-toggle {
+    flex: 1;
+    width: 100%;
     min-width: 0;
+    height: 44px;
     min-height: 2.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
+    padding: 0 !important;
     border: 1px solid transparent;
     border-radius: 0.8125rem;
     background: transparent;
@@ -617,6 +636,8 @@ body.is-record-delete-modal-open {
     font: inherit;
     font-size: 0.75rem;
     font-weight: 900;
+    line-height: 1;
+    text-align: center;
     cursor: pointer;
     transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
@@ -633,18 +654,27 @@ body.is-record-delete-modal-open {
 }
 
 .map-view-toggle em {
-    font-style: normal;
-}
-
-.map-view-icon {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.125rem;
-    height: 1.125rem;
-    flex: 0 0 auto;
-    font-size: 1rem;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-style: normal;
     line-height: 1;
+    text-align: center;
+    letter-spacing: 0 !important; 
+}
+
+.map-view-toggle .map-view-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 1.1rem;
+    line-height: 1;
+    transform: translateY(-1px); 
 }
 
 .map-search-results[hidden] {
