@@ -1,0 +1,65 @@
+﻿<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="application-name" th:content="${appName}" content="Plia">
+    <title th:text="|오늘의 미션 - ${appName}|">오늘의 미션 - Plia</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
+    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260530d)}" href="../../static/css/mainpage.css?v=20260530d">
+    <script th:src="@{/js/mainpage.js(v=20260531d)}" src="../../static/js/mainpage.js?v=20260531d" defer></script>
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="bg-shape bg-shape-1"></div>
+<div class="bg-shape bg-shape-2"></div>
+
+<main class="mobile-page home-app mission-page" data-mission-page th:aria-label="|${appName} 오늘의 미션 화면|" aria-label="Plia 오늘의 미션 화면">
+    <div class="bg-shape bg-shape-3"></div>
+
+    <section class="dashboard">
+        <header class="app-header">
+            <a class="app-brand" th:href="@{/}" href="/">
+                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" th:alt="|${appName} 로고|" alt="Plia 로고">
+                <span th:text="${appName}">Plia</span>
+            </a>
+            <form th:action="@{/logout}" method="post">
+                <button class="logout-btn" type="submit">로그아웃</button>
+            </form>
+        </header>
+
+        <div class="main-content">
+            <section class="mission-page-card" aria-labelledby="mission-page-title">
+                <div class="mission-panel-head">
+                    <div>
+                        <p>Daily mission</p>
+                        <h2 id="mission-page-title">오늘의 미션</h2>
+                    </div>
+                </div>
+                <ul class="mission-list" id="mission-list" aria-live="polite"></ul>
+            </section>
+        </div>
+    </section>
+</main>
+
+<section class="mission-confirm" id="mission-confirm" aria-hidden="true">
+    <button class="mission-confirm-backdrop" type="button" data-mission-confirm-close aria-label="미션 완료 확인 닫기"></button>
+    <div class="mission-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="mission-confirm-title" aria-describedby="mission-confirm-description">
+        <div class="mission-confirm-mark" aria-hidden="true">✓</div>
+        <h2 id="mission-confirm-title">미션을 완료하셨습니까?</h2>
+        <p id="mission-confirm-description">완료로 기록하면 오늘의 진행도와 경험치에 반영됩니다.</p>
+        <div class="mission-confirm-actions">
+            <button class="mission-confirm-cancel" type="button" data-mission-confirm-close>아직이에요</button>
+            <button class="mission-confirm-submit" type="button" id="mission-confirm-submit">완료했어요</button>
+        </div>
+    </div>
+</section>
+
+<nav class="bottom-tabs" aria-label="하단 메뉴">
+    <a th:href="@{/}" href="/">홈</a>
+    <a th:href="@{/map}" href="/map">감정지도</a>
+    <a th:href="@{/profile}" href="/profile">프로필</a>
+</nav>
+</body>
+</html>

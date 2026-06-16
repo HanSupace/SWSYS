@@ -15,6 +15,7 @@ public class HealingSpotRepository {
     private static final double EARTH_RADIUS_IN_METERS = 6371000;
     private static final int SEARCH_RADIUS_IN_METERS = 20000;
     private static final int SEARCH_LIMIT = 3;
+    private static final int LIKED_SPOT_LIMIT = 5;
     private static final int DISTANCE_SCORE_DECAY_IN_METERS = 5000;
 
     private final JdbcTemplate jdbcTemplate;
@@ -79,6 +80,40 @@ public class HealingSpotRepository {
         );
     }
 
+    public List<LikedSpotCandidate> findMostLikedSpots() {
+        return jdbcTemplate.query(
+                """
+                select
+                    m.id,
+                    m.emotion_label,
+                    m.location_name,
+                    m.title,
+                    m.description,
+                    m.latitude,
+                    m.longitude,
+                    max(m.created_at) as latest_created_at,
+                    count(l.id) as like_count
+                from emotion_map_markers m
+                left join likes l on l.record_id = m.id
+                group by m.id, m.emotion_label, m.location_name, m.title, m.description, m.latitude, m.longitude
+                having count(l.id) > 0
+                order by like_count desc, latest_created_at desc, m.id desc
+                limit ?
+                """,
+                (resultSet, rowNumber) -> new LikedSpotCandidate(
+                        resultSet.getLong("id"),
+                        resultSet.getString("emotion_label"),
+                        resultSet.getString("location_name"),
+                        resultSet.getString("title"),
+                        resultSet.getString("description"),
+                        resultSet.getObject("latitude", BigDecimal.class),
+                        resultSet.getObject("longitude", BigDecimal.class),
+                        resultSet.getInt("like_count")
+                ),
+                LIKED_SPOT_LIMIT
+        );
+    }
+
     public record HealingSpotCandidate(
             double distanceInMeters,
             String emotionLabel,
@@ -86,6 +121,18 @@ public class HealingSpotRepository {
             BigDecimal latitude,
             BigDecimal longitude,
             int positiveCount
+    ) {
+    }
+
+    public record LikedSpotCandidate(
+            Long id,
+            String emotionLabel,
+            String locationName,
+            String title,
+            String description,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            int likeCount
     ) {
     }
 }

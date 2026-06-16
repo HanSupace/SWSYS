@@ -1,0 +1,92 @@
+﻿<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="application-name" th:content="${appName}" content="Plia">
+    <title th:text="|${appName} 랭킹|">Plia 랭킹</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
+    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260513a)}" href="../../static/css/mainpage.css?v=20260513a">
+    <link rel="stylesheet" th:href="@{/css/ranking.css(v=20260512c)}" href="../../static/css/ranking.css?v=20260512c">
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="bg-shape bg-shape-1"></div>
+<div class="bg-shape bg-shape-2"></div>
+<div class="bg-shape bg-shape-3"></div>
+
+<main class="mobile-page home-app ranking-app" th:aria-label="|${appName} 랭킹 화면|" aria-label="Plia 랭킹 화면">
+    <section class="dashboard">
+        <header class="app-header">
+            <a class="app-brand" th:href="@{/}" href="/">
+                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" th:alt="|${appName} 로고|" alt="Plia 로고">
+                <span th:text="${appName}">Plia</span>
+            </a>
+            <form th:action="@{/logout}" method="post">
+                <button class="logout-btn" type="submit">로그아웃</button>
+            </form>
+        </header>
+
+        <div class="main-content ranking-content">
+            <section class="ranking-hero" aria-label="내 랭킹 요약">
+                <div class="ranking-hero-top">
+                    <div>
+                        <p>현재 내 위치</p>
+                        <h1 th:text="|${ranking.currentUser().rank()}위|">12위</h1>
+                    </div>
+                    <strong th:text="|Lv. ${ranking.currentUser().progress().level()}|">Lv. 4</strong>
+                </div>
+                <div class="ranking-hero-meta">
+                    <strong th:text="${loginUser.nickname()}">닉네임</strong>
+                    <span th:text="|누적 ${ranking.currentUser().totalXp()} XP|">누적 520 XP</span>
+                </div>
+                <div class="ranking-hero-track" aria-hidden="true">
+                    <span th:style="|width: ${ranking.currentUser().progress().progressPercent()}%;|"></span>
+                </div>
+                <p class="ranking-hero-caption"
+                   th:text="|다음 레벨까지 ${ranking.currentUser().progress().requiredXp() - ranking.currentUser().progress().currentXp()} XP|">
+                    다음 레벨까지 30 XP
+                </p>
+            </section>
+
+            <section class="ranking-board" aria-label="상위 랭킹">
+                <div class="ranking-board-head">
+                    <h2>TOP 10</h2>
+                    <span>누적 XP 기준</span>
+                </div>
+                <ol class="ranking-list">
+                    <li th:each="entry : ${ranking.leaders()}" th:classappend="${entry.currentUser()} ? ' is-me'">
+                        <span class="ranking-rank" th:text="|#${entry.rank()}|">#1</span>
+                        <div class="ranking-user">
+                            <strong th:text="${entry.nickname()}">닉네임</strong>
+                            <span th:text="|Lv. ${entry.progress().level()} · ${entry.totalXp()} XP|">Lv. 5 · 680 XP</span>
+                        </div>
+                        <em th:if="${entry.currentUser()}">나</em>
+                    </li>
+                </ol>
+
+                <div class="ranking-outside-top" th:if="${!ranking.currentUserInLeaders()}">
+                    <span>내 기록</span>
+                    <div class="ranking-outside-row">
+                        <strong th:text="|#${ranking.currentUser().rank()}|">#12</strong>
+                        <div>
+                            <b th:text="${ranking.currentUser().nickname()}">닉네임</b>
+                            <p th:text="|Lv. ${ranking.currentUser().progress().level()} · ${ranking.currentUser().totalXp()} XP|">
+                                Lv. 4 · 520 XP
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</main>
+
+<nav class="bottom-tabs" aria-label="하단 메뉴">
+    <a th:href="@{/}" href="/">홈</a>
+    <a th:href="@{/map}" href="/map">감정지도</a>
+    <a th:href="@{/profile}" href="/profile">프로필</a>
+</nav>
+</body>
+</html>

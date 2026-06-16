@@ -30,6 +30,22 @@ public class HealingSpotService {
                 .toList();
     }
 
+    public List<LikedSpotResponse> findLikedSpots() {
+        return healingSpotRepository.findMostLikedSpots()
+                .stream()
+                .map(candidate -> new LikedSpotResponse(
+                        candidate.id(),
+                        displayName(candidate.locationName(), candidate.title()),
+                        emotionEmoji(candidate.emotionLabel()),
+                        candidate.emotionLabel(),
+                        candidate.likeCount(),
+                        displayDescription(candidate.description(), candidate.locationName()),
+                        candidate.latitude(),
+                        candidate.longitude()
+                ))
+                .toList();
+    }
+
     private String formatDistance(double distanceInMeters) {
         long roundedMeters = Math.round(distanceInMeters);
 
@@ -45,5 +61,29 @@ public class HealingSpotService {
         return EmotionCatalog.findByLabel(emotionLabel)
                 .map(EmotionCatalog.EmotionMeta::icon)
                 .orElse("🙂");
+    }
+
+    private String displayName(String locationName, String title) {
+        if (locationName != null && !locationName.isBlank()) {
+            return locationName.trim();
+        }
+
+        if (title != null && !title.isBlank()) {
+            return title.trim();
+        }
+
+        return "이름 없는 위치";
+    }
+
+    private String displayDescription(String description, String locationName) {
+        if (description != null && !description.isBlank()) {
+            return description.trim();
+        }
+
+        if (locationName != null && !locationName.isBlank()) {
+            return locationName.trim();
+        }
+
+        return "";
     }
 }

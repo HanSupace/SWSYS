@@ -28,4 +28,9 @@ public class HealingSpotController {
     ) {
         return healingSpotService.findHealingSpots(latitude, longitude);
     }
+
+    @GetMapping("/api/spots/liked")
+    public List<LikedSpotResponse> likedSpots() {
+        return healingSpotService.findLikedSpots();
+    }
 }
