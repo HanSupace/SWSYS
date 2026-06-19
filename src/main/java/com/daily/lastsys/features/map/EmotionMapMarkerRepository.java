@@ -53,16 +53,19 @@ public class EmotionMapMarkerRepository {
     public List<EmotionMapMarkerResponse> findAll(Long userId) {
         return jdbcTemplate.query(
                 """
-                select id, latitude, longitude, emotion_label, emotion_color,
-                       title, location_name, description, created_at,
-                       case when user_id = ? then true else false end as own
-                from emotion_map_markers
-                order by created_at desc, id desc
+                select m.id, m.latitude, m.longitude, u.nickname as author_nickname,
+                       m.emotion_label, m.emotion_color,
+                       m.title, m.location_name, m.description, m.created_at,
+                       case when m.user_id = ? then true else false end as own
+                from emotion_map_markers m
+                join users u on u.id = m.user_id
+                order by m.created_at desc, m.id desc
                 """,
                 (resultSet, rowNumber) -> new EmotionMapMarkerResponse(
                         resultSet.getLong("id"),
                         resultSet.getObject("latitude", BigDecimal.class),
                         resultSet.getObject("longitude", BigDecimal.class),
+                        resultSet.getString("author_nickname"),
                         resultSet.getString("emotion_label"),
                         resultSet.getString("emotion_color"),
                         resultSet.getString("title"),
@@ -87,13 +90,40 @@ public class EmotionMapMarkerRepository {
         return deletedCount > 0;
     }
 
+    public boolean updateById(Long userId, Long markerId, EmotionMapMarkerRequest request) {
+        int updatedCount = jdbcTemplate.update(
+                """
+                update emotion_map_markers
+                set latitude = ?,
+                    longitude = ?,
+                    emotion_label = ?,
+                    emotion_color = ?,
+                    title = ?,
+                    location_name = ?,
+                    description = ?,
+                    updated_at = current_timestamp
+                where user_id = ? and id = ?
+                """,
+                request.latitude(),
+                request.longitude(),
+                request.emotionLabel(),
+                request.emotionColor(),
+                request.title(),
+                request.locationName(),
+                normalizeDescription(request.description()),
+                userId,
+                markerId
+        );
+        return updatedCount > 0;
+    }
+
     public EmotionMapRecordDetailResponse findDetail(Long userId, Long markerId) {
         return jdbcTemplate.queryForObject(
                 """
                 select m.id, m.user_id, u.nickname as author_nickname,
                        m.latitude, m.longitude, m.emotion_label, m.emotion_color,
                        m.title, m.location_name, m.description,
-                       m.created_at, m.created_at as updated_at,
+                       m.created_at, m.updated_at,
                        case when m.user_id = ? then true else false end as own,
                        count(distinct l.id) as like_count,
                        count(distinct c.id) as comment_count,
@@ -105,7 +135,7 @@ public class EmotionMapMarkerRepository {
                 left join likes ml on ml.record_id = m.id and ml.user_id = ?
                 where m.id = ?
                 group by m.id, m.user_id, u.nickname, m.latitude, m.longitude, m.emotion_label, m.emotion_color,
-                         m.title, m.location_name, m.description, m.created_at
+                         m.title, m.location_name, m.description, m.created_at, m.updated_at
                 """,
                 (resultSet, rowNumber) -> new EmotionMapRecordDetailResponse(
                         resultSet.getLong("id"),
@@ -214,15 +244,18 @@ public class EmotionMapMarkerRepository {
     private EmotionMapMarkerResponse findById(Long userId, Long markerId) {
         return jdbcTemplate.queryForObject(
                 """
-                select id, latitude, longitude, emotion_label, emotion_color,
-                       title, location_name, description, created_at
-                from emotion_map_markers
-                where user_id = ? and id = ?
+                select m.id, m.latitude, m.longitude, u.nickname as author_nickname,
+                       m.emotion_label, m.emotion_color,
+                       m.title, m.location_name, m.description, m.created_at
+                from emotion_map_markers m
+                join users u on u.id = m.user_id
+                where m.user_id = ? and m.id = ?
                 """,
                 (resultSet, rowNumber) -> new EmotionMapMarkerResponse(
                         resultSet.getLong("id"),
                         resultSet.getObject("latitude", BigDecimal.class),
                         resultSet.getObject("longitude", BigDecimal.class),
+                        resultSet.getString("author_nickname"),
                         resultSet.getString("emotion_label"),
                         resultSet.getString("emotion_color"),
                         resultSet.getString("title"),

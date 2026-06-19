@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const calendarElement = document.getElementById('emotion-calendar');
+    const missionPage = document.querySelector('[data-mission-page]');
     const calendarTitle = document.getElementById('calendar-title');
     const previousButton = document.getElementById('calendar-prev');
     const nextButton = document.getElementById('calendar-next');
@@ -15,10 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const userXp = document.getElementById('user-xp');
     const userXpBar = document.getElementById('user-xp-bar');
     const emotionButtonBox = document.getElementById('emotion-button-box');
+    const missionProgressCount = document.getElementById('mission-progress-count');
+    const missionProgressBar = document.getElementById('mission-progress-bar');
     let missionsLoaded = false;
-    let missionSuccessCounts = new Map();
+    let calendarEmotionDays = new Map();
     let pendingMissionButton = null;
-    const selectedEmotionStorageKey = 'lastsys.selectedEmotion';
+    const selectedEmotionStorageKey = 'plia.selectedEmotion';
+    const legacySelectedEmotionStorageKey = 'lastsys.selectedEmotion';
 
     const today = getKoreaToday();
     let visibleMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -52,7 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let selectedEmotion = '';
 
         try {
-            selectedEmotion = localStorage.getItem(selectedEmotionStorageKey) || '';
+            selectedEmotion = localStorage.getItem(selectedEmotionStorageKey)
+                || localStorage.getItem(legacySelectedEmotionStorageKey)
+                || '';
         } catch (error) {
             selectedEmotion = '';
         }
@@ -79,19 +85,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         updateCalendarTitle(calendarTitle, visibleMonth);
-        renderFallbackCalendar(calendarElement, visibleMonth, today, missionSuccessCounts);
+        renderFallbackCalendar(calendarElement, visibleMonth, today, calendarEmotionDays);
     };
 
     previousButton?.addEventListener('click', () => {
         visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1);
         renderCalendar();
-        loadMonthlySuccessCounts();
+        loadMonthlyCalendarEmotions();
     });
 
     nextButton?.addEventListener('click', () => {
         visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 1);
         renderCalendar();
-        loadMonthlySuccessCounts();
+        loadMonthlyCalendarEmotions();
     });
 
     emotionButtonBox?.addEventListener('click', (event) => {
@@ -195,7 +201,9 @@ document.addEventListener('DOMContentLoaded', () => {
     missionList?.addEventListener('click', (event) => {
         const rerollButton = event.target.closest('[data-mission-reroll-slot]');
 
-        if (rerollButton) {
+        if (rerollButton && missionList.contains(rerollButton)) {
+            event.preventDefault();
+            event.stopPropagation();
             rerollMissionSlot(rerollButton);
             return;
         }
@@ -210,11 +218,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function rerollMissionSlot(rerollButton) {
-        if (rerollButton.disabled) {
+        if (rerollButton.dataset.rerollAvailable !== 'true') {
             return;
         }
 
-        rerollButton.disabled = true;
+        rerollButton.dataset.rerollAvailable = 'false';
+        rerollButton.classList.add('is-waiting');
 
         try {
             const response = await fetch(`/api/daily-missions/slots/${rerollButton.dataset.missionRerollSlot}/reroll`, {
@@ -231,7 +240,8 @@ document.addEventListener('DOMContentLoaded', () => {
             missionsLoaded = true;
             renderMissionPayload(await response.json());
         } catch (error) {
-            rerollButton.disabled = false;
+            rerollButton.dataset.rerollAvailable = 'true';
+            rerollButton.classList.remove('is-waiting');
             renderMissionMessage('미션을 다시 뽑지 못했습니다. 잠시 후 다시 시도해 주세요.');
         }
     }
@@ -270,11 +280,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function loadTodayMissions() {
-        if (!missionList) {
+        if (!missionList && !missionProgressCount && !missionProgressBar) {
             return;
         }
 
-        renderMissionMessage('오늘의 미션을 불러오는 중입니다.');
+        if (missionList) {
+            renderMissionMessage('오늘의 미션을 불러오는 중입니다.');
+        }
 
         try {
             const response = await fetch('/api/daily-missions', {
@@ -290,7 +302,9 @@ document.addEventListener('DOMContentLoaded', () => {
             missionsLoaded = true;
             renderMissionPayload(await response.json());
         } catch (error) {
-            renderMissionMessage('미션을 불러오지 못했습니다. 다시 열어 주세요.');
+            if (missionList) {
+                renderMissionMessage('미션을 불러오지 못했습니다. 다시 열어 주세요.');
+            }
         }
     }
 
@@ -313,10 +327,30 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p>${escapeHtml(mission.text)}</p>
                         <strong>${mission.completed ? '성공' : '도전'}</strong>
                     </button>
-                    <button class="mission-item-reroll" type="button" data-mission-reroll-slot="${mission.slotIndex}" ${mission.completed ? 'disabled' : ''} aria-label="${index + 1}번 미션 다시 뽑기">↻</button>
+                    ${renderMissionRerollButton(mission, index)}
                 </div>
             </li>
         `).join('');
+    }
+
+    function renderMissionRerollButton(mission, index) {
+        const remainingRerolls = Number.isFinite(Number(mission.remainingRerolls))
+            ? Math.max(0, Number(mission.remainingRerolls))
+            : Math.max(0, 3 - Number(mission.rerollCount || 0));
+        const rerollAvailable = typeof mission.rerollAvailable === 'boolean'
+            ? mission.rerollAvailable
+            : !mission.completed && remainingRerolls > 0;
+        const className = [
+            'mission-item-reroll',
+            rerollAvailable ? '' : 'is-disabled'
+        ].filter(Boolean).join(' ');
+
+        return `
+                    <button class="${className}" type="button" data-mission-reroll-slot="${mission.slotIndex}" data-reroll-available="${rerollAvailable}" data-remaining-rerolls="${remainingRerolls}" aria-disabled="${!rerollAvailable}" aria-label="${index + 1}번 미션 다시 뽑기, 남은 횟수 ${remainingRerolls}회">
+                        <span aria-hidden="true">↻</span>
+                        <small>${remainingRerolls}/3</small>
+                    </button>
+        `;
     }
 
     function renderMissionMessage(message) {
@@ -337,7 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
         userXpBar.style.width = `${Math.max(0, Math.min(100, progress.progressPercent))}%`;
     }
 
-    async function loadMonthlySuccessCounts() {
+    async function loadMonthlyCalendarEmotions() {
         if (!calendarElement) {
             return;
         }
@@ -353,10 +387,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('calendar load failed');
             }
 
-            missionSuccessCounts = new Map((await response.json()).map((day) => [day.date, day.successCount]));
+            calendarEmotionDays = new Map((await response.json()).map((day) => [day.date, day]));
+
             renderCalendar();
         } catch (error) {
-            missionSuccessCounts = new Map();
+            calendarEmotionDays = new Map();
             renderCalendar();
         }
     }
@@ -366,17 +401,34 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const todayKey = toIsoDate(today);
-        missionSuccessCounts.set(todayKey, todaySuccessCount);
+        updateMissionActionProgress(todaySuccessCount);
+    }
 
-        if (visibleMonth.getFullYear() === today.getFullYear() && visibleMonth.getMonth() === today.getMonth()) {
-            renderCalendar();
+    function updateMissionActionProgress(successCount = 0, totalCount = 5) {
+        if (!missionProgressCount && !missionProgressBar) {
+            return;
+        }
+
+        const completed = Math.max(0, Math.min(totalCount, Number(successCount) || 0));
+        const percent = totalCount > 0 ? (completed / totalCount) * 100 : 0;
+
+        if (missionProgressCount) {
+            missionProgressCount.textContent = `${completed}/${totalCount}`;
+        }
+
+        if (missionProgressBar) {
+            missionProgressBar.style.width = `${percent}%`;
         }
     }
 
     initializeEmotionButtons();
+    updateMissionActionProgress();
     renderCalendar();
-    loadMonthlySuccessCounts();
+    loadMonthlyCalendarEmotions();
+
+    if (missionPage || missionProgressCount || missionProgressBar) {
+        loadTodayMissions();
+    }
 });
 
 function escapeHtml(value) {
@@ -396,7 +448,7 @@ function updateCalendarTitle(calendarTitle, date) {
     calendarTitle.textContent = `${date.getFullYear()}. ${String(date.getMonth() + 1).padStart(2, '0')}`;
 }
 
-function renderFallbackCalendar(calendarElement, visibleMonth, today, missionSuccessCounts) {
+function renderFallbackCalendar(calendarElement, visibleMonth, today, calendarEmotionDays) {
     const year = visibleMonth.getFullYear();
     const month = visibleMonth.getMonth();
     const firstDay = new Date(year, month, 1).getDay();
@@ -412,17 +464,23 @@ function renderFallbackCalendar(calendarElement, visibleMonth, today, missionSuc
     for (let date = 1; date <= lastDate; date += 1) {
         const isToday = year === today.getFullYear() && month === today.getMonth() && date === today.getDate();
         const isoDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-        const successCount = missionSuccessCounts.get(isoDate) || 0;
+        const representativeEmotion = calendarEmotionDays.get(isoDate);
+        const emotionStyle = calendarEmotionStyleFor(representativeEmotion?.emotionLabel, representativeEmotion?.emotionColor);
+        const emotionLabel = representativeEmotion?.emotionLabel || '';
         const className = [
             isToday ? 'today' : '',
-            getSuccessClassName(successCount)
+            emotionStyle ? 'has-emotion-record' : ''
         ].filter(Boolean).join(' ');
-        const tooltip = `완료 미션 ${successCount}개`;
+        const tooltip = emotionLabel ? `대표 감정 ${emotionLabel}` : '감정 기록 없음';
+        const style = emotionStyle
+            ? ` style="--calendar-emotion-bg: ${emotionStyle.background}; --calendar-emotion-border: ${emotionStyle.border}; --calendar-emotion-text: ${emotionStyle.color};"`
+            : '';
         cells.push(`
             <span
                 class="calendar-day ${className}"
-                data-tooltip="${tooltip}"
-                aria-label="${isoDate} ${tooltip}"
+                data-tooltip="${escapeHtml(tooltip)}"
+                aria-label="${isoDate} ${escapeHtml(tooltip)}"
+                ${style}
             >${date}</span>
         `);
     }
@@ -446,24 +504,31 @@ function renderFallbackCalendar(calendarElement, visibleMonth, today, missionSuc
 
 }
 
-function toIsoDate(date) {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
+function calendarEmotionStyleFor(label, value) {
+    const color = String(value || '').trim();
+    const fallbackColor = /^#[0-9a-fA-F]{6}$/.test(color) ? color : '';
 
-function getSuccessClassName(successCount) {
-    if (successCount >= 5) {
-        return 'mission-success-3';
+    if (window.PLIA_EMOTION && typeof window.PLIA_EMOTION.metaForLabel === 'function') {
+        const emotion = window.PLIA_EMOTION.metaForLabel(label, fallbackColor);
+
+        if (emotion && emotion.color) {
+            return {
+                background: emotion.background || emotion.color,
+                border: emotion.border || emotion.color,
+                color: emotion.color
+            };
+        }
     }
 
-    if (successCount >= 3) {
-        return 'mission-success-2';
+    if (!fallbackColor) {
+        return null;
     }
 
-    if (successCount >= 1) {
-        return 'mission-success-1';
-    }
-
-    return '';
+    return {
+        background: fallbackColor,
+        border: fallbackColor,
+        color: '#FFFFFF'
+    };
 }
 
 function getKoreaToday() {

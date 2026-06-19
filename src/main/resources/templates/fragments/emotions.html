@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="assets">
+    <link rel="stylesheet" th:href="@{/css/emotions.css(v=20260603a)}" href="../../static/css/emotions.css?v=20260603a">
+    <script id="plia-emotion-catalog" type="application/json" th:utext="${emotionCatalogJson}">[]</script>
+    <script th:src="@{/js/emotions.js(v=20260603a)}" src="../../static/js/emotions.js?v=20260603a"></script>
+</th:block>
+</html>

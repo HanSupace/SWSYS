@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>가입 완료 - LastSys</title>
+    <meta name="application-name" th:content="${appName}" content="Plia">
+    <title th:text="|가입 완료 - ${appName}|">가입 완료 - Plia</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
 </head>
@@ -15,7 +16,7 @@
 
 <main class="mobile-page auth-page" aria-label="가입 완료 화면">
     <section class="auth-panel success-panel">
-        <img class="auth-logo success-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" alt="LastSys 로고">
+        <img class="auth-logo success-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" th:alt="|${appName} 로고|" alt="Plia 로고">
         <div class="auth-heading">
             <h1>가입 완료</h1>
             <p><strong th:text="${nickname}">닉네임</strong>님의 계정이 생성되었습니다.</p>

@@ -3,60 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>나의 감정 기록 - LastSys</title>
+    <meta name="application-name" th:content="${appName}" content="Plia">
+    <title th:text="|나의 감정 분석 - ${appName}|">나의 감정 분석 - Plia</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
-    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260519b)}" href="../../static/css/mainpage.css?v=20260519b">
-    <link rel="stylesheet" th:href="@{/css/profile.css(v=20260527a)}" href="../../static/css/profile.css?v=20260527a">
+    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260531b)}" href="../../static/css/mainpage.css?v=20260531b">
+    <link rel="stylesheet" th:href="@{/css/profile.css(v=20260609b)}" href="../../static/css/profile.css?v=20260609b">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <th:block th:replace="~{fragments/emotions :: assets}"></th:block>
+    <script th:src="@{/js/emotion-records.js(v=20260609b)}" src="../../static/js/emotion-records.js?v=20260609b" defer></script>
 </head>
 <body>
 <div class="bg-pattern"></div>
 <div class="bg-shape bg-shape-1"></div>
 <div class="bg-shape bg-shape-2"></div>
 
-<main class="mobile-page home-app" aria-label="LastSys 나의 감정 기록 화면">
+<main class="mobile-page home-app emotion-records-page" th:aria-label="|${appName} 나의 감정 분석 화면|" aria-label="Plia 나의 감정 분석 화면">
     <div class="bg-shape bg-shape-3"></div>
     <section class="dashboard">
         <header class="app-header">
             <a class="app-brand" th:href="@{/}" href="/">
-                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" alt="LastSys 로고">
-                <span>LastSys</span>
+                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" th:alt="|${appName} 로고|" alt="Plia 로고">
+                <span th:text="${appName}">Plia</span>
             </a>
+            <form th:action="@{/logout}" method="post">
+                <button class="logout-btn" type="submit">로그아웃</button>
+            </form>
         </header>
 
         <div class="main-content">
-            <a th:href="@{/profile}" href="/profile" class="back-btn">← 프로필로 돌아가기</a>
-            
-            <section class="emotion-records-section">
+            <div class="emotion-records-topbar">
+                <a th:href="@{/}" href="/" class="back-btn">메인 페이지로 돌아가기</a>
+            </div>
+
+            <section class="emotion-records-hero" aria-labelledby="emotion-records-title">
+                <h1 id="emotion-records-title">나의 감정 분석</h1>
+                <p>최근 기록을 바탕으로 감정 흐름과 추천 위치를 확인해보세요.</p>
+            </section>
+
+            <section class="emotion-insight-card" aria-labelledby="emotion-summary-title">
                 <div class="emotion-records-head">
-                    <h3>나의 감정 기록</h3>
-                    <p>최근 기록된 감정 상태를 확인합니다.</p>
+                    <div>
+                        <p>최근 7일</p>
+                        <h2 id="emotion-summary-title">감정 요약</h2>
+                    </div>
                 </div>
 
-                <ul class="record-list">
-                    <li class="record-item" th:if="${currentCondition != null}">
+                <div class="emotion-chart-wrap">
+                    <canvas id="myEmotionChart"></canvas>
+                    <div id="emotion-chart-empty" class="emotion-chart-empty" hidden>
+                        <strong>아직 분석할 감정 기록이 없습니다.</strong>
+                        <span>감정지도에 기록을 남기면 이곳에서 요약을 볼 수 있습니다.</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="emotion-insight-card" aria-labelledby="liked-spot-title">
+                <div class="emotion-records-head">
+                    <div>
+                        <p>좋아요 많은 순</p>
+                        <h2 id="liked-spot-title">좋아요 수가 많은 위치 추천</h2>
+                    </div>
+                </div>
+
+                <ul class="record-list" id="liked-spot-list">
+                    <li class="record-item">
                         <div class="record-info">
-                            <span class="record-date">최근 설정한 상태</span>
-                            
-                            <span class="record-emotion" th:if="${currentCondition.toString() == 'NORMAL'}">
-                                <span>😊</span> 보통
-                            </span>
-                            <span class="record-emotion" th:if="${currentCondition.toString() == 'SAD'}">
-                                <span>☁️</span> 우울/가라앉음
-                            </span>
-                            <span class="record-emotion" th:if="${currentCondition.toString() == 'TIRED'}">
-                                <span>🥱</span> 피곤함
-                            </span>
-                            <span class="record-emotion" th:if="${currentCondition.toString() == 'STRESSED'}">
-                                <span>⚡</span> 스트레스
-                            </span>
+                            <span class="record-date">추천할 위치를 불러오는 중입니다.</span>
                         </div>
                     </li>
+                </ul>
+            </section>
 
-                    <li class="record-item" th:if="${currentCondition == null or currentCondition.toString() == 'ANY'}">
-                        <div class="empty-state">
-                            아직 설정된 감정 상태가 없습니다.<br>
-                            <a class="profile-inline-link" th:href="@{/profile/mission-settings}" href="/profile/mission-settings">미션 설정하러 가기</a>
+            <section class="emotion-insight-card" aria-labelledby="healing-spot-title">
+                <div class="emotion-records-head">
+                    <div>
+                        <p>현재 위치 기준</p>
+                        <h2 id="healing-spot-title">내 주변 힐링 스팟</h2>
+                    </div>
+                </div>
+
+                <ul class="record-list" id="healing-spot-list">
+                    <li class="record-item">
+                        <div class="record-info">
+                            <span class="record-date">위치 정보를 확인하고 주변 데이터를 불러오는 중입니다.</span>
                         </div>
                     </li>
                 </ul>

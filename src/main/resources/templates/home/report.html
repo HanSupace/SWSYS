@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="application-name" th:content="${appName}" content="Plia">
+    <title th:text="|${appName} 신고하기|">Plia 신고하기</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
+    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260531b)}" href="../../static/css/mainpage.css?v=20260531b">
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="bg-shape bg-shape-1"></div>
+<div class="bg-shape bg-shape-2"></div>
+<div class="bg-shape bg-shape-3"></div>
+
+<main class="mobile-page home-app report-page" aria-label="신고하기 화면">
+    <section class="dashboard">
+        <header class="app-header">
+            <a class="app-brand" th:href="@{/}" href="/">
+                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" th:alt="|${appName} 로고|" alt="Plia 로고">
+                <span th:text="${appName}">Plia</span>
+            </a>
+        </header>
+
+        <div class="main-content">
+            <div class="report-topbar">
+                <a th:href="@{/profile}" href="/profile" class="back-btn">프로필로 돌아가기</a>
+            </div>
+
+            <section class="report-card" aria-labelledby="report-title">
+                <div class="report-hero">
+                    <p class="report-eyebrow">Report Center</p>
+                    <h1 id="report-title">신고하기</h1>
+                    <p>문제가 된 위치와 내용을 남겨주시면 운영 기준에 따라 차분히 확인하겠습니다.</p>
+                </div>
+
+                <form class="report-form" th:action="@{/profile/report}" action="/profile/report" th:object="${userReportForm}" method="post" novalidate>
+                    <div class="report-section">
+                        <h2>신고 대상</h2>
+                        <label class="report-field">
+                            <span>위치</span>
+                            <input type="text" th:field="*{location}" maxlength="80" placeholder="예: 감정지도 마커 위치, 게시 위치">
+                            <small class="field-error" th:if="${#fields.hasErrors('location')}" th:errors="*{location}">위치 오류</small>
+                        </label>
+
+                        <label class="report-field">
+                            <span>제목</span>
+                            <input type="text" th:field="*{title}" maxlength="60" placeholder="신고 제목">
+                            <small class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">제목 오류</small>
+                        </label>
+                    </div>
+
+                    <div class="report-section">
+                        <h2>신고 내용</h2>
+                        <label class="report-field">
+                            <span>신고 카테고리</span>
+                            <select th:field="*{category}">
+                                <option value="">카테고리 선택</option>
+                                <option value="ABUSE">욕설</option>
+                                <option value="SELF_HARM">자해유도</option>
+                                <option value="HATE_SPEECH">혐오표현</option>
+                                <option value="SPAM">스팸</option>
+                                <option value="AD_SUSPECT">광고의심</option>
+                                <option value="OTHER">기타</option>
+                            </select>
+                            <small class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}">카테고리 오류</small>
+                        </label>
+
+                        <label class="report-field">
+                            <span>내용</span>
+                            <textarea th:field="*{content}" maxlength="500" placeholder="신고 내용을 구체적으로 입력해주세요."></textarea>
+                            <small class="field-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}">내용 오류</small>
+                        </label>
+                    </div>
+
+                    <div class="report-actions">
+                        <button class="report-submit" type="submit">신고 접수</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </section>
+</main>
+
+<nav class="bottom-tabs" aria-label="하단 메뉴">
+    <a th:href="@{/}" href="/">홈</a>
+    <a th:href="@{/map}" href="/map">감정지도</a>
+    <a class="active" th:href="@{/profile}" href="/profile">프로필</a>
+</nav>
+</body>
+</html>

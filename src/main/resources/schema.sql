@@ -99,7 +99,7 @@ create table if not exists comments (
     id bigint not null auto_increment,
     record_id bigint not null,
     user_id bigint not null,
-    content varchar(300) not null,
+    content text not null,
     created_at timestamp not null default current_timestamp,
     updated_at timestamp not null default current_timestamp,
     primary key (id),
@@ -107,3 +107,36 @@ create table if not exists comments (
     constraint fk_comments_record foreign key (record_id) references emotion_map_markers (id) on delete cascade,
     constraint fk_comments_user foreign key (user_id) references users (id) on delete cascade
 ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
+
+create table if not exists user_reports (
+    id bigint not null auto_increment,
+    user_id bigint not null,
+    location_name varchar(80) not null,
+    title varchar(60) not null,
+    content text not null,
+    category varchar(30) not null,
+    created_at timestamp not null default current_timestamp,
+    primary key (id),
+    key idx_user_reports_user_created (user_id, created_at),
+    constraint fk_user_reports_user foreign key (user_id) references users (id) on delete cascade
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
+
+set @emotion_map_markers_updated_at_exists := (
+    select count(*)
+    from information_schema.columns
+    where table_schema = database()
+      and table_name = 'emotion_map_markers'
+      and column_name = 'updated_at'
+);
+set @emotion_map_markers_updated_at_sql := if(
+    @emotion_map_markers_updated_at_exists = 0,
+    'alter table emotion_map_markers add column updated_at timestamp not null default current_timestamp',
+    'select 1'
+);
+prepare emotion_map_markers_updated_at_statement from @emotion_map_markers_updated_at_sql;
+execute emotion_map_markers_updated_at_statement;
+deallocate prepare emotion_map_markers_updated_at_statement;
+
+alter table emotion_map_markers modify description text;
+alter table comments modify content text not null;
+alter table user_reports modify content text not null;
