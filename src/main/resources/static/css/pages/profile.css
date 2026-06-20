@@ -641,3 +641,13 @@
         width: fit-content;
     }
 }
+
+.home-app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100svh;
+}
+
+.dashboard {
+    flex: 1; 
+}

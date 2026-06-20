@@ -19,7 +19,7 @@ body {
     width: min(100%, var(--page-max-width));
     min-height: 100svh;
     justify-content: flex-start;
-    padding: max(1.375rem, env(safe-area-inset-top)) var(--page-gutter) calc(var(--bottom-tab-height) + var(--bottom-safe-area) + clamp(4.5rem, 18vw, 5.5rem));
+    padding: max(1.375rem, env(safe-area-inset-top)) var(--page-gutter) calc(var(--bottom-tab-height) + 0rem);
     animation: none;
     transform: none;
 }
