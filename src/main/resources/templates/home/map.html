@@ -199,7 +199,7 @@
     <a th:href="@{/profile}" href="/profile">프로필</a>
 </nav>
 
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=193ceb4c1a6b6b4e4651b199d5836ee5&libraries=services,clusterer"></script>
+<script th:src="|https://dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoMapsJavascriptKey}&amp;libraries=services,clusterer|"></script>
 <script th:src="@{/js/shared/map-search-policy.js(v=20260620a)}" src="../../static/js/shared/map-search-policy.js?v=20260620a"></script>
 <script th:src="@{/js/pages/map.js(v=20260620a)}" src="../../static/js/pages/map.js?v=20260620a" defer></script>
 </body>
