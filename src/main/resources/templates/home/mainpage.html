@@ -3,24 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>LastSys 메인</title>
+    <meta name="application-name" th:content="${appName}" content="Plia">
+    <title th:text="|${appName} 메인|">Plia 메인</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
-    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260519b)}" href="../../static/css/mainpage.css?v=20260519b">
-    <script th:src="@{/js/mainpage.js(v=20260519b)}" src="../../static/js/mainpage.js?v=20260519b" defer></script>
+    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260531d)}" href="../../static/css/mainpage.css?v=20260531d">
+    <th:block th:replace="~{fragments/emotions :: assets}"></th:block>
+    <script th:src="@{/js/mainpage.js(v=20260531d)}" src="../../static/js/mainpage.js?v=20260531d" defer></script>
 </head>
 <body>
 <div class="bg-pattern"></div>
 <div class="bg-shape bg-shape-1"></div>
 <div class="bg-shape bg-shape-2"></div>
-<main class="mobile-page home-app" aria-label="LastSys 메인 화면">
+<main class="mobile-page home-app" th:aria-label="|${appName} 메인 화면|" aria-label="Plia 메인 화면">
 <div class="bg-shape bg-shape-3"></div>
 
     <section class="dashboard">
         <header class="app-header">
             <a class="app-brand" th:href="@{/}" href="/">
-                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" alt="LastSys 로고">
-                <span>LastSys</span>
+                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" th:alt="|${appName} 로고|" alt="Plia 로고">
+                <span th:text="${appName}">Plia</span>
             </a>
             <form th:action="@{/logout}" method="post">
                 <button class="logout-btn" type="submit">로그아웃</button>
@@ -42,24 +44,40 @@
                 </div>
             </a>
 
-            <article class="quote-card" aria-label="오늘의 명언">
-                <p th:text="${quote}">작은 기록이 하루의 방향을 만든다.</p>
-            </article>
-
             <section class="emotion-checkin" aria-labelledby="emotion-checkin-title">
                 <div class="emotion-checkin-head">
                     <h2 id="emotion-checkin-title">오늘은 어떤 감정을 느끼셨나요?</h2>
                 </div>
                 <div class="emotion-button-box" id="emotion-button-box" aria-label="감정 선택">
-                    <button class="emotion-choice" type="button" data-emotion-id="default-happiness" data-emotion="기쁨" data-tone="joy" aria-pressed="false">기쁨</button>
-                    <button class="emotion-choice" type="button" data-emotion-id="default-anticipation" data-emotion="기대" data-tone="joy" aria-pressed="false">기대</button>
-                    <button class="emotion-choice" type="button" data-emotion-id="default-sadness" data-emotion="슬픔" data-tone="sadness" aria-pressed="false">슬픔</button>
-                    <button class="emotion-choice" type="button" data-emotion-id="default-anger" data-emotion="분노" data-tone="anger" aria-pressed="false">분노</button>
-                    <button class="emotion-choice" type="button" data-emotion-id="default-anxiety" data-emotion="불안" data-tone="melancholy" aria-pressed="false">불안</button>
-                    <button class="emotion-choice" type="button" data-emotion-id="default-embarrassment" data-emotion="당황" data-tone="melancholy" aria-pressed="false">당황</button>
-                    <button class="emotion-choice" type="button" data-emotion-id="default-surprise" data-emotion="놀람" data-tone="joy" aria-pressed="false">놀람</button>
-                    <button class="emotion-choice" type="button" data-emotion-id="default-irritation" data-emotion="짜증" data-tone="anger" aria-pressed="false">짜증</button>
+                    <button class="emotion-choice"
+                            th:each="emotion : ${emotions}"
+                            type="button"
+                            th:data-emotion-id="${emotion.id()}"
+                            th:data-emotion-code="${emotion.code()}"
+                            th:data-emotion="${emotion.label()}"
+                            th:style="|--emotion-bg: ${emotion.background()}; --emotion-border: ${emotion.border()}; --emotion-text: ${emotion.color()};|"
+                            th:text="${emotion.label()}"
+                            data-emotion-id="default-happiness"
+                            data-emotion-code="HAPPY"
+                            data-emotion="기쁨"
+                            aria-pressed="false">기쁨</button>
                 </div>
+            </section>
+
+            <section class="main-action-grid" aria-label="오늘의 주요 기능">
+                <a class="main-action-button main-action-button-mission" th:href="@{/dailymission}" href="/dailymission">
+                    <strong>일일미션</strong>
+                    <span class="main-action-progress" aria-label="오늘 완료한 미션 수">
+                        <span id="mission-progress-count">0/5</span>
+                        <span class="main-action-progress-track" aria-hidden="true">
+                            <span id="mission-progress-bar"></span>
+                        </span>
+                    </span>
+                </a>
+                <a class="main-action-button main-action-button-analysis" th:href="@{/profile/emotion-records}" href="/profile/emotion-records">
+                    <strong>감정분석</strong>
+                    <span class="main-action-desc">기록 돌아보기</span>
+                </a>
             </section>
 
             <section class="calendar-panel" aria-label="감정 캘린더">
@@ -74,33 +92,6 @@
     </section>
 
 </main>
-
-<section class="mission-panel" id="mission-panel" aria-label="오늘의 선행 미션" aria-hidden="true">
-    <div class="mission-panel-head">
-        <div>
-            <h2>오늘의 미션</h2>
-        </div>
-        <div class="mission-panel-actions">
-            <button class="mission-close" type="button" aria-label="미션 닫기">×</button>
-        </div>
-    </div>
-    <ul class="mission-list" id="mission-list" aria-live="polite"></ul>
-</section>
-
-<section class="mission-confirm" id="mission-confirm" aria-hidden="true">
-    <button class="mission-confirm-backdrop" type="button" data-mission-confirm-close aria-label="미션 완료 확인 닫기"></button>
-    <div class="mission-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="mission-confirm-title" aria-describedby="mission-confirm-description">
-        <div class="mission-confirm-mark" aria-hidden="true">✓</div>
-        <h2 id="mission-confirm-title">미션을 완료하셨습니까?</h2>
-        <p id="mission-confirm-description">완료로 기록하면 오늘의 진행도와 경험치에 반영됩니다.</p>
-        <div class="mission-confirm-actions">
-            <button class="mission-confirm-cancel" type="button" data-mission-confirm-close>아직이에요</button>
-            <button class="mission-confirm-submit" type="button" id="mission-confirm-submit">완료했어요</button>
-        </div>
-    </div>
-</section>
-
-<button class="floating-toggle" type="button" aria-label="오늘의 선행 미션 열기" aria-controls="mission-panel" aria-expanded="false"></button>
 
 <nav class="bottom-tabs" aria-label="하단 메뉴">
     <a class="active" th:href="@{/}" href="/">홈</a>

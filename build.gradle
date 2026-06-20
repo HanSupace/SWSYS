@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.daily'
 version = '0.0.1-SNAPSHOT'
-description = 'LastSys'
+description = 'Plia'
 
 java {
     toolchain {

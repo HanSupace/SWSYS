@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 public record DailyMissionDayResponse(
         LocalDate date,
-        int successCount
+        String emotionLabel,
+        String emotionColor
 ) {
 }
