@@ -16,9 +16,6 @@ public final class EmotionCatalog {
             new EmotionMeta("default-irritation", "IRRITATED", "irritation", "짜증", "😣", "#925021", "#FFF0E4", "rgba(181, 99, 31, 0.22)", false)
     );
 
-    private EmotionCatalog() {
-    }
-
     public static List<EmotionMeta> all() {
         return EMOTIONS;
     }
