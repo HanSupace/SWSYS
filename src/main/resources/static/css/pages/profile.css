@@ -108,31 +108,8 @@
     margin: 0;
 }
 
-.menu-list .icon {
-    width: 2.125rem;
-    height: 2.125rem;
-    flex: 0 0 auto;
-    border-radius: 50%;
-    background: var(--primary-color);
-    color: #FFFFFF;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9375rem;
-}
-
 .text-danger {
     color: #E74C3C !important;
-}
-
-.text-danger .icon {
-    background: #FFEAEA;
-    color: #E74C3C;
-}
-
-.text-gray .icon {
-    background: #F1F3F5;
-    color: #666666;
 }
 
 .profile-back-btn,
