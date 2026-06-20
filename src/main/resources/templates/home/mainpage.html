@@ -36,8 +36,8 @@
                 <p>오늘도 반가워요!</p>
                 <div class="hero-progress" aria-label="사용자 레벨과 경험치">
                     <div class="hero-progress-top">
-                        <span id="user-xp" th:text="|${progress.currentXp()} / ${progress.requiredXp()} XP|">0 / 100 XP</span>
-                        <strong id="user-level" th:text="|Lv. ${progress.level()}|">Lv. 1</strong>
+                        <span id="user-xp" th:text="|${progress.currentXp()} / ${progress.requiredXp()} XP|">XP</span>
+                        <strong id="user-level" th:text="|Lv. ${progress.level()}|">Lv</strong>
                     </div>
                     <div class="xp-track" aria-hidden="true">
                         <span id="user-xp-bar" th:data-progress="${progress.progressPercent()}" data-progress="0"></span>
