@@ -222,15 +222,6 @@ public class EmotionMapMarkerRepository {
         );
     }
 
-    public int countComments(Long markerId) {
-        Integer count = jdbcTemplate.queryForObject(
-                "select count(*) from comments where record_id = ?",
-                Integer.class,
-                markerId
-        );
-        return count == null ? 0 : count;
-    }
-
     private int countLikes(Long markerId) {
         Integer count = jdbcTemplate.queryForObject(
                 "select count(*) from likes where record_id = ?",

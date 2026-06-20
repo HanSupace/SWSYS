@@ -1,7 +1,6 @@
 package com.daily.lastsys.features.emotion;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 public final class EmotionCatalog {
@@ -42,49 +41,10 @@ public final class EmotionCatalog {
                 .findFirst();
     }
 
-    public static Optional<EmotionMeta> findByCode(String code) {
-        if (code == null) {
-            return Optional.empty();
-        }
-
-        String normalizedCode = code.trim().toUpperCase(Locale.ROOT);
-        return EMOTIONS.stream()
-                .filter(emotion -> emotion.code().equals(normalizedCode))
-                .findFirst();
-    }
-
-    public static Optional<EmotionMeta> findByValue(String value) {
-        if (value == null) {
-            return Optional.empty();
-        }
-
-        String normalizedValue = value.trim().toLowerCase(Locale.ROOT);
-        return EMOTIONS.stream()
-                .filter(emotion -> emotion.value().equals(normalizedValue))
-                .findFirst();
-    }
-
-    public static Optional<EmotionMeta> findById(String id) {
-        if (id == null) {
-            return Optional.empty();
-        }
-
-        String normalizedId = id.trim();
-        return EMOTIONS.stream()
-                .filter(emotion -> emotion.id().equals(normalizedId))
-                .findFirst();
-    }
-
     public static String colorForLabelOrDefault(String label, String fallbackColor) {
         return findByLabel(label)
                 .map(EmotionMeta::color)
                 .orElse(fallbackColor);
-    }
-
-    public static boolean colorMatches(String label, String color) {
-        return findByLabel(label)
-                .map(emotion -> emotion.color().equalsIgnoreCase(String.valueOf(color).trim().toUpperCase(Locale.ROOT)))
-                .orElse(false);
     }
 
     public record EmotionMeta(

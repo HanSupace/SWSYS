@@ -19,7 +19,6 @@
 <main class="mobile-page home-app" th:aria-label="|${appName} 프로필 화면|" aria-label="Plia 프로필 화면">
     <div class="bg-shape bg-shape-3"></div>
     <section class="dashboard">
-        <!-- 상단 헤더 -->
         <header class="app-header">
             <a class="app-brand" th:href="@{/}" href="/">
                 <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" th:alt="|${appName} 로고|" alt="Plia 로고">
@@ -30,7 +29,6 @@
         <div class="main-content">
             <p class="profile-message" th:if="${deleteErrorMsg}" th:text="${deleteErrorMsg}">회원 탈퇴 오류</p>
 
-            <!-- 1. 프로필 상단 정보 (기존 quote-card 디자인 재활용) -->
             <article class="quote-card profile-header-card" aria-label="내 프로필 정보">
                 <div class="profile-avatar">🌿</div>
                 <div class="profile-info">
@@ -38,7 +36,6 @@
                 </div>
             </article>
 
-            <!-- 2. 내 활동 관리 메뉴 -->
             <section class="menu-section" aria-label="내 활동 관리">
                 <ul class="menu-list">
                     <li>
@@ -62,11 +59,9 @@
                 </ul>
             </section>
 
-            <!-- 3. 계정 관리 메뉴 -->
             <section class="menu-section" aria-label="계정 관리">
                 <ul class="menu-list">
                     <li>
-                        <!-- 로그아웃은 POST 방식으로 처리하도록 Form 형태 유지 -->
                         <form th:action="@{/logout}" method="post">
                             <button type="submit" class="text-gray">
                                 <span class="icon">👋</span>

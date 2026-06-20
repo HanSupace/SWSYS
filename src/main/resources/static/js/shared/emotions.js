@@ -14,7 +14,7 @@
         try {
             var parsedCatalog = JSON.parse(catalogText);
             return Array.isArray(parsedCatalog) ? parsedCatalog : [];
-        } catch (error) {
+        } catch {
             return [];
         }
     }

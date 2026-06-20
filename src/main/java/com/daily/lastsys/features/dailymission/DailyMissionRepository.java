@@ -128,34 +128,6 @@ public class DailyMissionRepository {
         );
     }
 
-    public int findRerollCount(Long userId, LocalDate missionDate) {
-        Integer rerollCount = jdbcTemplate.queryForObject(
-                """
-                select coalesce(max(reroll_count), 0)
-                from daily_mission_rerolls
-                where user_id = ? and mission_date = ?
-                """,
-                Integer.class,
-                userId,
-                missionDate
-        );
-        return rerollCount == null ? 0 : rerollCount;
-    }
-
-    public void increaseRerollCount(Long userId, LocalDate missionDate) {
-        jdbcTemplate.update(
-                """
-                insert into daily_mission_rerolls (user_id, mission_date, reroll_count)
-                values (?, ?, 1)
-                on conflict (user_id, mission_date) do update set
-                    reroll_count = daily_mission_rerolls.reroll_count + 1,
-                    updated_at = current_timestamp
-                """,
-                userId,
-                missionDate
-        );
-    }
-
     public Map<Integer, Integer> findSlotRerollCounts(Long userId, LocalDate missionDate) {
         List<SlotRerollCount> rerollCounts = jdbcTemplate.query(
                 """

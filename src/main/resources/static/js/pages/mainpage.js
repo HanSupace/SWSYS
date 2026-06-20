@@ -43,8 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             localStorage.setItem(selectedEmotionStorageKey, getEmotionValue(selectedButton));
-        } catch (error) {
-            // 선택 저장이 막혀도 버튼 선택 상태는 유지합니다.
+        } catch {
         }
     };
 
@@ -59,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selectedEmotion = localStorage.getItem(selectedEmotionStorageKey)
                 || localStorage.getItem(legacySelectedEmotionStorageKey)
                 || '';
-        } catch (error) {
+        } catch {
             selectedEmotion = '';
         }
 
@@ -167,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             missionsLoaded = true;
             renderMissionPayload(await response.json());
-        } catch (error) {
+        } catch {
             renderMissionMessage('미션을 다시 뽑지 못했습니다. 잠시 후 다시 시도해 주세요.');
         } finally {
             missionReroll.disabled = false;
@@ -241,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             missionsLoaded = true;
             renderMissionPayload(await response.json());
-        } catch (error) {
+        } catch {
             rerollButton.dataset.rerollAvailable = 'true';
             rerollButton.classList.remove('is-waiting');
             renderMissionMessage('미션을 다시 뽑지 못했습니다. 잠시 후 다시 시도해 주세요.');
@@ -273,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             renderMissionPayload(await response.json());
             setMissionConfirmOpen(false);
-        } catch (error) {
+        } catch {
             missionButton.disabled = false;
             renderMissionMessage('미션 완료 처리에 실패했습니다. 잠시 후 다시 시도해 주세요.');
         } finally {
@@ -303,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             missionsLoaded = true;
             renderMissionPayload(await response.json());
-        } catch (error) {
+        } catch {
             if (missionList) {
                 renderMissionMessage('미션을 불러오지 못했습니다. 다시 열어 주세요.');
             }
@@ -392,7 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
             calendarEmotionDays = new Map((await response.json()).map((day) => [day.date, day]));
 
             renderCalendar();
-        } catch (error) {
+        } catch {
             calendarEmotionDays = new Map();
             renderCalendar();
         }

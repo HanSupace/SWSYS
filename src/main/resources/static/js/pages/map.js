@@ -176,8 +176,7 @@
                 nextUrl.searchParams.delete('emotionId');
                 nextUrl.searchParams.delete('locate');
                 window.history.replaceState(window.history.state, '', nextUrl.pathname + nextUrl.search + nextUrl.hash);
-            } catch (error) {
-                // URL 정리에 실패해도 현재 자동 열림 상태는 한 번만 소비합니다.
+            } catch {
             }
 
             requestedEmotionId = '';
@@ -387,10 +386,6 @@
                     markerLocationInput.placeholder = markerLocationDefaultPlaceholder;
                     failMarkerLocationAutofill();
                 });
-        }
-
-        function formatPlace(place) {
-            return place.place_name + ' · ' + (place.road_address_name || place.address_name || '주소 정보 없음');
         }
 
         function placeSearchOptions(mode) {
@@ -654,7 +649,7 @@
             try {
                 var storedViewMode = localStorage.getItem(mapViewStorageKey);
                 return storedViewMode === 'feed' ? 'feed' : 'map';
-            } catch (error) {
+            } catch {
                 return 'map';
             }
         }
@@ -662,8 +657,7 @@
         function persistMapViewMode(viewMode) {
             try {
                 localStorage.setItem(mapViewStorageKey, viewMode);
-            } catch (error) {
-                // 저장이 막혀도 현재 화면 전환은 유지합니다.
+            } catch {
             }
         }
 
@@ -1174,7 +1168,7 @@
                 activeRecordComments = [];
                 renderRecordDetail();
                 await loadRecordComments(recordId);
-            } catch (error) {
+            } catch {
                 showError('기록 상세를 불러오지 못했습니다.');
                 closeRecordPanel();
             } finally {
@@ -1206,7 +1200,7 @@
                 activeRecordDetail.likedByMe = result.likedByMe;
                 activeRecordDetail.likeCount = result.likeCount;
                 renderRecordDetail();
-            } catch (error) {
+            } catch {
                 activeRecordDetail.likedByMe = previousLiked;
                 activeRecordDetail.likeCount = previousCount;
                 renderRecordDetail();
@@ -1309,7 +1303,7 @@
         function renderViewportClustersSafely() {
             try {
                 renderViewportClusters();
-            } catch (error) {
+            } catch {
                 removeClusterOverlays();
             }
         }
@@ -1904,7 +1898,7 @@
                 }
                 renderFeedList();
                 updateFilterMenu(visibleMarkerItems().length);
-            } catch (error) {
+            } catch {
                 showError('저장된 감정 마커를 불러오지 못했습니다.');
             }
         }
@@ -2051,7 +2045,7 @@
                 activeRecordDetail.commentCount += 1;
                 recordCommentInput.value = '';
                 renderRecordDetail();
-            } catch (error) {
+            } catch {
                 showError('댓글을 등록하지 못했습니다.');
             }
         });
