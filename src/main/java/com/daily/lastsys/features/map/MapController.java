@@ -13,6 +13,6 @@ public class MapController {
             return "redirect:/login";
         }
 
-        return "map";
+        return "home/map";
     }
 }

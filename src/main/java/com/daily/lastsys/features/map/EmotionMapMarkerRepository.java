@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,7 +31,7 @@ public class EmotionMapMarkerRepository {
                     )
                     values (?, ?, ?, ?, ?, ?, ?, ?)
                     """,
-                    Statement.RETURN_GENERATED_KEYS
+                    new String[] {"id"}
             );
             statement.setLong(1, userId);
             statement.setBigDecimal(2, request.latitude());
@@ -193,7 +192,7 @@ public class EmotionMapMarkerRepository {
                     insert into comments (record_id, user_id, content)
                     values (?, ?, ?)
                     """,
-                    Statement.RETURN_GENERATED_KEYS
+                    new String[] {"id"}
             );
             statement.setLong(1, markerId);
             statement.setLong(2, userId);

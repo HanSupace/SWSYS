@@ -20,7 +20,7 @@ public class EmotionSummaryRepository {
                 select emotion_label, count(*) as emotion_count
                 from emotion_map_markers
                 where user_id = ?
-                  and created_at >= date_sub(current_timestamp, interval 7 day)
+                  and created_at >= current_timestamp - interval '7 days'
                 group by emotion_label
                 order by emotion_count desc, emotion_label asc
                 """,

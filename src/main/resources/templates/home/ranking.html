@@ -6,9 +6,10 @@
     <meta name="application-name" th:content="${appName}" content="Plia">
     <title th:text="|${appName} 랭킹|">Plia 랭킹</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
-    <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
-    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260513a)}" href="../../static/css/mainpage.css?v=20260513a">
-    <link rel="stylesheet" th:href="@{/css/ranking.css(v=20260512c)}" href="../../static/css/ranking.css?v=20260512c">
+    <link rel="stylesheet" th:href="@{/css/base/home.css(v=20260512b)}" href="../../static/css/base/home.css?v=20260512b">
+    <link rel="stylesheet" th:href="@{/css/pages/mainpage.css(v=20260513a)}" href="../../static/css/pages/mainpage.css?v=20260513a">
+    <link rel="stylesheet" th:href="@{/css/pages/ranking.css(v=20260512c)}" href="../../static/css/pages/ranking.css?v=20260512c">
+    <script th:src="@{/js/shared/progress.js(v=20260620a)}" src="../../static/js/shared/progress.js?v=20260620a" defer></script>
 </head>
 <body>
 <div class="bg-pattern"></div>
@@ -42,7 +43,7 @@
                     <span th:text="|누적 ${ranking.currentUser().totalXp()} XP|">누적 520 XP</span>
                 </div>
                 <div class="ranking-hero-track" aria-hidden="true">
-                    <span th:style="|width: ${ranking.currentUser().progress().progressPercent()}%;|"></span>
+                    <span th:data-progress="${ranking.currentUser().progress().progressPercent()}" data-progress="0"></span>
                 </div>
                 <p class="ranking-hero-caption"
                    th:text="|다음 레벨까지 ${ranking.currentUser().progress().requiredXp() - ranking.currentUser().progress().currentXp()} XP|">

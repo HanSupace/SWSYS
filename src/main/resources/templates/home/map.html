@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title th:text="|${appName} 감정지도|">Plia 감정지도</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" th:href="@{/css/base/home.css(v=20260512b)}" href="../../static/css/base/home.css?v=20260512b">
+    <link rel="stylesheet" th:href="@{/css/pages/mainpage.css(v=20260519b)}" href="../../static/css/pages/mainpage.css?v=20260519b">
+    <link rel="stylesheet" th:href="@{/css/pages/map.css(v=20260610c)}" href="../../static/css/pages/map.css?v=20260610c">
+    <th:block th:replace="~{fragments/emotions :: assets}"></th:block>
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="bg-shape bg-shape-1"></div>
+<div class="bg-shape bg-shape-2"></div>
+<div class="bg-shape bg-shape-3"></div>
+
+<main class="mobile-page home-app map-app" th:aria-label="|${appName} 감정지도 화면|" aria-label="Plia 감정지도 화면">
+    <section class="dashboard map-dashboard">
+        <header class="app-header">
+            <a class="app-brand" th:href="@{/static}" href="/static">
+                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" th:alt="|${appName} 로고|" alt="Plia 로고">
+                <span th:text="${appName}">Plia</span>
+            </a>
+            <form th:action="@{/logout}" method="post">
+                <button class="logout-btn" type="submit">로그아웃</button>
+            </form>
+        </header>
+
+        <section class="map-shell" aria-label="감정지도">
+            <div class="map-control-header">
+                <div class="map-filter">
+                    <button id="map-filter-toggle" class="map-filter-toggle" type="button" aria-label="지도 필터 메뉴" aria-expanded="false" aria-controls="map-filter-panel">
+                        <span aria-hidden="true"></span>
+                    </button>
+                </div>
+                <form id="map-search-form" class="map-search-form" autocomplete="off">
+                    <input id="map-search-input" type="search" placeholder="위치 검색" aria-label="위치 검색">
+                    <button type="submit">검색</button>
+                </form>
+                <div class="map-view-switch" role="group" aria-label="보기 방식 전환">
+                    <button id="map-view-map" class="map-view-toggle" type="button" data-map-view="map" aria-pressed="true" aria-label="지도로 보기">
+                        <span class="map-view-icon" aria-hidden="true">
+                            <img th:src="@{/images/map.png(v=20260610a)}" src="../../static/images/map.png?v=20260610a" alt="">
+                        </span>
+                        <em>지도</em>
+                    </button>
+                    <button id="map-view-feed" class="map-view-toggle" type="button" data-map-view="feed" aria-pressed="false" aria-label="피드로 보기">
+                        <span class="map-view-icon" aria-hidden="true">
+                            <img th:src="@{/images/list.png(v=20260610a)}" src="../../static/images/list.png?v=20260610a" alt="">
+                        </span>
+                        <em>피드</em>
+                    </button>
+                </div>
+            </div>
+            <div class="map-stage">
+                <div id="map" class="emotion-map" aria-label="카카오 지도"></div>
+                <section id="map-feed-panel" class="map-feed-panel" aria-label="감정 피드" hidden>
+                    <div class="map-feed-head">
+                        <div>
+                            <strong>감정 피드</strong>
+                            <span id="map-feed-summary">전체 기록 0개</span>
+                        </div>
+                    </div>
+                    <div id="map-feed-list" class="map-feed-list" aria-live="polite"></div>
+                </section>
+                <aside id="map-cluster-panel" class="map-cluster-panel" aria-label="클러스터 기록 리스트" hidden>
+                    <div class="map-cluster-panel-head">
+                        <div>
+                            <strong id="map-cluster-panel-title">기록 0개</strong>
+                            <span id="map-cluster-panel-summary">클러스터 기록</span>
+                        </div>
+                        <button id="map-cluster-panel-close" type="button" aria-label="클러스터 기록 닫기">×</button>
+                    </div>
+                    <div id="map-cluster-records" class="map-cluster-records"></div>
+                </aside>
+                <aside id="map-record-panel" class="map-record-panel" aria-label="기록 상세" hidden>
+                    <div class="map-record-panel-head">
+                        <div>
+                            <strong id="map-record-title">기록 상세</strong>
+                            <span id="map-record-meta">게시물</span>
+                        </div>
+                        <button id="map-record-panel-close" type="button" aria-label="기록 상세 닫기">×</button>
+                    </div>
+                    <article id="map-record-content" class="map-record-content"></article>
+                    <section class="map-record-comments" aria-label="댓글">
+                        <div id="map-record-comments-list" class="map-record-comments-list"></div>
+                        <form id="map-record-comment-form" class="map-record-comment-form" autocomplete="off">
+                            <input id="map-record-comment-input" type="text" maxlength="300" placeholder="댓글 작성" aria-label="댓글 작성">
+                            <button type="submit">등록</button>
+                        </form>
+                    </section>
+                </aside>
+                <button id="map-filter-backdrop" class="map-filter-backdrop" type="button" aria-label="필터 메뉴 닫기" hidden></button>
+                <section id="map-filter-panel" class="map-filter-panel" aria-label="감정핀 필터" hidden>
+                    <div class="map-filter-head">
+                        <strong>감정핀 보기</strong>
+                        <span id="map-filter-summary">전체</span>
+                    </div>
+                    <div class="map-filter-actions">
+                        <button class="map-filter-chip is-active" type="button" data-filter-type="all">
+                            <span>전체</span>
+                            <em id="map-filter-all-count">0</em>
+                        </button>
+                        <button class="map-filter-chip" type="button" data-filter-type="mine">
+                            <span>내 감정핀</span>
+                            <em id="map-filter-mine-count">0</em>
+                        </button>
+                        <button class="map-filter-chip" type="button" data-filter-type="emotions">
+                            <span>감정별</span>
+                            <em id="map-emotion-toggle-mark">+</em>
+                        </button>
+                        <div id="map-emotion-filters" class="map-emotion-filters" aria-label="감정별 핀 보기" hidden></div>
+                    </div>
+                </section>
+                <div id="map-search-results" class="map-search-results" hidden></div>
+                <div class="map-crosshair" aria-hidden="true"></div>
+                <button id="open-marker-modal" class="open-marker-modal" type="button">기록하기</button>
+                <button id="move-current-location" class="move-current-location" type="button" aria-label="현재 위치로 이동">
+                    <img th:src="@{/images/gps.png(v=20260610a)}" src="../../static/images/gps.png?v=20260610a" alt="" aria-hidden="true">
+                </button>
+            </div>
+            <div id="map-message" class="map-message" role="status">지도를 불러오는 중입니다.</div>
+        </section>
+    </section>
+</main>
+
+<div id="marker-modal" class="marker-modal" hidden>
+    <button id="marker-modal-backdrop" class="marker-modal-backdrop" type="button" aria-label="기록하기 닫기"></button>
+    <section class="marker-modal-panel" role="dialog" aria-modal="true" aria-labelledby="marker-modal-title">
+        <div class="marker-modal-head">
+            <div>
+                <h2 id="marker-modal-title">기록하기</h2>
+                <p>선택한 위치에 감정 마커를 남겨보세요.</p>
+            </div>
+            <button id="close-marker-modal" class="marker-modal-close" type="button" aria-label="기록하기 닫기">×</button>
+        </div>
+
+        <form id="emotion-marker-form" class="emotion-marker-form" autocomplete="off">
+            <div class="emotion-picker" role="radiogroup" aria-label="감정 선택">
+                <label class="emotion-option"
+                       th:each="emotion, emotionStatus : ${emotions}"
+                       th:data-emotion-id="${emotion.id()}"
+                       th:data-emotion-code="${emotion.code()}"
+                       data-emotion-id="default-happiness"
+                       data-emotion-code="HAPPY">
+                    <input type="radio"
+                           name="emotion"
+                           th:value="${emotion.value()}"
+                           th:data-emotion-code="${emotion.code()}"
+                           th:data-label="${emotion.label()}"
+                           th:data-color="${emotion.color()}"
+                           th:checked="${emotionStatus.index == 0}"
+                           value="happiness"
+                           data-emotion-code="HAPPY"
+                           data-label="기쁨"
+                           checked>
+                    <span th:text="${emotion.label()}">기쁨</span>
+                </label>
+            </div>
+            <div class="marker-fields">
+                <label>
+                    <span>위치</span>
+                    <input id="marker-location" type="text" maxlength="80" placeholder="위치 이름을 적어주세요" required>
+                    <input id="marker-location-selected" type="hidden">
+                </label>
+                <div id="marker-location-results" class="marker-location-results" hidden></div>
+                <p id="marker-form-message" class="marker-form-message" role="status" hidden></p>
+                <label>
+                    <span>제목</span>
+                    <input id="marker-title" type="text" maxlength="24" placeholder="지금의 마음" required>
+                </label>
+                <label>
+                    <span>설명</span>
+                    <textarea id="marker-description" maxlength="2000" rows="6" placeholder="오늘의 감정을 자세히 적어보세요" required></textarea>
+                </label>
+            </div>
+            <button class="marker-submit" type="submit">마커 추가</button>
+        </form>
+    </section>
+</div>
+
+<div id="record-delete-modal" class="record-delete-modal" hidden>
+    <button id="record-delete-backdrop" class="record-delete-backdrop" type="button" aria-label="삭제 확인 닫기"></button>
+    <section class="record-delete-panel" role="dialog" aria-modal="true" aria-labelledby="record-delete-title">
+        <h2 id="record-delete-title">기록을 삭제할까요?</h2>
+        <p>연결된 좋아요와 댓글도 함께 삭제됩니다.</p>
+        <div class="record-delete-actions">
+            <button id="record-delete-cancel" type="button">취소</button>
+            <button id="record-delete-confirm" type="button">삭제</button>
+        </div>
+    </section>
+</div>
+
+<nav class="bottom-tabs" aria-label="하단 메뉴">
+    <a th:href="@{/}" href="/">홈</a>
+    <a class="active" th:href="@{/map}" href="/map">감정지도</a>
+    <a th:href="@{/profile}" href="/profile">프로필</a>
+</nav>
+
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=193ceb4c1a6b6b4e4651b199d5836ee5&libraries=services,clusterer"></script>
+<script th:src="@{/js/shared/map-search-policy.js(v=20260620a)}" src="../../static/js/shared/map-search-policy.js?v=20260620a"></script>
+<script th:src="@{/js/pages/map.js(v=20260620a)}" src="../../static/js/pages/map.js?v=20260620a" defer></script>
+</body>
+</html>

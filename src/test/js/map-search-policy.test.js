@@ -1,5 +1,5 @@
 const assert = require('node:assert/strict');
-const policy = require('../../main/resources/static/js/map-search-policy.js');
+const policy = require('../../main/resources/static/js/shared/map-search-policy.js');
 
 const seoulCenter = { latitude: 37.566826, longitude: 126.9786567 };
 const nearbyPlace = { latitude: 37.575, longitude: 126.9786567 };

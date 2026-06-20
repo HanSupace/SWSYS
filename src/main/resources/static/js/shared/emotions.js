@@ -94,6 +94,22 @@
         };
     }
 
+    function applyStyles(root) {
+        var scope = root || document;
+
+        scope.querySelectorAll('[data-emotion-code]').forEach(function (element) {
+            var emotion = byCode(element.dataset.emotionCode);
+
+            if (!emotion) {
+                return;
+            }
+
+            element.style.setProperty('--emotion-bg', emotion.background || emotion.color);
+            element.style.setProperty('--emotion-border', emotion.border || emotion.color);
+            element.style.setProperty('--emotion-text', emotion.color);
+        });
+    }
+
     var emotions = parseCatalog()
         .map(normalizeEmotion)
         .filter(function (emotion) {
@@ -114,6 +130,11 @@
         byValue: byValue,
         byId: byId,
         colorFor: colorFor,
-        metaForLabel: metaForLabel
+        metaForLabel: metaForLabel,
+        applyStyles: applyStyles
     };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        applyStyles(document);
+    });
 }());
