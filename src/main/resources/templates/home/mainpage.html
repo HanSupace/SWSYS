@@ -7,7 +7,7 @@
     <title th:text="|${appName} 메인|">Plia 메인</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/base/home.css(v=20260512b)}" href="../../static/css/base/home.css?v=20260512b">
-    <link rel="stylesheet" th:href="@{/css/pages/mainpage.css(v=20260531d)}" href="../../static/css/pages/mainpage.css?v=20260531d">
+    <link rel="stylesheet" th:href="@{/css/pages/mainpage.css(v=20260621b)}" href="../../static/css/pages/mainpage.css?v=20260621b">
     <th:block th:replace="~{fragments/emotions :: assets}"></th:block>
     <script th:src="@{/js/shared/progress.js(v=20260620a)}" src="../../static/js/shared/progress.js?v=20260620a" defer></script>
     <script th:src="@{/js/pages/mainpage.js(v=20260620a)}" src="../../static/js/pages/mainpage.js?v=20260620a" defer></script>
@@ -16,8 +16,7 @@
 <div class="bg-pattern"></div>
 <div class="bg-shape bg-shape-1"></div>
 <div class="bg-shape bg-shape-2"></div>
-<main class="mobile-page home-app" th:aria-label="|${appName} 메인 화면|" aria-label="Plia 메인 화면">
-<div class="bg-shape bg-shape-3"></div>
+<div class="bg-shape bg-shape-3"></div>  <main class="mobile-page home-app" th:aria-label="|${appName} 메인 화면|" aria-label="Plia 메인 화면">
 
     <section class="dashboard">
         <header class="app-header">
@@ -76,7 +75,7 @@
                 </a>
                 <a class="main-action-button main-action-button-analysis" th:href="@{/profile/emotion-records}" href="/profile/emotion-records">
                     <strong>감정분석</strong>
-                    <span class="main-action-desc">기록 돌아보기</span>
+                    <span class="main-action-desc">기록 보기</span>
                 </a>
             </section>
 
