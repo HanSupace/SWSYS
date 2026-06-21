@@ -5,13 +5,22 @@ body {
     --panel-width: min(calc(100vw - (var(--page-gutter) * 2)), 24.875rem);
     --bottom-safe-area: max(0.875rem, env(safe-area-inset-bottom));
     --bottom-tab-height: clamp(3.5rem, 15vw, 4rem);
-    overflow-y: auto;
     overflow-x: hidden;
     align-items: flex-start;
 }
 
+html {
+    overflow-y: auto;
+}
+
+body {
+    min-height: 100svh;
+    overflow-y: visible;
+}
+
 .bg-pattern,
 .bg-shape {
+    position: fixed;
     pointer-events: none;
 }
 
@@ -19,14 +28,15 @@ body {
     width: min(100%, var(--page-max-width));
     min-height: 100svh;
     justify-content: flex-start;
-    padding: max(1.375rem, env(safe-area-inset-top)) var(--page-gutter) calc(var(--bottom-tab-height) + 0rem);
+    padding: max(1.375rem, env(safe-area-inset-top)) var(--page-gutter) calc(var(--bottom-tab-height) + var(--bottom-safe-area) + 0.75rem);
+    overflow: visible;
     animation: none;
     transform: none;
 }
 
 .dashboard {
     width: 100%;
-    min-height: calc(100svh - clamp(3rem, 12vw, 3.5rem));
+    min-height: 0;
     display: flex;
     flex-direction: column;
 }
@@ -74,7 +84,7 @@ body {
 
 .main-content {
     width: 100%;
-    flex: 1;
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -275,8 +285,7 @@ body {
 
 .main-action-button {
     position: relative;
-    min-height: 0;
-    aspect-ratio: 1;
+    min-height: clamp(6.75rem, 29vw, 7.5rem);
     display: flex;
     flex-direction: column;
     align-items: center;

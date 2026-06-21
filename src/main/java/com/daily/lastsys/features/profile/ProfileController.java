@@ -80,10 +80,8 @@ public class ProfileController {
         if (loginUser == null) return "redirect:/login";
 
         try {
-            // 1. DB의 닉네임 업데이트 (아이디는 건드리지 않음)
             loginService.changeNickname(loginUser.id(), nickname);
 
-            // 2. 화면에 바로 적용되도록 세션 정보 갱신
             LoginUser updatedUser = new LoginUser(loginUser.id(), loginUser.username(), nickname);
             session.setAttribute("loginUser", updatedUser);
 
@@ -114,13 +112,11 @@ public class ProfileController {
 
         if (loginUser == null) return "redirect:/login";
 
-        // 1. 새 비밀번호 일치 검증
         if (!newPassword.equals(confirmPassword)) {
             redirectAttributes.addFlashAttribute("errorMsg", "새 비밀번호와 비밀번호 확인이 일치하지 않습니다.");
             return "redirect:/profile/change-password";
         }
 
-        // 2. LoginService를 통해 DB와 통신하여 진짜 비밀번호 검증 실행
         boolean isCurrentPasswordCorrect = loginService.changePassword(loginUser.id(), currentPassword, newPassword);
         
         if (!isCurrentPasswordCorrect) {
