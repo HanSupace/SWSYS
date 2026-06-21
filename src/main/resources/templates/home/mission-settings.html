@@ -6,9 +6,9 @@
     <meta name="application-name" th:content="${appName}" content="Plia">
     <title th:text="|선행 미션 설정 - ${appName}|">선행 미션 설정 - Plia</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
-    <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
-    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260519b)}" href="../../static/css/mainpage.css?v=20260519b">
-    <link rel="stylesheet" th:href="@{/css/profile.css(v=20260527a)}" href="../../static/css/profile.css?v=20260527a">
+    <link rel="stylesheet" th:href="@{/css/base/home.css(v=20260512b)}" href="../../static/css/base/home.css?v=20260512b">
+    <link rel="stylesheet" th:href="@{/css/pages/mainpage.css(v=20260519b)}" href="../../static/css/pages/mainpage.css?v=20260519b">
+    <link rel="stylesheet" th:href="@{/css/pages/profile.css(v=20260527a)}" href="../../static/css/pages/profile.css?v=20260527a">
 </head>
 <body>
 <div class="bg-pattern"></div>
@@ -31,7 +31,7 @@
             <section class="mission-settings">
                 <div class="mission-settings-head">
                     <h3>선행 미션 방식</h3>
-                    <p>평범 모드는 랜덤 미션을, 규칙 기반 모드는 현재 역할과 상황에 맞는 미션을 우선 보여줍니다.</p>
+                    <p>일반 모드는 랜덤 미션을, 규칙 기반 모드는 현재 상황에 맞는 미션을 우선 보여줍니다.</p>
                 </div>
                 
                 <p class="mission-settings-saved" th:if="${param.missionSettingsSaved}">미션 설정이 저장되었습니다.</p>
@@ -40,7 +40,7 @@
                     <div class="mission-mode-options">
                         <label>
                             <input type="radio" th:field="*{mode}" value="PLAIN">
-                            <span>평범 모드</span>
+                            <span>일반 모드</span>
                         </label>
                         <label>
                             <input type="radio" th:field="*{mode}" value="RULE_BASED">
@@ -50,7 +50,7 @@
 
                     <div class="mission-setting-grid" id="mission-rule-fields">
                         <label class="mission-setting-field">
-                            <span>직업/역할</span>
+                            <span>직업</span>
                             <select th:field="*{lifeStage}" data-rule-field>
                                 <option value="ANY">상관없음</option>
                                 <option value="PRIMARY_SECONDARY_STUDENT">초중고생</option>
@@ -97,23 +97,7 @@
     <a class="active" th:href="@{/profile}" href="/profile">프로필</a>
 </nav>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const modeInputs = document.querySelectorAll('input[name="mode"]');
-        const ruleFields = document.querySelectorAll('[data-rule-field]');
-        const ruleFieldGroup = document.getElementById('mission-rule-fields');
+<script th:src="@{/js/pages/mission-settings.js(v=20260620a)}" src="../../static/js/pages/mission-settings.js?v=20260620a" defer></script>
 
-        const updateRuleFields = () => {
-            const selectedMode = document.querySelector('input[name="mode"]:checked')?.value || 'PLAIN';
-            const disabled = selectedMode !== 'RULE_BASED';
-
-            ruleFields.forEach((field) => field.disabled = disabled);
-            ruleFieldGroup?.classList.toggle('is-disabled', disabled);
-        };
-
-        modeInputs.forEach((input) => input.addEventListener('change', updateRuleFields));
-        updateRuleFields();
-    });
-</script>
 </body>
 </html>

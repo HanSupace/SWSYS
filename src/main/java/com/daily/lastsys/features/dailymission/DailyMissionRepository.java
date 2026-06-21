@@ -37,8 +37,9 @@ public class DailyMissionRepository {
     public boolean increaseSuccessCount(Long userId, LocalDate missionDate, int maxSuccessCount) {
         jdbcTemplate.update(
                 """
-                insert ignore into daily_mission_days (user_id, mission_date, success_count)
+                insert into daily_mission_days (user_id, mission_date, success_count)
                 values (?, ?, 0)
+                on conflict (user_id, mission_date) do nothing
                 """,
                 userId,
                 missionDate
@@ -61,8 +62,9 @@ public class DailyMissionRepository {
     public boolean insertMissionCompletion(Long userId, LocalDate missionDate, String missionKey) {
         int inserted = jdbcTemplate.update(
                 """
-                insert ignore into daily_mission_completions (user_id, mission_date, mission_key)
+                insert into daily_mission_completions (user_id, mission_date, mission_key)
                 values (?, ?, ?)
+                on conflict (user_id, mission_date, mission_key) do nothing
                 """,
                 userId,
                 missionDate,
@@ -111,11 +113,11 @@ public class DailyMissionRepository {
                 """
                 insert into user_mission_settings (user_id, mission_mode, life_stage, environment_type, condition_type)
                 values (?, ?, ?, ?, ?)
-                on duplicate key update
-                    mission_mode = values(mission_mode),
-                    life_stage = values(life_stage),
-                    environment_type = values(environment_type),
-                    condition_type = values(condition_type),
+                on conflict (user_id) do update set
+                    mission_mode = excluded.mission_mode,
+                    life_stage = excluded.life_stage,
+                    environment_type = excluded.environment_type,
+                    condition_type = excluded.condition_type,
                     updated_at = current_timestamp
                 """,
                 userId,
@@ -123,34 +125,6 @@ public class DailyMissionRepository {
                 settings.lifeStage(),
                 settings.environmentType(),
                 settings.conditionType()
-        );
-    }
-
-    public int findRerollCount(Long userId, LocalDate missionDate) {
-        Integer rerollCount = jdbcTemplate.queryForObject(
-                """
-                select coalesce(max(reroll_count), 0)
-                from daily_mission_rerolls
-                where user_id = ? and mission_date = ?
-                """,
-                Integer.class,
-                userId,
-                missionDate
-        );
-        return rerollCount == null ? 0 : rerollCount;
-    }
-
-    public void increaseRerollCount(Long userId, LocalDate missionDate) {
-        jdbcTemplate.update(
-                """
-                insert into daily_mission_rerolls (user_id, mission_date, reroll_count)
-                values (?, ?, 1)
-                on duplicate key update
-                    reroll_count = reroll_count + 1,
-                    updated_at = current_timestamp
-                """,
-                userId,
-                missionDate
         );
     }
 
@@ -182,14 +156,14 @@ public class DailyMissionRepository {
                 """
                 insert into daily_mission_slot_rerolls (user_id, mission_date, slot_index, reroll_count)
                 values (?, ?, ?, 1)
-                on duplicate key update
-                    reroll_count = if(reroll_count < ?, reroll_count + 1, reroll_count),
-                    updated_at = if(reroll_count < ?, current_timestamp, updated_at)
+                on conflict (user_id, mission_date, slot_index) do update set
+                    reroll_count = daily_mission_slot_rerolls.reroll_count + 1,
+                    updated_at = current_timestamp
+                where daily_mission_slot_rerolls.reroll_count < ?
                 """,
                 userId,
                 missionDate,
                 slotIndex,
-                maxRerollCount,
                 maxRerollCount
         );
         return updated > 0 && findSlotRerollCounts(userId, missionDate).getOrDefault(slotIndex, 0) <= maxRerollCount;

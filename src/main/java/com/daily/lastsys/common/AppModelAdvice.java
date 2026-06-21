@@ -2,6 +2,7 @@ package com.daily.lastsys.common;
 
 import com.daily.lastsys.features.emotion.EmotionCatalog;
 import com.daily.lastsys.features.emotion.EmotionCatalog.EmotionMeta;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
@@ -9,6 +10,12 @@ import java.util.List;
 
 @ControllerAdvice
 public class AppModelAdvice {
+
+    private final String kakaoMapsJavascriptKey;
+
+    public AppModelAdvice(@Value("${kakao.maps.javascript-key:}") String kakaoMapsJavascriptKey) {
+        this.kakaoMapsJavascriptKey = kakaoMapsJavascriptKey;
+    }
 
     @ModelAttribute("appName")
     public String appName() {
@@ -18,6 +25,11 @@ public class AppModelAdvice {
     @ModelAttribute("emotions")
     public List<EmotionMeta> emotions() {
         return EmotionCatalog.all();
+    }
+
+    @ModelAttribute("kakaoMapsJavascriptKey")
+    public String kakaoMapsJavascriptKey() {
+        return kakaoMapsJavascriptKey;
     }
 
     @ModelAttribute("emotionCatalogJson")

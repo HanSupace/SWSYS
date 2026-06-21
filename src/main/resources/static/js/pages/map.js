@@ -1,204 +1,4 @@
-<!doctype html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title th:text="|${appName} 감정지도|">Plia 감정지도</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
-    <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../static/css/home.css?v=20260512b">
-    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260519b)}" href="../static/css/mainpage.css?v=20260519b">
-    <link rel="stylesheet" th:href="@{/css/map.css(v=20260531a)}" href="../static/css/map.css?v=20260531a">
-    <th:block th:replace="~{fragments/emotions :: assets}"></th:block>
-</head>
-<body>
-<div class="bg-pattern"></div>
-<div class="bg-shape bg-shape-1"></div>
-<div class="bg-shape bg-shape-2"></div>
-<div class="bg-shape bg-shape-3"></div>
-
-<main class="mobile-page home-app map-app" th:aria-label="|${appName} 감정지도 화면|" aria-label="Plia 감정지도 화면">
-    <section class="dashboard map-dashboard">
-        <header class="app-header">
-            <a class="app-brand" th:href="@{/}" href="/">
-                <img class="app-logo" th:src="@{/images/logo.png}" src="../../static/images/logo.png" th:alt="|${appName} 로고|" alt="Plia 로고">
-                <span th:text="${appName}">Plia</span>
-            </a>
-            <form th:action="@{/logout}" method="post">
-                <button class="logout-btn" type="submit">로그아웃</button>
-            </form>
-        </header>
-
-        <section class="map-shell" aria-label="감정지도">
-            <div class="map-control-header">
-                <div class="map-filter">
-                    <button id="map-filter-toggle" class="map-filter-toggle" type="button" aria-label="지도 필터 메뉴" aria-expanded="false" aria-controls="map-filter-panel">
-                        <span aria-hidden="true"></span>
-                    </button>
-                </div>
-                <form id="map-search-form" class="map-search-form" autocomplete="off">
-                    <input id="map-search-input" type="search" placeholder="위치 검색" aria-label="위치 검색">
-                    <button type="submit">검색</button>
-                </form>
-                <div class="map-view-switch" role="group" aria-label="보기 방식 전환">
-                    <button id="map-view-map" class="map-view-toggle" type="button" data-map-view="map" aria-pressed="true" aria-label="지도로 보기">
-                        <span class="map-view-icon" aria-hidden="true">📍</span>
-                        <em>지도</em>
-                    </button>
-                    <button id="map-view-feed" class="map-view-toggle" type="button" data-map-view="feed" aria-pressed="false" aria-label="피드로 보기">
-                        <span class="map-view-icon" aria-hidden="true">📝</span>
-                        <em>피드</em>
-                    </button>
-                </div>
-            </div>
-            <div class="map-stage">
-                <div id="map" class="emotion-map" aria-label="카카오 지도"></div>
-                <section id="map-feed-panel" class="map-feed-panel" aria-label="감정 피드" hidden>
-                    <div class="map-feed-head">
-                        <div>
-                            <strong>감정 피드</strong>
-                            <span id="map-feed-summary">전체 기록 0개</span>
-                        </div>
-                    </div>
-                    <div id="map-feed-list" class="map-feed-list" aria-live="polite"></div>
-                </section>
-                <aside id="map-cluster-panel" class="map-cluster-panel" aria-label="클러스터 기록 리스트" hidden>
-                    <div class="map-cluster-panel-head">
-                        <div>
-                            <strong id="map-cluster-panel-title">기록 0개</strong>
-                            <span id="map-cluster-panel-summary">클러스터 기록</span>
-                        </div>
-                        <button id="map-cluster-panel-close" type="button" aria-label="클러스터 기록 닫기">×</button>
-                    </div>
-                    <div id="map-cluster-records" class="map-cluster-records"></div>
-                </aside>
-                <aside id="map-record-panel" class="map-record-panel" aria-label="기록 상세" hidden>
-                    <div class="map-record-panel-head">
-                        <div>
-                            <strong id="map-record-title">기록 상세</strong>
-                            <span id="map-record-meta">게시물</span>
-                        </div>
-                        <button id="map-record-panel-close" type="button" aria-label="기록 상세 닫기">×</button>
-                    </div>
-                    <article id="map-record-content" class="map-record-content"></article>
-                    <section class="map-record-comments" aria-label="댓글">
-                        <div id="map-record-comments-list" class="map-record-comments-list"></div>
-                        <form id="map-record-comment-form" class="map-record-comment-form" autocomplete="off">
-                            <input id="map-record-comment-input" type="text" maxlength="300" placeholder="댓글 작성" aria-label="댓글 작성">
-                            <button type="submit">등록</button>
-                        </form>
-                    </section>
-                </aside>
-                <button id="map-filter-backdrop" class="map-filter-backdrop" type="button" aria-label="필터 메뉴 닫기" hidden></button>
-                <section id="map-filter-panel" class="map-filter-panel" aria-label="감정핀 필터" hidden>
-                    <div class="map-filter-head">
-                        <strong>감정핀 보기</strong>
-                        <span id="map-filter-summary">전체</span>
-                    </div>
-                    <div class="map-filter-actions">
-                        <button class="map-filter-chip is-active" type="button" data-filter-type="all" style="--chip-color: var(--primary-color)">
-                            <span>전체</span>
-                            <em id="map-filter-all-count">0</em>
-                        </button>
-                        <button class="map-filter-chip" type="button" data-filter-type="mine" style="--chip-color: var(--primary-color)">
-                            <span>내 감정핀</span>
-                            <em id="map-filter-mine-count">0</em>
-                        </button>
-                        <button class="map-filter-chip" type="button" data-filter-type="emotions" style="--chip-color: var(--primary-color)">
-                            <span>감정별</span>
-                            <em id="map-emotion-toggle-mark">+</em>
-                        </button>
-                        <div id="map-emotion-filters" class="map-emotion-filters" aria-label="감정별 핀 보기" hidden></div>
-                    </div>
-                </section>
-                <div id="map-search-results" class="map-search-results" hidden></div>
-                <div class="map-crosshair" aria-hidden="true"></div>
-                <button id="open-marker-modal" class="open-marker-modal" type="button">기록하기</button>
-                <button id="move-current-location" class="move-current-location" type="button" aria-label="현재 위치로 이동">
-                    <span aria-hidden="true">⌖</span>
-                </button>
-            </div>
-            <div id="map-message" class="map-message" role="status">지도를 불러오는 중입니다.</div>
-        </section>
-    </section>
-</main>
-
-<div id="marker-modal" class="marker-modal" hidden>
-    <button id="marker-modal-backdrop" class="marker-modal-backdrop" type="button" aria-label="기록하기 닫기"></button>
-    <section class="marker-modal-panel" role="dialog" aria-modal="true" aria-labelledby="marker-modal-title">
-        <div class="marker-modal-head">
-            <div>
-                <h2 id="marker-modal-title">기록하기</h2>
-                <p>선택한 위치에 감정 마커를 남겨보세요.</p>
-            </div>
-            <button id="close-marker-modal" class="marker-modal-close" type="button" aria-label="기록하기 닫기">×</button>
-        </div>
-
-        <form id="emotion-marker-form" class="emotion-marker-form" autocomplete="off">
-            <div class="emotion-picker" role="radiogroup" aria-label="감정 선택">
-                <label class="emotion-option"
-                       th:each="emotion, emotionStatus : ${emotions}"
-                       th:data-emotion-id="${emotion.id()}"
-                       th:data-emotion-code="${emotion.code()}"
-                       th:style="|--emotion-bg: ${emotion.background()}; --emotion-border: ${emotion.border()}; --emotion-text: ${emotion.color()};|"
-                       data-emotion-id="default-happiness"
-                       data-emotion-code="HAPPY">
-                    <input type="radio"
-                           name="emotion"
-                           th:value="${emotion.value()}"
-                           th:data-emotion-code="${emotion.code()}"
-                           th:data-label="${emotion.label()}"
-                           th:data-color="${emotion.color()}"
-                           th:checked="${emotionStatus.index == 0}"
-                           value="happiness"
-                           data-emotion-code="HAPPY"
-                           data-label="기쁨"
-                           checked>
-                    <span th:text="${emotion.label()}">기쁨</span>
-                </label>
-            </div>
-            <div class="marker-fields">
-                <label>
-                    <span>위치</span>
-                    <input id="marker-location" type="text" maxlength="80" placeholder="위치 이름을 적어주세요" required>
-                    <input id="marker-location-selected" type="hidden">
-                </label>
-                <div id="marker-location-results" class="marker-location-results" hidden></div>
-                <p id="marker-form-message" class="marker-form-message" role="status" hidden></p>
-                <label>
-                    <span>제목</span>
-                    <input id="marker-title" type="text" maxlength="24" placeholder="지금의 마음" required>
-                </label>
-                <label>
-                    <span>설명</span>
-                    <textarea id="marker-description" maxlength="2000" rows="6" placeholder="오늘의 감정을 자세히 적어보세요" required></textarea>
-                </label>
-            </div>
-            <button class="marker-submit" type="submit">마커 추가</button>
-        </form>
-    </section>
-</div>
-
-<div id="record-delete-modal" class="record-delete-modal" hidden>
-    <button id="record-delete-backdrop" class="record-delete-backdrop" type="button" aria-label="삭제 확인 닫기"></button>
-    <section class="record-delete-panel" role="dialog" aria-modal="true" aria-labelledby="record-delete-title">
-        <h2 id="record-delete-title">기록을 삭제할까요?</h2>
-        <p>연결된 좋아요와 댓글도 함께 삭제됩니다.</p>
-        <div class="record-delete-actions">
-            <button id="record-delete-cancel" type="button">취소</button>
-            <button id="record-delete-confirm" type="button">삭제</button>
-        </div>
-    </section>
-</div>
-
-<nav class="bottom-tabs" aria-label="하단 메뉴">
-    <a th:href="@{/}" href="/">홈</a>
-    <a class="active" th:href="@{/map}" href="/map">감정지도</a>
-    <a th:href="@{/profile}" href="/profile">프로필</a>
-</nav>
-
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=193ceb4c1a6b6b4e4651b199d5836ee5&libraries=services,clusterer"></script>
-<script>
-    (function () {
+(function () {
         var container = document.getElementById('map');
         var message = document.getElementById('map-message');
         var searchForm = document.getElementById('map-search-form');
@@ -285,7 +85,6 @@
         var requestedPosition = hasRequestedPosition ? new kakao.maps.LatLng(requestedLat, requestedLng) : null;
         var currentPosition = requestedPosition || defaultPosition;
         var selectedPosition = currentPosition;
-        var hasCurrentPosition = hasRequestedPosition;
         var searchedPlaces = [];
         var markerPlaces = [];
         var selectedMarkerLocationPosition = null;
@@ -309,9 +108,11 @@
         var recordDetailLoading = false;
         var pendingDeleteRecordId = null;
         var requestedEmotionId = urlParams.get('emotionId') || '';
+        var shouldLocateOnEntry = urlParams.get('locate') === 'current';
+        var currentLocationRequest = null;
         var markerVisualSize = 34;
-        var EARTH_RADIUS_METERS = 6371000;
-        var MAX_DISTANCE_METERS = 2000;
+        var searchPolicy = window.PliaMapSearchPolicy;
+        var SEARCH_MODES = searchPolicy.MODES;
         var markerOverlayZIndex = 6;
         var selectedMarkerOverlayZIndex = 24;
         var clusterOverlayZIndex = 12;
@@ -331,30 +132,13 @@
         var markerLocationRequestId = 0;
         var isResolvingMarkerLocation = false;
         var markerLocationEditedDuringResolve = false;
-        var currentLocationElement = document.createElement('div');
-        currentLocationElement.className = 'current-location-dot';
-        currentLocationElement.setAttribute('aria-label', hasRequestedPosition ? '선택한 힐링 스팟 위치' : '현재 위치');
-
-        var currentLocationOverlay = new kakao.maps.CustomOverlay({
-            position: currentPosition,
-            content: currentLocationElement,
-            yAnchor: 0.5,
-            xAnchor: 0.5,
-            zIndex: 4
-        });
-
-        function syncCurrentLocationOverlay() {
-            currentLocationOverlay.setMap(currentViewMode === 'map' && hasCurrentPosition ? map : null);
-        }
-
-        syncCurrentLocationOverlay();
-        message.textContent = hasRequestedPosition ? '선택한 힐링 스팟 위치를 표시했습니다.' : '현재 위치를 확인하는 중입니다.';
-        message.hidden = hasRequestedPosition;
+        message.hidden = true;
 
         function openMarkerModal() {
+            selectedPosition = map.getCenter();
             markerModal.hidden = false;
             document.body.classList.add('is-marker-modal-open');
-            fillMarkerLocationFromCurrentPosition();
+            fillMarkerLocationFromMapCenter();
             window.setTimeout(function () {
                 markerLocationInput.focus();
             }, 120);
@@ -390,9 +174,9 @@
             try {
                 var nextUrl = new URL(window.location.href);
                 nextUrl.searchParams.delete('emotionId');
+                nextUrl.searchParams.delete('locate');
                 window.history.replaceState(window.history.state, '', nextUrl.pathname + nextUrl.search + nextUrl.hash);
-            } catch (error) {
-                // URL 정리에 실패해도 현재 자동 열림 상태는 한 번만 소비합니다.
+            } catch {
             }
 
             requestedEmotionId = '';
@@ -409,11 +193,7 @@
         }
 
         function moveTo(position, level) {
-            currentPosition = position;
-            hasCurrentPosition = true;
-            currentLocationElement.setAttribute('aria-label', '현재 위치');
-            currentLocationOverlay.setPosition(position);
-            syncCurrentLocationOverlay();
+            selectedPosition = position;
             map.setLevel(level);
             map.setCenter(position);
         }
@@ -445,18 +225,40 @@
         }
 
         function moveToCurrentLocation() {
+            if (currentLocationRequest) {
+                return currentLocationRequest;
+            }
+
             message.textContent = '현재 위치를 확인하는 중입니다.';
             message.classList.remove('is-error');
             message.hidden = false;
 
-            getCurrentKakaoPosition()
+            var locationSucceeded = false;
+            currentLocationRequest = getCurrentKakaoPosition()
                 .then(function (userPosition) {
+                    locationSucceeded = true;
                     moveTo(userPosition, 4);
-                    message.hidden = true;
                 })
-                .catch(function () {
-                    showError('현재 위치를 가져오지 못했습니다. 브라우저 위치 권한을 허용해주세요.');
+                .catch(function (error) {
+                    selectedPosition = map.getCenter();
+
+                    if (error && error.code === 1) {
+                        showError('위치 권한이 거부되어 현재 지도 위치를 사용합니다. 브라우저에서 위치 권한을 허용할 수 있습니다.');
+                    } else if (error && error.code === 3) {
+                        showError('현재 위치 확인 시간이 초과되어 현재 지도 위치를 사용합니다.');
+                    } else {
+                        showError('현재 위치를 가져오지 못해 현재 지도 위치를 사용합니다.');
+                    }
+                })
+                .finally(function () {
+                    currentLocationRequest = null;
+
+                    if (locationSucceeded) {
+                        message.hidden = true;
+                    }
                 });
+
+            return currentLocationRequest;
         }
 
         function formatPosition(position) {
@@ -525,12 +327,14 @@
             markerLocationInput.value = '';
             markerLocationSelectedInput.value = '';
             selectedMarkerLocationPosition = null;
-            showMarkerFormInfo('현재 위치를 가져오지 못했습니다. 위치를 직접 입력해주세요.');
+            showMarkerFormInfo('선택한 지도 위치의 주소를 찾지 못했습니다. 위치를 직접 입력해주세요.');
         }
 
-        function fillMarkerLocationFromCurrentPosition() {
+        function fillMarkerLocationFromMapCenter() {
             var requestId = markerLocationRequestId + 1;
+            var centerPosition = map.getCenter();
             markerLocationRequestId = requestId;
+            selectedPosition = centerPosition;
             isResolvingMarkerLocation = true;
             markerLocationEditedDuringResolve = false;
             markerPlaces = [];
@@ -538,23 +342,15 @@
             markerLocationInput.value = '';
             markerLocationSelectedInput.value = '';
             selectedMarkerLocationPosition = null;
-            markerLocationInput.placeholder = '현재 위치를 확인하는 중...';
-            showMarkerFormInfo('현재 위치를 확인하는 중...');
+            markerLocationInput.placeholder = '선택 위치의 주소를 확인하는 중...';
+            showMarkerFormInfo('지도 중앙의 선택 위치를 확인하는 중...');
 
-            getCurrentKakaoPosition()
-                .then(function (userPosition) {
-                    if (requestId !== markerLocationRequestId) {
-                        return null;
-                    }
-
-                    moveTo(userPosition, 4);
-                    return addressFromPosition(userPosition)
-                        .then(function (locationName) {
-                            return {
-                                position: userPosition,
-                                locationName: locationName
-                            };
-                        });
+            addressFromPosition(centerPosition)
+                .then(function (locationName) {
+                    return {
+                        position: centerPosition,
+                        locationName: locationName
+                    };
                 })
                 .then(function (result) {
                     if (!result || requestId !== markerLocationRequestId) {
@@ -592,21 +388,15 @@
                 });
         }
 
-        function formatPlace(place) {
-            return place.place_name + ' · ' + (place.road_address_name || place.address_name || '주소 정보 없음');
-        }
-
-        function placeSearchOptions() {
-            var baseLocation = hasCurrentPosition ? currentPosition : map.getCenter();
+        function placeSearchOptions(mode) {
+            var baseLocation = mode === SEARCH_MODES.RECORD ? selectedPosition : map.getCenter();
             return {
                 location: baseLocation
             };
         }
 
         function markerPlaceSearchOptions() {
-            return {
-                location: map.getCenter()
-            };
+            return placeSearchOptions(SEARCH_MODES.RECORD);
         }
 
         function formatDistance(distance) {
@@ -649,35 +439,66 @@
         function emotionMetaForLabel(label, fallbackColor) {
             if (window.PLIA_EMOTION && typeof window.PLIA_EMOTION.metaForLabel === 'function') {
                 var emotion = window.PLIA_EMOTION.metaForLabel(label, fallbackColor || '');
-                return normalizeEmotionMeta(emotion.label || label, emotion.color || fallbackColor);
+                return normalizeEmotionMeta(emotion.label || label, emotion.color || fallbackColor, emotion.icon || '');
             }
 
-            return normalizeEmotionMeta(label, fallbackColor);
+            return normalizeEmotionMeta(label, fallbackColor, '');
         }
 
-        function normalizeEmotionMeta(label, fallbackColor) {
+        function normalizeEmotionMeta(label, fallbackColor, fallbackIcon) {
             var normalizedLabel = String(label || '').trim();
             var normalizedKey = normalizedLabel.toLowerCase();
             var emotionColors = {
                 '\uae30\uc068': '#765A08',
                 happy: '#765A08',
                 happiness: '#765A08',
+                '\uae30\ub300': '#4F711F',
                 anticipation: '#4F711F',
+                '\uc2ac\ud514': '#315C86',
                 sadness: '#315C86',
+                sad: '#315C86',
+                '\ubd84\ub178': '#9D312B',
                 anger: '#9D312B',
+                angry: '#9D312B',
                 '\ubd88\uc548': '#5C477D',
                 anxious: '#5C477D',
                 anxiety: '#5C477D',
+                '\ub2f9\ud669': '#8B3D66',
                 embarrassment: '#8B3D66',
                 '\ub180\ub78c': '#28746F',
                 surprised: '#28746F',
                 surprise: '#28746F',
+                '\uc9dc\uc99d': '#925021',
                 irritation: '#925021'
+            };
+            var emotionIcons = {
+                '\uae30\uc068': '😊',
+                happy: '😊',
+                happiness: '😊',
+                '\uae30\ub300': '🙂',
+                anticipation: '🙂',
+                '\uc2ac\ud514': '😢',
+                sadness: '😢',
+                sad: '😢',
+                '\ubd84\ub178': '😠',
+                anger: '😠',
+                angry: '😠',
+                '\ubd88\uc548': '😟',
+                anxious: '😟',
+                anxiety: '😟',
+                '\ub2f9\ud669': '😳',
+                embarrassment: '😳',
+                '\ub180\ub78c': '😮',
+                surprised: '😮',
+                surprise: '😮',
+                '\uc9dc\uc99d': '😣',
+                irritation: '😣'
             };
 
             return {
                 label: normalizedLabel,
-                color: emotionColors[normalizedLabel] || emotionColors[normalizedKey] || fallbackColor || '#2F7650'
+                color: emotionColors[normalizedLabel] || emotionColors[normalizedKey] || fallbackColor || '#2F7650',
+                icon: emotionIcons[normalizedLabel] || emotionIcons[normalizedKey] || fallbackIcon || '🙂'
             };
         }
 
@@ -685,6 +506,7 @@
             var emotion = emotionMetaForLabel(recordDetail.emotionLabel, recordDetail.emotionColor);
             recordDetail.emotionLabel = emotion.label || recordDetail.emotionLabel;
             recordDetail.emotionColor = emotion.color || recordDetail.emotionColor;
+            recordDetail.emotionIcon = emotion.icon || recordDetail.emotionIcon || '🙂';
             return recordDetail;
         }
 
@@ -778,27 +600,12 @@
             });
         }
 
-        function distanceBetweenPositions(firstPosition, secondPosition) {
-            var firstLatitude = firstPosition.getLat() * Math.PI / 180;
-            var secondLatitude = secondPosition.getLat() * Math.PI / 180;
-            var latitudeDelta = secondLatitude - firstLatitude;
-            var longitudeDelta = (secondPosition.getLng() - firstPosition.getLng()) * Math.PI / 180;
-            var haversineValue = Math.sin(latitudeDelta / 2) ** 2
-                + Math.cos(firstLatitude) * Math.cos(secondLatitude) * Math.sin(longitudeDelta / 2) ** 2;
-            var normalizedHaversineValue = Math.min(1, haversineValue);
-
-            return EARTH_RADIUS_METERS * 2 * Math.atan2(
-                Math.sqrt(normalizedHaversineValue),
-                Math.sqrt(1 - normalizedHaversineValue)
-            );
-        }
-
-        function isWithinMarkerDistance(position) {
-            return distanceBetweenPositions(map.getCenter(), position) < MAX_DISTANCE_METERS;
+        function canSelectSearchResult(mode, position) {
+            return searchPolicy.canSelect(mode, selectedPosition, position);
         }
 
         function showMarkerDistanceError() {
-            setMarkerFormMessage('마커 위치에서 2km 이내의 위치만 선택할 수 있습니다.');
+            setMarkerFormMessage('핀 위치에서 250m 이내의 위치만 선택할 수 있습니다.');
         }
 
         function hideMarkerFormMessage() {
@@ -814,13 +621,6 @@
 
             var searchedPosition = new kakao.maps.LatLng(place.y, place.x);
 
-            if (!isWithinMarkerDistance(searchedPosition)) {
-                showMarkerDistanceError();
-                return;
-            }
-
-            selectedPosition = searchedPosition;
-            hideMarkerFormMessage();
             map.setLevel(4);
             map.setCenter(searchedPosition);
             searchInput.value = place.place_name;
@@ -849,7 +649,7 @@
             try {
                 var storedViewMode = localStorage.getItem(mapViewStorageKey);
                 return storedViewMode === 'feed' ? 'feed' : 'map';
-            } catch (error) {
+            } catch {
                 return 'map';
             }
         }
@@ -857,8 +657,7 @@
         function persistMapViewMode(viewMode) {
             try {
                 localStorage.setItem(mapViewStorageKey, viewMode);
-            } catch (error) {
-                // 저장이 막혀도 현재 화면 전환은 유지합니다.
+            } catch {
             }
         }
 
@@ -887,7 +686,6 @@
             }
             openMarkerModalButton.hidden = isFeedView;
             moveCurrentLocationButton.hidden = isFeedView;
-            syncCurrentLocationOverlay();
 
             if (isFeedView) {
                 closeClusterPanel();
@@ -905,7 +703,7 @@
 
             feedPanel.hidden = true;
             kakao.maps.event.trigger(map, 'resize');
-            map.setCenter(currentPosition);
+            map.setCenter(selectedPosition);
             refreshMarkerLayers();
         }
 
@@ -1370,7 +1168,7 @@
                 activeRecordComments = [];
                 renderRecordDetail();
                 await loadRecordComments(recordId);
-            } catch (error) {
+            } catch {
                 showError('기록 상세를 불러오지 못했습니다.');
                 closeRecordPanel();
             } finally {
@@ -1402,7 +1200,7 @@
                 activeRecordDetail.likedByMe = result.likedByMe;
                 activeRecordDetail.likeCount = result.likeCount;
                 renderRecordDetail();
-            } catch (error) {
+            } catch {
                 activeRecordDetail.likedByMe = previousLiked;
                 activeRecordDetail.likeCount = previousCount;
                 renderRecordDetail();
@@ -1505,7 +1303,7 @@
         function renderViewportClustersSafely() {
             try {
                 renderViewportClusters();
-            } catch (error) {
+            } catch {
                 removeClusterOverlays();
             }
         }
@@ -1720,10 +1518,13 @@
             openRecordDetail(recordButton.dataset.recordId);
         });
 
+        var initialLocationRequest = Promise.resolve();
+
         if (hasRequestedPosition) {
             map.setCenter(requestedPosition);
-        } else if (!requestedEmotionId) {
-            moveToCurrentLocation();
+            selectedPosition = requestedPosition;
+        } else if (shouldLocateOnEntry || !requestedEmotionId) {
+            initialLocationRequest = moveToCurrentLocation();
         }
 
         kakao.maps.event.addListener(map, 'center_changed', function () {
@@ -1739,14 +1540,7 @@
         });
 
         kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
-            if (!isWithinMarkerDistance(mouseEvent.latLng)) {
-                showMarkerDistanceError();
-                return;
-            }
-
-            selectedPosition = mouseEvent.latLng;
-            hideMarkerFormMessage();
-            map.panTo(selectedPosition);
+            map.panTo(mouseEvent.latLng);
             searchResults.hidden = true;
             closeClusterPanel();
             closeRecordPanel();
@@ -1800,7 +1594,7 @@
                 }
 
                 renderSearchResults(results, keyword);
-            }, placeSearchOptions());
+            }, placeSearchOptions(SEARCH_MODES.BROWSE));
         }
 
         searchForm.addEventListener('submit', function (event) {
@@ -1837,7 +1631,7 @@
                 resultButton.addEventListener('click', function () {
                     var markerLocationPosition = new kakao.maps.LatLng(place.y, place.x);
 
-                    if (!isWithinMarkerDistance(markerLocationPosition)) {
+                    if (!canSelectSearchResult(SEARCH_MODES.RECORD, markerLocationPosition)) {
                         showMarkerDistanceError();
                         return;
                     }
@@ -1966,7 +1760,7 @@
             markerElement.className = 'emotion-map-marker';
             markerElement.style.setProperty('--marker-color', emotion.color);
             markerElement.setAttribute('aria-label', emotion.label + ' 감정 마커: ' + title);
-            markerElement.innerHTML = '<span></span>';
+            markerElement.innerHTML = '<span class="emotion-map-marker-icon" aria-hidden="true">' + escapeHtml(emotion.icon || '🙂') + '</span>';
 
             var markerOverlay = new kakao.maps.CustomOverlay({
                 position: position,
@@ -2014,6 +1808,7 @@
                 infoOverlay: infoOverlay,
                 emotionLabel: emotion.label,
                 emotionColor: emotion.color,
+                emotionIcon: emotion.icon || '🙂',
                 title: title,
                 description: description,
                 locationName: locationName,
@@ -2073,7 +1868,8 @@
                 new kakao.maps.LatLng(marker.latitude, marker.longitude),
                 {
                     label: emotion.label || marker.emotionLabel,
-                    color: emotion.color || marker.emotionColor
+                    color: emotion.color || marker.emotionColor,
+                    icon: emotion.icon || '🙂'
                 },
                 marker.title,
                 marker.description || '',
@@ -2102,7 +1898,7 @@
                 }
                 renderFeedList();
                 updateFilterMenu(visibleMarkerItems().length);
-            } catch (error) {
+            } catch {
                 showError('저장된 감정 마커를 불러오지 못했습니다.');
             }
         }
@@ -2147,7 +1943,7 @@
                 selectedMarkerLocationPosition = null;
             }
 
-            if (selectedMarkerLocationPosition && !isWithinMarkerDistance(selectedMarkerLocationPosition)) {
+            if (selectedMarkerLocationPosition && !canSelectSearchResult(SEARCH_MODES.RECORD, selectedMarkerLocationPosition)) {
                 markerLocationInput.focus();
                 showMarkerDistanceError();
                 return;
@@ -2165,7 +1961,7 @@
             }
 
             try {
-                var markerPosition = selectedMarkerLocationPosition || map.getCenter();
+                var markerPosition = selectedPosition;
                 var selectedEmotion = emotionMetaForLabel(checkedEmotion.dataset.label, checkedEmotion.dataset.color);
                 var savedMarker = await saveEmotionMarker({
                     latitude: markerPosition.getLat(),
@@ -2249,17 +2045,20 @@
                 activeRecordDetail.commentCount += 1;
                 recordCommentInput.value = '';
                 renderRecordDetail();
-            } catch (error) {
+            } catch {
                 showError('댓글을 등록하지 못했습니다.');
             }
         });
 
         if (requestedEmotionId && selectMarkerEmotion(requestedEmotionId)) {
+            var waitForInitialLocation = shouldLocateOnEntry && !hasRequestedPosition;
             clearRequestedEmotionIntent();
-            openMarkerModal();
-        } else if (requestedEmotionId && !hasRequestedPosition) {
-            clearRequestedEmotionIntent();
-            moveToCurrentLocation();
+
+            if (waitForInitialLocation) {
+                initialLocationRequest.finally(openMarkerModal);
+            } else {
+                openMarkerModal();
+            }
         } else if (requestedEmotionId) {
             clearRequestedEmotionIntent();
         }
@@ -2277,11 +2076,10 @@
                 return;
             }
 
+            var centerBeforeResize = map.getCenter();
             kakao.maps.event.trigger(map, 'resize');
-            map.setCenter(currentPosition);
+            map.setCenter(centerBeforeResize);
+            selectedPosition = centerBeforeResize;
             scheduleCustomMarkerVisibilitySync();
         });
     })();
-</script>
-</body>
-</html>

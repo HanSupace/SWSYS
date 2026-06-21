@@ -1,0 +1,20 @@
+databases:
+  - name: plia-postgres
+    databaseName: plia
+    user: plia
+    plan: free
+
+services:
+  - type: web
+    name: plia
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /login
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: plia-postgres
+          property: connectionString
+      - key: KAKAO_MAPS_JAVASCRIPT_KEY
+        sync: false

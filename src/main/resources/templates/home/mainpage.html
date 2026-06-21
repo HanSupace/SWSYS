@@ -6,17 +6,17 @@
     <meta name="application-name" th:content="${appName}" content="Plia">
     <title th:text="|${appName} 메인|">Plia 메인</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
-    <link rel="stylesheet" th:href="@{/css/home.css(v=20260512b)}" href="../../static/css/home.css?v=20260512b">
-    <link rel="stylesheet" th:href="@{/css/mainpage.css(v=20260531d)}" href="../../static/css/mainpage.css?v=20260531d">
+    <link rel="stylesheet" th:href="@{/css/base/home.css(v=20260512b)}" href="../../static/css/base/home.css?v=20260512b">
+    <link rel="stylesheet" th:href="@{/css/pages/mainpage.css(v=20260621b)}" href="../../static/css/pages/mainpage.css?v=20260621b">
     <th:block th:replace="~{fragments/emotions :: assets}"></th:block>
-    <script th:src="@{/js/mainpage.js(v=20260531d)}" src="../../static/js/mainpage.js?v=20260531d" defer></script>
+    <script th:src="@{/js/shared/progress.js(v=20260620a)}" src="../../static/js/shared/progress.js?v=20260620a" defer></script>
+    <script th:src="@{/js/pages/mainpage.js(v=20260620a)}" src="../../static/js/pages/mainpage.js?v=20260620a" defer></script>
 </head>
 <body>
 <div class="bg-pattern"></div>
 <div class="bg-shape bg-shape-1"></div>
 <div class="bg-shape bg-shape-2"></div>
-<main class="mobile-page home-app" th:aria-label="|${appName} 메인 화면|" aria-label="Plia 메인 화면">
-<div class="bg-shape bg-shape-3"></div>
+<div class="bg-shape bg-shape-3"></div>  <main class="mobile-page home-app" th:aria-label="|${appName} 메인 화면|" aria-label="Plia 메인 화면">
 
     <section class="dashboard">
         <header class="app-header">
@@ -35,11 +35,11 @@
                 <p>오늘도 반가워요!</p>
                 <div class="hero-progress" aria-label="사용자 레벨과 경험치">
                     <div class="hero-progress-top">
-                        <span id="user-xp" th:text="|${progress.currentXp()} / ${progress.requiredXp()} XP|">0 / 100 XP</span>
-                        <strong id="user-level" th:text="|Lv. ${progress.level()}|">Lv. 1</strong>
+                        <span id="user-xp" th:text="|${progress.currentXp()} / ${progress.requiredXp()} XP|">XP</span>
+                        <strong id="user-level" th:text="|Lv. ${progress.level()}|">Lv</strong>
                     </div>
                     <div class="xp-track" aria-hidden="true">
-                        <span id="user-xp-bar" th:style="|width: ${progress.progressPercent()}%;|"></span>
+                        <span id="user-xp-bar" th:data-progress="${progress.progressPercent()}" data-progress="0"></span>
                     </div>
                 </div>
             </a>
@@ -55,7 +55,6 @@
                             th:data-emotion-id="${emotion.id()}"
                             th:data-emotion-code="${emotion.code()}"
                             th:data-emotion="${emotion.label()}"
-                            th:style="|--emotion-bg: ${emotion.background()}; --emotion-border: ${emotion.border()}; --emotion-text: ${emotion.color()};|"
                             th:text="${emotion.label()}"
                             data-emotion-id="default-happiness"
                             data-emotion-code="HAPPY"
@@ -76,7 +75,7 @@
                 </a>
                 <a class="main-action-button main-action-button-analysis" th:href="@{/profile/emotion-records}" href="/profile/emotion-records">
                     <strong>감정분석</strong>
-                    <span class="main-action-desc">기록 돌아보기</span>
+                    <span class="main-action-desc">기록 보기</span>
                 </a>
             </section>
 

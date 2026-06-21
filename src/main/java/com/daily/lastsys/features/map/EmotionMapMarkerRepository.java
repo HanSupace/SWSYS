@@ -3,12 +3,10 @@ package com.daily.lastsys.features.map;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,7 +30,7 @@ public class EmotionMapMarkerRepository {
                     )
                     values (?, ?, ?, ?, ?, ?, ?, ?)
                     """,
-                    Statement.RETURN_GENERATED_KEYS
+                    new String[] {"id"}
             );
             statement.setLong(1, userId);
             statement.setBigDecimal(2, request.latitude());
@@ -162,27 +160,29 @@ public class EmotionMapMarkerRepository {
     }
 
     public EmotionMapLikeToggleResponse toggleLike(Long userId, Long markerId) {
-        try {
-            jdbcTemplate.update(
-                    """
-                    insert into likes (record_id, user_id)
-                    values (?, ?)
-                    """,
-                    markerId,
-                    userId
-            );
+        int insertedCount = jdbcTemplate.update(
+                """
+                insert into likes (record_id, user_id)
+                values (?, ?)
+                on conflict (record_id, user_id) do nothing
+                """,
+                markerId,
+                userId
+        );
+
+        if (insertedCount > 0) {
             return new EmotionMapLikeToggleResponse(true, countLikes(markerId));
-        } catch (DuplicateKeyException exception) {
-            jdbcTemplate.update(
-                    """
-                    delete from likes
-                    where record_id = ? and user_id = ?
-                    """,
-                    markerId,
-                    userId
-            );
-            return new EmotionMapLikeToggleResponse(false, countLikes(markerId));
         }
+
+        jdbcTemplate.update(
+                """
+                delete from likes
+                where record_id = ? and user_id = ?
+                """,
+                markerId,
+                userId
+        );
+        return new EmotionMapLikeToggleResponse(false, countLikes(markerId));
     }
 
     public EmotionMapCommentResponse saveComment(Long userId, Long markerId, EmotionMapCommentRequest request) {
@@ -193,7 +193,7 @@ public class EmotionMapMarkerRepository {
                     insert into comments (record_id, user_id, content)
                     values (?, ?, ?)
                     """,
-                    Statement.RETURN_GENERATED_KEYS
+                    new String[] {"id"}
             );
             statement.setLong(1, markerId);
             statement.setLong(2, userId);
@@ -221,15 +221,6 @@ public class EmotionMapMarkerRepository {
                 userId,
                 markerId
         );
-    }
-
-    public int countComments(Long markerId) {
-        Integer count = jdbcTemplate.queryForObject(
-                "select count(*) from comments where record_id = ?",
-                Integer.class,
-                markerId
-        );
-        return count == null ? 0 : count;
     }
 
     private int countLikes(Long markerId) {

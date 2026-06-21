@@ -161,9 +161,24 @@ document.addEventListener('DOMContentLoaded', () => {
         return '#2F7650';
     }
 
+    async function loadLikedSpots() {
+        try {
+            const response = await fetch('/api/spots/liked');
+
+            if (!response.ok) {
+                throw new Error('Failed to load liked spots.');
+            }
+
+            renderLikedSpots(await response.json());
+        } catch (fetchError) {
+            console.error(fetchError);
+            renderSpotMessage('liked-spot-list', '추천 위치를 불러오지 못했습니다.');
+        }
+    }
+
     function loadHealingSpots() {
         if (!navigator.geolocation) {
-            renderHealingSpotMessage('GPS를 지원하지 않는 기기 또는 브라우저입니다.');
+            renderSpotMessage('healing-spot-list', 'GPS를 지원하지 않는 기기 또는 브라우저입니다.');
             return;
         }
 
@@ -184,17 +199,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     renderHealingSpots(await response.json());
                 } catch (fetchError) {
                     console.error(fetchError);
-                    renderHealingSpotMessage('주변 힐링 스팟을 불러오지 못했습니다.');
+                    renderSpotMessage('healing-spot-list', '주변 힐링 스팟을 불러오지 못했습니다.');
                 }
             },
             () => {
-                renderHealingSpotMessage('위치 권한을 허용해 주세요.');
+                renderSpotMessage('healing-spot-list', '위치 권한을 허용해 주세요.');
             }
         );
     }
 
-    function renderHealingSpotMessage(message) {
-        const listElement = document.getElementById('healing-spot-list');
+    function renderSpotMessage(listId, message) {
+        const listElement = document.getElementById(listId);
 
         if (!listElement) {
             return;
@@ -207,6 +222,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </li>
         `;
+    }
+
+    function renderLikedSpots(spots) {
+        const listElement = document.getElementById('liked-spot-list');
+
+        if (!listElement) {
+            return;
+        }
+
+        listElement.innerHTML = '';
+
+        if (spots.length === 0) {
+            listElement.innerHTML = `
+                <li class="record-item record-empty">
+                    <div class="record-info">
+                        <span class="record-emotion">아직 추천할 만큼 좋아요 데이터가 없어요.</span>
+                        <span class="record-date">감정지도에서 마음에 드는 위치에 좋아요를 남기면 이곳에 표시됩니다.</span>
+                    </div>
+                </li>
+            `;
+            return;
+        }
+
+        spots.forEach((spot) => {
+            listElement.appendChild(createSpotItem(spot, `
+                <span class="record-icon" aria-hidden="true">${escapeHtml(spot.emotion || '•')}</span>
+                <div class="record-info">
+                    <span class="record-date">${escapeHtml(spot.emotionLabel || '감정')} · 좋아요 ${escapeHtml(spot.likeCount || 0)}개</span>
+                    <span class="record-emotion">
+                        ${escapeHtml(spot.name)}
+                    </span>
+                    ${spot.description ? '<span class="record-description">' + escapeHtml(shortenText(spot.description, 72)) + '</span>' : ''}
+                </div>
+            `));
+        });
     }
 
     function renderHealingSpots(spots) {
@@ -231,19 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         spots.forEach((spot) => {
-            const item = document.createElement('li');
-            item.className = 'record-item';
-            item.setAttribute('style', 'cursor: pointer;');
-            item.tabIndex = 0;
-            item.setAttribute('role', 'link');
-            item.onclick = () => openSpotOnMap(spot);
-            item.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    openSpotOnMap(spot);
-                }
-            });
-            item.innerHTML = `
+            listElement.appendChild(createSpotItem(spot, `
                 <span class="record-icon" aria-hidden="true">${escapeHtml(spot.emotion || '•')}</span>
                 <div class="record-info">
                     <span class="record-date">현위치에서 ${escapeHtml(spot.distance)}</span>
@@ -251,13 +289,39 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${escapeHtml(spot.name)}
                     </span>
                 </div>
-            `;
-            listElement.appendChild(item);
+            `));
         });
+    }
+
+    function createSpotItem(spot, content) {
+        const item = document.createElement('li');
+        item.className = 'record-item';
+        item.setAttribute('style', 'cursor: pointer;');
+        item.tabIndex = 0;
+        item.setAttribute('role', 'link');
+        item.onclick = () => openSpotOnMap(spot);
+        item.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openSpotOnMap(spot);
+            }
+        });
+        item.innerHTML = content;
+        return item;
     }
 
     function openSpotOnMap(spot) {
         window.location.href = '/map?lat=' + spot.lat + '&lng=' + spot.lng;
+    }
+
+    function shortenText(value, maxLength) {
+        const text = String(value || '').trim().replace(/\s+/g, ' ');
+
+        if (text.length <= maxLength) {
+            return text;
+        }
+
+        return text.slice(0, maxLength - 1) + '…';
     }
 
     function escapeHtml(value) {
@@ -270,5 +334,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     loadEmotionSummaryChart();
+    loadLikedSpots();
     loadHealingSpots();
 });

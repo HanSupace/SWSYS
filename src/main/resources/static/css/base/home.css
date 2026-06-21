@@ -1,7 +1,7 @@
 :root {
     --primary-color: #1A4D39;
     --primary-hover: #123829;
-    --bg-color: #F8FAF9; /* 배경을 조금 더 화사하게 */
+    --bg-color: #F8FAF9;
     --text-main: #1C2622;
     --text-sub: #5E7A6E;
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -25,7 +25,6 @@ html, body {
     position: relative;
 }
 
-/* 1. 심심함을 달래줄 은은한 도트 패턴 포인트 */
 .bg-pattern {
     position: absolute;
     inset: 0;
@@ -34,7 +33,6 @@ html, body {
     z-index: 0;
 }
 
-/* 2. 감각적인 빛 번짐 (Mesh Gradient) 효과 */
 .bg-shape {
     position: absolute;
     border-radius: 50%;
@@ -48,7 +46,7 @@ html, body {
     height: 90vw;
     max-width: 24.375rem;
     max-height: 24.375rem;
-    background: #8ED6A3; /* 산뜻한 민트그린 */
+    background: #8ED6A3;
     top: -24%; left: -30%;
 }
 .bg-shape-2 {
@@ -56,7 +54,7 @@ html, body {
     height: 84vw;
     max-width: 22.5rem;
     max-height: 22.5rem;
-    background: #C6E8D2; /* 부드러운 세이지 그린 */
+    background: #C6E8D2;
     bottom: -22%; right: -30%;
     animation-delay: -4s;
 }
@@ -80,20 +78,18 @@ html, body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* 로고가 가볍게 둥둥 떠다니는 효과 */
 @keyframes floatLogo {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-8%); }
 }
 
-/* 모바일 페이지 컨테이너: 글래스모피즘 */
 .mobile-page {
     width: min(100%, 26.875rem);
     min-height: 100svh;
     padding: max(2.5rem, env(safe-area-inset-top)) clamp(1.25rem, 6.5vw, 1.75rem) max(2.5rem, env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
-    justify-content: center; /* 요소들을 화면 중앙으로 모음 */
+    justify-content: center;
     background: rgba(255, 255, 255, 0.45);
     backdrop-filter: blur(1.5rem);
     -webkit-backdrop-filter: blur(1.5rem);
@@ -106,9 +102,9 @@ html, body {
 .welcome {
     display: flex;
     flex-direction: column;
-    justify-content: center; /* 양끝 배치가 아닌 중앙 정렬 */
+    justify-content: center;
     align-items: center;
-    gap: 8vh; /* 로고 영역과 버튼 영역 사이의 적당한 간격 */
+    gap: 8vh;
     height: 100%;
 }
 
@@ -120,13 +116,12 @@ html, body {
     animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
 }
 
-/* 네모 틀 없이 로고 이미지만 깔끔하게 */
 .logo {
     width: clamp(5.625rem, 26vw, 6.875rem);
     height: auto;
     object-fit: contain;
-    filter: drop-shadow(0 1rem 1.5rem rgba(26, 77, 57, 0.15)); /* 로고 자체에 예쁜 그림자 */
-    animation: floatLogo 4s ease-in-out infinite; /* 애니메이션 적용 */
+    filter: drop-shadow(0 1rem 1.5rem rgba(26, 77, 57, 0.15));
+    animation: floatLogo 4s ease-in-out infinite;
 }
 
 .copy {
@@ -259,7 +254,6 @@ html, body {
         right: -46%;
     }
 }
-/* --- 메인 로고 크기 수정 --- */
 .logo {
     width: clamp(7.5rem, 35vw, 9.375rem);
     height: auto;
@@ -268,14 +262,11 @@ html, body {
     animation: floatLogo 4s ease-in-out infinite;
 }
 
-/* --- 모바일 컨테이너 스크롤 처리 보완 --- */
-/* 입력 폼이 길어지면 잘리지 않고 스크롤 되도록 변경 */
 .mobile-page {
     overflow-y: auto;
     overflow-x: hidden;
 }
 
-/* --- 회원가입 폼 전용 스타일 (Auth Page) --- */
 .auth-page {
     justify-content: center;
 }
@@ -289,7 +280,6 @@ html, body {
     padding-block: 1.5rem;
 }
 
-/* 인증 화면 로고 */
 .brand-link {
     display: flex;
     flex-direction: column;
@@ -342,7 +332,6 @@ html, body {
     margin-bottom: 0.25rem;
 }
 
-/* 입력 폼 레이아웃 */
 .signup-form {
     display: flex;
     flex-direction: column;
@@ -362,14 +351,13 @@ html, body {
     padding-left: 0.125rem;
 }
 
-/* 트렌디한 입력창(Input) 스타일 */
 .field input {
     width: 100%;
     height: clamp(3rem, 12vw, 3.25rem);
     padding: 0 1rem;
-    border-radius: 0.875rem; /* 버튼과 어울리는 둥근 테두리 */
+    border-radius: 0.875rem;
     border: 0.09375rem solid rgba(26, 77, 57, 0.12);
-    background: rgba(255, 255, 255, 0.6); /* 반투명 배경 */
+    background: rgba(255, 255, 255, 0.6);
     color: var(--text-main);
     font-size: 0.9375rem;
     font-family: inherit;
@@ -382,16 +370,14 @@ html, body {
     color: #9EBBAD;
 }
 
-/* 입력창 포커스(클릭) 시 부드러운 하이라이트 */
 .field input:focus {
     background: #FFFFFF;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 0.25rem rgba(26, 77, 57, 0.1);
 }
 
-/* 에러 메시지 */
 .field-error {
-    color: #E53E3E; /* 너무 눈부시지 않은 부드러운 레드 */
+    color: #E53E3E;
     font-size: 0.8125rem;
     font-weight: 600;
     padding-left: 0.125rem;
@@ -408,12 +394,10 @@ html, body {
     text-align: center;
 }
 
-/* 폼 안의 제출 버튼 여백 설정 */
 .submit-btn {
     margin-top: 0.75rem;
 }
 
-/* 하단 뒤로가기 링크 */
 .text-link {
     align-self: center;
     color: var(--text-sub);
