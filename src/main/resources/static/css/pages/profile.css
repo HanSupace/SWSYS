@@ -642,6 +642,60 @@
     }
 }
 
+@media (min-width: 48rem) {
+    body.profile-responsive-page .main-content {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-areas: none;
+        align-content: center;
+    }
+
+    .profile-header-card {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 1.25rem;
+        padding: 1.5rem;
+        text-align: left;
+    }
+
+    .profile-avatar {
+        width: 5.5rem;
+        height: 5.5rem;
+        flex: 0 0 5.5rem;
+    }
+
+    .profile-header-card + .menu-section,
+    .profile-header-card + .menu-section + .menu-section {
+        min-width: 0;
+    }
+}
+
+@media (min-width: 64rem) {
+    body.profile-responsive-page .main-content {
+        grid-template-columns: minmax(17rem, 0.72fr) minmax(0, 1.6fr);
+    }
+
+    .profile-header-card {
+        grid-column: auto;
+        grid-row: 1 / span 2;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .profile-header-card ~ .menu-section {
+        grid-column: 2;
+    }
+
+    .profile-header-card + .menu-section {
+        grid-row: 1;
+    }
+
+    .profile-header-card + .menu-section + .menu-section {
+        grid-row: 2;
+    }
+}
+
 .home-app {
     display: flex;
     flex-direction: column;
