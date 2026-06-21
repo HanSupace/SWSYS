@@ -605,7 +605,7 @@
         }
 
         function showMarkerDistanceError() {
-            setMarkerFormMessage('마커 위치에서 2km 이내의 위치만 선택할 수 있습니다.');
+            setMarkerFormMessage('핀 위치에서 250m 이내의 위치만 선택할 수 있습니다.');
         }
 
         function hideMarkerFormMessage() {

@@ -10,7 +10,7 @@ import java.util.List;
 public class HealingSpotRepository {
 
     private static final double EARTH_RADIUS_IN_METERS = 6371000;
-    private static final int SEARCH_RADIUS_IN_METERS = 20000;
+    private static final int SEARCH_RADIUS_IN_METERS = 50000;
     private static final int LIKED_SPOT_LIMIT = 5;
 
     private final JdbcTemplate jdbcTemplate;

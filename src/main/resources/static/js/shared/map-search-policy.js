@@ -12,7 +12,7 @@
         RECORD: 'record'
     });
     var EARTH_RADIUS_METERS = 6371000;
-    var RECORD_RADIUS_METERS = 2000;
+    var RECORD_RADIUS_METERS = 250;
 
     function coordinate(position, getterName, propertyName) {
         if (position && typeof position[getterName] === 'function') {

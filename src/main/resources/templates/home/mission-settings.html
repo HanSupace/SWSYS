@@ -31,7 +31,7 @@
             <section class="mission-settings">
                 <div class="mission-settings-head">
                     <h3>선행 미션 방식</h3>
-                    <p>평범 모드는 랜덤 미션을, 규칙 기반 모드는 현재 역할과 상황에 맞는 미션을 우선 보여줍니다.</p>
+                    <p>일반 모드는 랜덤 미션을, 규칙 기반 모드는 현재 상황에 맞는 미션을 우선 보여줍니다.</p>
                 </div>
                 
                 <p class="mission-settings-saved" th:if="${param.missionSettingsSaved}">미션 설정이 저장되었습니다.</p>
@@ -40,7 +40,7 @@
                     <div class="mission-mode-options">
                         <label>
                             <input type="radio" th:field="*{mode}" value="PLAIN">
-                            <span>평범 모드</span>
+                            <span>일반 모드</span>
                         </label>
                         <label>
                             <input type="radio" th:field="*{mode}" value="RULE_BASED">
@@ -50,7 +50,7 @@
 
                     <div class="mission-setting-grid" id="mission-rule-fields">
                         <label class="mission-setting-field">
-                            <span>직업/역할</span>
+                            <span>직업</span>
                             <select th:field="*{lifeStage}" data-rule-field>
                                 <option value="ANY">상관없음</option>
                                 <option value="PRIMARY_SECONDARY_STUDENT">초중고생</option>
