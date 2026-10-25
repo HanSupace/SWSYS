@@ -1326,3 +1326,26 @@ body {
         top: 2.375rem;
     }
 }
+.recommendation-search {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid rgba(26, 77, 57, 0.12);
+    border-radius: 1.125rem;
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: 0 0.5rem 1.25rem rgba(26, 77, 57, 0.06);
+}
+.recommendation-search label { display: block; margin-bottom: 0.625rem; color: var(--primary-color); font-size: 0.875rem; font-weight: 800; }
+.recommendation-search-row { display: flex; gap: 0.5rem; }
+.recommendation-search-row input { min-width: 0; flex: 1; min-height: 2.75rem; padding: 0 0.75rem; border: 1px solid rgba(26, 77, 57, 0.18); border-radius: 0.75rem; background: #fff; color: var(--text-main); font: inherit; font-size: 0.875rem; }
+.recommendation-search-row input::placeholder { color: #84968d; }
+.recommendation-search-row button { min-width: 3.5rem; padding: 0 0.875rem; border: 0; border-radius: 0.75rem; background: var(--primary-color); color: #fff; font: inherit; font-size: 0.875rem; font-weight: 800; cursor: pointer; }
+#recommendation-message { margin-top: 0.5rem; color: var(--text-sub); font-size: 0.75rem; line-height: 1.5; }
+.recommendation-results { display: grid; gap: 0.5rem; max-height: 15rem; margin-top: 0.625rem; overflow: auto; }
+.recommendation-results-heading { color: var(--primary-color); font-size: 0.75rem; font-weight: 800; }
+.recommendation-card { padding: 0.75rem; border: 1px solid rgba(26, 77, 57, 0.08); border-radius: 0.75rem; background: #f5f9f6; }
+.recommendation-card > div { display: flex; gap: 0.5rem; margin-bottom: 0.25rem; font-size: 0.6875rem; }
+.recommendation-emotion { color: var(--primary-color); font-weight: 800; }
+.recommendation-location, .recommendation-card small { color: var(--text-sub); }
+.recommendation-card strong { display: block; color: var(--text-main); font-size: 0.875rem; }
+.recommendation-card p { margin: 0.3125rem 0; color: #43574d; font-size: 0.75rem; white-space: pre-wrap; }
+.recommendation-empty { margin: 0; padding: 0.75rem; color: var(--text-sub); font-size: 0.8125rem; }

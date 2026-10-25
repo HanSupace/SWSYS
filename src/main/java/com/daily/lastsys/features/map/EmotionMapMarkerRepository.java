@@ -19,16 +19,16 @@ public class EmotionMapMarkerRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public EmotionMapMarkerResponse save(Long userId, EmotionMapMarkerRequest request) {
+    public EmotionMapMarkerResponse save(Long userId, EmotionMapMarkerRequest request, List<String> tags, boolean classified) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement statement = connection.prepareStatement(
                     """
                     insert into emotion_map_markers (
                         user_id, latitude, longitude, emotion_label, emotion_color,
-                        title, location_name, description
+                        title, location_name, description, tags_classified
                     )
-                    values (?, ?, ?, ?, ?, ?, ?, ?)
+                    values (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     new String[] {"id"}
             );
@@ -40,6 +40,7 @@ public class EmotionMapMarkerRepository {
             statement.setString(6, request.title());
             statement.setString(7, request.locationName());
             statement.setString(8, normalizeDescription(request.description()));
+            statement.setBoolean(9, classified);
             return statement;
         }, keyHolder);
 
@@ -88,7 +89,7 @@ public class EmotionMapMarkerRepository {
         return deletedCount > 0;
     }
 
-    public boolean updateById(Long userId, Long markerId, EmotionMapMarkerRequest request) {
+    public boolean updateById(Long userId, Long markerId, EmotionMapMarkerRequest request, List<String> tags, boolean classified) {
         int updatedCount = jdbcTemplate.update(
                 """
                 update emotion_map_markers
@@ -99,6 +100,7 @@ public class EmotionMapMarkerRepository {
                     title = ?,
                     location_name = ?,
                     description = ?,
+                    tags_classified = ?,
                     updated_at = current_timestamp
                 where user_id = ? and id = ?
                 """,
@@ -109,10 +111,28 @@ public class EmotionMapMarkerRepository {
                 request.title(),
                 request.locationName(),
                 normalizeDescription(request.description()),
+                classified,
                 userId,
                 markerId
         );
+        if (updatedCount > 0) replaceTags(markerId, tags);
         return updatedCount > 0;
+    }
+
+    private void replaceTags(Long markerId, List<String> tags) {
+        jdbcTemplate.update("delete from emotion_map_marker_tags where marker_id = ?", markerId);
+        for (String tag : tags) if (com.daily.lastsys.features.recommendation.RecommendationTagCatalog.allCodes().contains(tag))
+            jdbcTemplate.update("insert into emotion_map_marker_tags(marker_id, tag_code) values (?, ?) on conflict do nothing", markerId, tag);
+    }
+
+    public boolean existsOwnedBy(Long userId, Long markerId) {
+        Boolean exists = jdbcTemplate.queryForObject(
+                "select exists(select 1 from emotion_map_markers where user_id = ? and id = ?)",
+                Boolean.class,
+                userId,
+                markerId
+        );
+        return Boolean.TRUE.equals(exists);
     }
 
     public EmotionMapRecordDetailResponse findDetail(Long userId, Long markerId) {

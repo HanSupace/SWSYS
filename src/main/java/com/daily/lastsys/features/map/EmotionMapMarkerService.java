@@ -3,6 +3,11 @@ package com.daily.lastsys.features.map;
 import com.daily.lastsys.common.ApiValidationException;
 import com.daily.lastsys.features.emotion.EmotionCatalog;
 import com.daily.lastsys.features.emotion.EmotionCatalog.EmotionMeta;
+import com.daily.lastsys.features.recommendation.OpenAiRecommendationTagger;
+import com.daily.lastsys.features.recommendation.RecommendationTagDocument;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,11 +19,17 @@ import java.util.Optional;
 
 @Service
 public class EmotionMapMarkerService {
+    private static final Logger log = LoggerFactory.getLogger(EmotionMapMarkerService.class);
 
     private final EmotionMapMarkerRepository emotionMapMarkerRepository;
+    private final OpenAiRecommendationTagger tagger;
 
-    public EmotionMapMarkerService(EmotionMapMarkerRepository emotionMapMarkerRepository) {
+    public EmotionMapMarkerService(
+            EmotionMapMarkerRepository emotionMapMarkerRepository,
+            OpenAiRecommendationTagger tagger
+    ) {
         this.emotionMapMarkerRepository = emotionMapMarkerRepository;
+        this.tagger = tagger;
     }
 
     public List<EmotionMapMarkerResponse> findMarkers(Long userId) {
@@ -28,17 +39,18 @@ public class EmotionMapMarkerService {
     }
 
     public EmotionMapMarkerResponse createMarker(Long userId, EmotionMapMarkerRequest request) {
-        return emotionMapMarkerRepository.save(userId, validateAndNormalize(request));
+        EmotionMapMarkerRequest normalizedRequest = validateAndNormalize(request);
+        TagResult result = classify(normalizedRequest);
+        return emotionMapMarkerRepository.save(userId, normalizedRequest, result.tags(), result.classified());
     }
 
-    @Transactional
     public EmotionMapRecordDetailResponse updateMarker(Long userId, Long markerId, EmotionMapMarkerRequest request) {
         EmotionMapMarkerRequest normalizedRequest = validateAndNormalize(request);
-        boolean updated = emotionMapMarkerRepository.updateById(userId, markerId, normalizedRequest);
-
-        if (!updated) {
+        if (!emotionMapMarkerRepository.existsOwnedBy(userId, markerId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인이 작성한 기록만 수정할 수 있습니다.");
         }
+        TagResult result = classify(normalizedRequest);
+        emotionMapMarkerRepository.updateById(userId, markerId, normalizedRequest, result.tags(), result.classified());
 
         return normalize(emotionMapMarkerRepository.findDetail(userId, markerId));
     }
@@ -156,4 +168,14 @@ public class EmotionMapMarkerService {
     private String trim(String value) {
         return value == null ? "" : value.trim();
     }
+
+    private TagResult classify(EmotionMapMarkerRequest request) {
+        String text = RecommendationTagDocument.textFor(request.emotionLabel(), request.title(), request.locationName(), request.description());
+        try { return new TagResult(tagger.classifyRecord(text), true); } catch (RuntimeException ex) { return new TagResult(List.of(), false); }
+    }
+    private record TagResult(List<String> tags, boolean classified) {}
 }
+
+
+
+
