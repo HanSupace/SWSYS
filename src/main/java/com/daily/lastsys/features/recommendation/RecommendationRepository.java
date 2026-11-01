@@ -98,7 +98,7 @@ public class RecommendationRepository {
         return jdbc.query(sql.toString(), (rs, row) -> new EmotionMapMarkerResponse(rs.getLong("id"), rs.getObject("latitude", BigDecimal.class), rs.getObject("longitude", BigDecimal.class), rs.getString("author_nickname"), rs.getString("emotion_label"), rs.getString("emotion_color"), rs.getString("title"), rs.getString("location_name"), rs.getString("description"), rs.getObject("created_at", LocalDateTime.class), rs.getBoolean("own")), args.toArray());
     }
     private void addGroup(StringBuilder sql, List<Object> args, List<String> group, boolean include) {
-        sql.append(include ? " and exists (" : " and not exists (").append("select 1 from emotion_map_marker_tags t where t.marker_id=m.id and t.tag_code in (")
+        sql.append(include ? "exists (" : " and not exists (").append("select 1 from emotion_map_marker_tags t where t.marker_id=m.id and t.tag_code in (")
                 .append(String.join(",", java.util.Collections.nCopies(group.size(), "?"))).append("))"); args.addAll(group);
     }
 }

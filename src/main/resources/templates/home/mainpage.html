@@ -7,11 +7,12 @@
     <title th:text="|${appName} 메인|">Plia 메인</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/base/home.css(v=20260512b)}" href="../../static/css/base/home.css?v=20260512b">
-    <link rel="stylesheet" th:href="@{/css/pages/mainpage.css(v=20261024a)}" href="../../static/css/pages/mainpage.css?v=20261024a">
+    <link rel="stylesheet" th:href="@{/css/pages/mainpage.css(v=20261101d)}" href="../../static/css/pages/mainpage.css?v=20261101d">
     <th:block th:replace="~{fragments/emotions :: assets}"></th:block>
     <script th:src="@{/js/shared/progress.js(v=20260620a)}" src="../../static/js/shared/progress.js?v=20260620a" defer></script>
     <script th:src="@{/js/pages/mainpage.js(v=20260620a)}" src="../../static/js/pages/mainpage.js?v=20260620a" defer></script>
-    <script th:src="@{/js/pages/recommendations.js(v=20261101a)}" src="../../static/js/pages/recommendations.js?v=20261101a" defer></script>
+    <script th:src="@{/js/pages/recommendations.js(v=20261101b)}" src="../../static/js/pages/recommendations.js?v=20261101b" defer></script>
+    <script th:src="@{/js/pages/popular-places.js(v=20261101c)}" src="../../static/js/pages/popular-places.js?v=20261101c" defer></script>
 </head>
 <body>
 <div class="bg-pattern"></div>
@@ -45,15 +46,24 @@
                 </div>
             </a>
 
+            <section class="popular-places-panel" aria-labelledby="popular-places-title">
+                <button id="popular-place-toggle" class="popular-place-toggle" type="button" aria-expanded="false" aria-controls="popular-place-list" disabled>
+                    <span id="popular-places-title">실시간 인기 장소</span>
+                    <span class="popular-place-chevron" aria-hidden="true"></span>
+                </button>
+                <div id="popular-place-current" class="popular-place-current">순위 없음</div>
+                <ol id="popular-place-list" class="popular-place-list" hidden></ol>
+            </section>
+
             <section class="recommendation-search" aria-label="저장된 감정 기록 추천">
                 <form id="recommendation-form" autocomplete="off">
-                    <label for="recommendation-query">저장된 감정 기록에서 원하는 분위기를 찾아보세요</label>
+                    <label for="recommendation-query">어떤 곳을 찾으세요?</label>
                     <div class="recommendation-search-row">
                         <input id="recommendation-query" type="search" maxlength="500" placeholder="예: 신나는 곳에 가고 싶어">
                         <button type="submit">찾기</button>
                     </div>
                 </form>
-                <p id="recommendation-message" role="status" aria-live="polite">기록이 저장된 장소만 추천해요.</p>
+                <p id="recommendation-message" role="status" aria-live="polite" hidden></p>
                 <div id="recommendation-results" class="recommendation-results" hidden></div>
             </section>
 
