@@ -1,6 +1,25 @@
 document.addEventListener('DOMContentLoaded', () => {
     let emotionChart = null;
 
+    async function loadEmotionNarrative() {
+        const text = document.getElementById('emotion-narrative-text');
+        const details = document.getElementById('emotion-narrative-details');
+        if (!text) return;
+        try {
+            const response = await fetch('/api/emotions/narrative', { headers: { Accept: 'application/json' } });
+            if (!response.ok) throw new Error('Emotion narrative unavailable');
+            const result = await response.json();
+            text.textContent = result.summary || '분석할 기록이 아직 없습니다.';
+            if (details && result.feedback && result.suggestion) {
+                document.getElementById('emotion-narrative-feedback').textContent = result.feedback;
+                document.getElementById('emotion-narrative-suggestion').textContent = result.suggestion;
+                details.hidden = false;
+            }
+        } catch (error) {
+            text.textContent = '감정 흐름을 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.';
+        }
+    }
+
     async function loadEmotionSummaryChart() {
         const canvas = document.getElementById('myEmotionChart');
         const emptyElement = document.getElementById('emotion-chart-empty');
@@ -333,6 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .replaceAll("'", '&#039;');
     }
 
+    loadEmotionNarrative();
     loadEmotionSummaryChart();
     loadLikedSpots();
     loadHealingSpots();

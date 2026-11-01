@@ -626,7 +626,22 @@
             searchInput.value = place.place_name;
             searchInput.blur();
             searchResults.hidden = true;
+            recordSelectedPlaceSearch(place);
             showNotice((index + 1) + '번째 검색 위치를 선택했습니다.');
+        }
+
+        function recordSelectedPlaceSearch(place) {
+            fetch('/api/place-searches', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    placeId: place.id || '',
+                    placeName: place.place_name,
+                    categoryName: place.category_name || '',
+                    latitude: Number(place.y),
+                    longitude: Number(place.x)
+                })
+            }).catch(function () {});
         }
 
         function showError(text) {
@@ -1639,6 +1654,7 @@
                     markerLocationInput.value = place.place_name;
                     markerLocationSelectedInput.value = place.place_name;
                     selectedMarkerLocationPosition = markerLocationPosition;
+                    recordSelectedPlaceSearch(place);
                     hideMarkerFormMessage();
                     markerLocationResults.hidden = true;
                     titleInput.focus();

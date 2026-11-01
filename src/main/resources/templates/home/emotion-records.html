@@ -8,10 +8,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/base/home.css(v=20260512b)}" href="../../static/css/base/home.css?v=20260512b">
     <link rel="stylesheet" th:href="@{/css/pages/mainpage.css(v=20260621b)}" href="../../static/css/pages/mainpage.css?v=20260621b">
-    <link rel="stylesheet" th:href="@{/css/pages/profile.css(v=20260621b)}" href="../../static/css/pages/profile.css?v=20260621b">
+    <link rel="stylesheet" th:href="@{/css/pages/profile.css(v=20261101b)}" href="../../static/css/pages/profile.css?v=20261101b">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <th:block th:replace="~{fragments/emotions :: assets}"></th:block>
-    <script th:src="@{/js/pages/emotion-records.js(v=20260609b)}" src="../../static/js/pages/emotion-records.js?v=20260609b" defer></script>
+    <script th:src="@{/js/pages/emotion-records.js(v=20261101c)}" src="../../static/js/pages/emotion-records.js?v=20261101c" defer></script>
 </head>
 <body>
 <div class="bg-pattern"></div>
@@ -38,7 +38,26 @@
 
             <section class="emotion-records-hero" aria-labelledby="emotion-records-title">
                 <h1 id="emotion-records-title">나의 감정 분석</h1>
-                <p>최근 기록을 바탕으로 감정 흐름과 추천 위치를 확인해보세요.</p>
+                <p>내 기록에서 감정의 흐름을 살펴보세요.</p>
+            </section>
+
+            <section class="emotion-insight-card emotion-narrative-card" aria-labelledby="emotion-narrative-title">
+                <div class="emotion-records-head">
+                    <div>
+                        <h2 id="emotion-narrative-title">나의 감정 흐름</h2>
+                    </div>
+                </div>
+                <p id="emotion-narrative-text" class="emotion-narrative-text" role="status" aria-live="polite">기록을 살펴보고 있습니다…</p>
+                <div id="emotion-narrative-details" class="emotion-narrative-details" hidden>
+                    <div>
+                        <h3>피드백</h3>
+                        <p id="emotion-narrative-feedback"></p>
+                    </div>
+                    <div>
+                        <h3>해보면 좋은 것</h3>
+                        <p id="emotion-narrative-suggestion"></p>
+                    </div>
+                </div>
             </section>
 
             <section class="emotion-insight-card" aria-labelledby="emotion-summary-title">
